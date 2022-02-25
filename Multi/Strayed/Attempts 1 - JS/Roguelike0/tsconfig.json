@@ -1,0 +1,8 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "watch": true,
+    "rootDir": "ts",
+    "outDir": "js"
+  }
+}

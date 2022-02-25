@@ -1,0 +1,382 @@
+{
+  "gates": [
+    {
+      "type": "CLOCK",
+      "offx": -219.9998779296875,
+      "offy": -25.00006103515625
+    },
+    {
+      "type": "OR",
+      "offx": -219.99990844726562,
+      "offy": -60.000030517578125
+    },
+    {
+      "type": "XOR",
+      "offx": -184.99990844726562,
+      "offy": -60.000030517578125
+    },
+    {
+      "type": "TIMER",
+      "offx": -184.99990844726562,
+      "offy": -25.000091552734375
+    },
+    {
+      "type": "XOR",
+      "offx": -149.99990844726562,
+      "offy": -60.000030517578125
+    },
+    {
+      "type": "TIMER",
+      "offx": -149.99990844726562,
+      "offy": -25.000091552734375
+    },
+    {
+      "type": "XOR",
+      "offx": -114.99990844726562,
+      "offy": -60.000030517578125
+    },
+    {
+      "type": "TIMER",
+      "offx": -114.99990844726562,
+      "offy": -25.000030517578125
+    },
+    {
+      "type": "XOR",
+      "offx": -79.99984741210938,
+      "offy": -60.000091552734375
+    },
+    {
+      "type": "TIMER",
+      "offx": -79.99984741210938,
+      "offy": -25.000091552734375
+    },
+    {
+      "type": "NAND",
+      "offx": -184.99990844726562,
+      "offy": -200.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -219.99990844726562,
+      "offy": -200.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -184.99990844726562,
+      "offy": -165.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -184.99990844726562,
+      "offy": -130.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -219.99990844726562,
+      "offy": -165.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -219.99990844726562,
+      "offy": -130.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -79.99990844726562,
+      "offy": -200.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -114.99990844726562,
+      "offy": -200.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -79.99990844726562,
+      "offy": -165.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -79.99990844726562,
+      "offy": -130.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -114.99990844726562,
+      "offy": -165.0000457763672
+    },
+    {
+      "type": "NAND",
+      "offx": -114.99990844726562,
+      "offy": -130.0000457763672
+    },
+    {
+      "type": "OR",
+      "offx": -184.99990844726562,
+      "offy": -410.00006103515625
+    },
+    {
+      "type": "NAND",
+      "offx": -79.99990844726562,
+      "offy": -340.00006103515625
+    },
+    {
+      "type": "NAND",
+      "offx": -114.99990844726562,
+      "offy": -340.00006103515625
+    },
+    {
+      "type": "NAND",
+      "offx": -79.99990844726562,
+      "offy": -305.00006103515625
+    },
+    {
+      "type": "NAND",
+      "offx": -79.99990844726562,
+      "offy": -270.00006103515625
+    },
+    {
+      "type": "NAND",
+      "offx": -114.99990844726562,
+      "offy": -305.00006103515625
+    },
+    {
+      "type": "NAND",
+      "offx": -114.99990844726562,
+      "offy": -270.00006103515625
+    },
+    {
+      "type": "OR",
+      "offx": -149.99984741210938,
+      "offy": -410.00006103515625
+    },
+    {
+      "type": "OR",
+      "offx": -219.99990844726562,
+      "offy": -410.00006103515625
+    }
+  ],
+  "isBlueprint": true,
+  "connections": [
+    {
+      "gateIn": 0,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 3,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 5,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 7,
+      "gateOut": 6
+    },
+    {
+      "gateIn": 9,
+      "gateOut": 8
+    },
+    {
+      "gateIn": 6,
+      "gateOut": 9
+    },
+    {
+      "gateIn": 6,
+      "gateOut": 8
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 7
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 6
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 5
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 15,
+      "gateOut": 14
+    },
+    {
+      "gateIn": 14,
+      "gateOut": 15
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 10
+    },
+    {
+      "gateIn": 10,
+      "gateOut": 11
+    },
+    {
+      "gateIn": 12,
+      "gateOut": 13
+    },
+    {
+      "gateIn": 13,
+      "gateOut": 12
+    },
+    {
+      "gateIn": 14,
+      "gateOut": 11
+    },
+    {
+      "gateIn": 12,
+      "gateOut": 10
+    },
+    {
+      "gateIn": 12,
+      "gateOut": 14
+    },
+    {
+      "gateIn": 15,
+      "gateOut": 13
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 15
+    },
+    {
+      "gateIn": 17,
+      "gateOut": 21
+    },
+    {
+      "gateIn": 21,
+      "gateOut": 19
+    },
+    {
+      "gateIn": 18,
+      "gateOut": 20
+    },
+    {
+      "gateIn": 18,
+      "gateOut": 16
+    },
+    {
+      "gateIn": 20,
+      "gateOut": 17
+    },
+    {
+      "gateIn": 19,
+      "gateOut": 18
+    },
+    {
+      "gateIn": 18,
+      "gateOut": 19
+    },
+    {
+      "gateIn": 17,
+      "gateOut": 16
+    },
+    {
+      "gateIn": 20,
+      "gateOut": 21
+    },
+    {
+      "gateIn": 21,
+      "gateOut": 20
+    },
+    {
+      "gateIn": 10,
+      "gateOut": 22
+    },
+    {
+      "gateIn": 16,
+      "gateOut": 17
+    },
+    {
+      "gateIn": 23,
+      "gateOut": 24
+    },
+    {
+      "gateIn": 28,
+      "gateOut": 27
+    },
+    {
+      "gateIn": 27,
+      "gateOut": 28
+    },
+    {
+      "gateIn": 24,
+      "gateOut": 23
+    },
+    {
+      "gateIn": 25,
+      "gateOut": 26
+    },
+    {
+      "gateIn": 26,
+      "gateOut": 25
+    },
+    {
+      "gateIn": 27,
+      "gateOut": 24
+    },
+    {
+      "gateIn": 25,
+      "gateOut": 23
+    },
+    {
+      "gateIn": 25,
+      "gateOut": 27
+    },
+    {
+      "gateIn": 28,
+      "gateOut": 26
+    },
+    {
+      "gateIn": 24,
+      "gateOut": 28
+    },
+    {
+      "gateIn": 16,
+      "gateOut": 25
+    },
+    {
+      "gateIn": 16,
+      "gateOut": 27
+    },
+    {
+      "gateIn": 23,
+      "gateOut": 29
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 14
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 12
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 20
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 18
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 30
+    }
+  ]
+}

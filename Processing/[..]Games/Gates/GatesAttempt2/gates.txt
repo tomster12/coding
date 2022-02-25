@@ -1,0 +1,27 @@
+
+
+    Transparent - Can change whenever
+
+  SR Latch
+input 1 sets to 1
+input 2 sets to 0
+
+
+    Not transparent - Change only when E active
+
+  SR Latch Gated
+When E active input 1 sets output to 1
+When E active input 2 sets output to 0
+When E inactive output stays same
+
+  D Latch Gated
+When E active output changes to input 1
+When E inactive output stays same
+
+  D Flip Flop (Master Slave / Standard)
+On CLOCK positive edge output changes to input 1
+When CLOCK inactive output stays same
+
+  T Flip Flop
+On CLOCK positive edge output toggles
+When CLOCK inactive output stays same

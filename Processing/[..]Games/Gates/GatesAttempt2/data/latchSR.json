@@ -1,0 +1,43 @@
+{
+  "gates": [
+    {
+      "type": "NAND",
+      "offx": -62.333221435546875,
+      "offy": -119.66673278808594
+    },
+    {
+      "type": "NAND",
+      "offx": -27.333221435546875,
+      "offy": -119.66673278808594
+    },
+    {
+      "type": "INPUT",
+      "offx": -27.333221435546875,
+      "offy": -49.666717529296875
+    },
+    {
+      "type": "INPUT",
+      "offx": -62.333221435546875,
+      "offy": -49.666717529296875
+    }
+  ],
+  "isBlueprint": true,
+  "connections": [
+    {
+      "gateIn": 1,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 3,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 1
+    }
+  ]
+}

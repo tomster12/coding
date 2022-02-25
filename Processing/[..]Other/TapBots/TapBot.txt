@@ -1,0 +1,85 @@
+can send and receive taps
+can detect collision
+
+if tapped doesnt know direction
+if collided doesnt know direction
+
+
+action
+
+
+"Searching"
+Randomly move until a collision,
+at which point change to "Collision"
+
+
+"Collision"
+
+if (have info) {
+  rotate and double tap: "I have info"
+  wait small amount of time
+
+  if receive double tap: "Want info?" {
+    // Current knows both have info, other doesnt
+    // Other is faced correctly and waiting
+    rotate quickly and triple tap: "Go away"
+  }
+
+  if receive single tap: "I have no info" {
+    // Current knows he can give, other doesnt
+    // Other is faced correctly and waiting
+    rotate quickly and quadruple tap: "Accept request"
+  }
+}
+
+if (!have info) {
+  rotate and single tap: "I dont have info"
+
+  if receive double tap: "Want info?" {
+    // current knows he can get, other doesnt
+    // Other is faced correctly and waiting
+    rotate quickly and quadruple tap: "Accept request"
+  }
+
+  if receive single tap: "I have no info" {
+    // current knows both dont have info, other doesnt
+    // Other is faced correctly and waiting
+    rotate quickly and triple tap: "Go away"
+  }
+}
+
+
+"InfoM"
+if has no info send single tap
+then change to "Searching" and move 
+backwards for 0.5 seconds
+
+If has info send double tap
+then wait for a tap, upon receiving
+change to "InfoOut"
+
+
+"InfoS"
+if receive single tap
+change to "Searching" and move 
+backwards for 0.5 seconds
+
+if receive double tap
+change to "InfoIn" and send tap
+
+
+"InfoOut"
+Tap information at a constant rate
+until complete and then return to "Searching"
+
+"InfoIn"
+whenever a tap is received add to current
+information until an 8 bit is received on
+which change to "Searching"
+
+
+
+
+
+
+

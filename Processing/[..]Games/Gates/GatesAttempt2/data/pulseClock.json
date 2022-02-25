@@ -1,0 +1,56 @@
+{
+  "gates": [
+    {
+      "type": "CLOCK",
+      "offx": -45.99989318847656,
+      "offy": -61.99993896484375
+    },
+    {
+      "type": "AND",
+      "offx": -80.99989318847656,
+      "offy": -26.99993896484375
+    },
+    {
+      "type": "NOT",
+      "offx": -45.99989318847656,
+      "offy": -26.99993896484375
+    },
+    {
+      "type": "OR",
+      "offx": -80.99989318847656,
+      "offy": -61.99993896484375
+    },
+    {
+      "type": "OR",
+      "offx": -115.99989318847656,
+      "offy": -61.99993896484375
+    }
+  ],
+  "isBlueprint": true,
+  "connections": [
+    {
+      "gateIn": 0,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 3
+    }
+  ]
+}

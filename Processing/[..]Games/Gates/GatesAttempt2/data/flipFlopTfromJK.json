@@ -1,0 +1,147 @@
+{
+  "gates": [
+    {
+      "type": "NAND",
+      "offx": -145.00015258789062,
+      "offy": -182.0001220703125
+    },
+    {
+      "type": "NAND",
+      "offx": -110.0001220703125,
+      "offy": -182.0001220703125
+    },
+    {
+      "type": "NAND",
+      "offx": -145.00015258789062,
+      "offy": -217.0000762939453
+    },
+    {
+      "type": "NAND",
+      "offx": -110.000244140625,
+      "offy": -217.00010681152344
+    },
+    {
+      "type": "NAND",
+      "offx": -145.00015258789062,
+      "offy": -252.0000762939453
+    },
+    {
+      "type": "NAND",
+      "offx": -110.0001220703125,
+      "offy": -252.0000762939453
+    },
+    {
+      "type": "NAND",
+      "offx": -145.00015258789062,
+      "offy": -287.00006103515625
+    },
+    {
+      "type": "NAND",
+      "offx": -110.000244140625,
+      "offy": -287.00006103515625
+    },
+    {
+      "type": "INPUT",
+      "offx": -145.00021362304688,
+      "offy": -112.00006103515625
+    },
+    {
+      "type": "CLOCK",
+      "offx": -110.000244140625,
+      "offy": -112.00006103515625
+    },
+    {
+      "type": "NOT",
+      "offx": -75.000244140625,
+      "offy": -217.0000762939453
+    },
+    {
+      "type": "NOT",
+      "offx": -75.000244140625,
+      "offy": -182.00006103515625
+    }
+  ],
+  "isBlueprint": true,
+  "connections": [
+    {
+      "gateIn": 2,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 3,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 5,
+      "gateOut": 7
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 6
+    },
+    {
+      "gateIn": 7,
+      "gateOut": 6
+    },
+    {
+      "gateIn": 6,
+      "gateOut": 7
+    },
+    {
+      "gateIn": 10,
+      "gateOut": 5
+    },
+    {
+      "gateIn": 10,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 3,
+      "gateOut": 5
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 8,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 6,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 7,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 9,
+      "gateOut": 11
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 10
+    },
+    {
+      "gateIn": 8,
+      "gateOut": 1
+    }
+  ]
+}

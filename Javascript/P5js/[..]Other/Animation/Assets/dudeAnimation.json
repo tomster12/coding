@@ -1,0 +1,249 @@
+{
+  "frames":
+  {
+    "#Idle Stood 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 0,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 300
+    },
+    "#Idle Stood 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 3,
+        "y": 0,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 100
+    },
+    "#Idle Stood 2.aseprite":
+    {
+      "frame":
+      {
+        "x": 6,
+        "y": 0,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 300
+    },
+    "#Idle Stood 3.aseprite":
+    {
+      "frame":
+      {
+        "x": 9,
+        "y": 0,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 100
+    },
+    "#Idle Crouch 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 8,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 300
+    },
+    "#Idle Crouch 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 3,
+        "y": 8,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 100
+    },
+    "#Idle Crouch 2.aseprite":
+    {
+      "frame":
+      {
+        "x": 6,
+        "y": 8,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 300
+    },
+    "#Idle Crouch 3.aseprite":
+    {
+      "frame":
+      {
+        "x": 9,
+        "y": 8,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 100
+    },
+    "#Walk 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 16,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 200
+    },
+    "#Walk 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 3,
+        "y": 16,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 200
+    },
+    "#Crouch 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 24,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 200
+    },
+    "#Crouch 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 3,
+        "y": 24,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 200
+    },
+    "#Jump 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 32,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 100
+    },
+    "#Tr Jump Ground 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 40,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 100
+    },
+    "#Tr Jump Ground 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 3,
+        "y": 40,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 300
+    },
+    "#Tr Ground Jump 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 48,
+        "w": 3,
+        "h": 8
+      },
+      "duration": 100
+    }
+  },
+  "meta":
+  {
+    "image": "dudeAnimation.png",
+    "size":
+    {
+      "w": 12,
+      "h": 56
+    },
+    "frameTags": [
+    {
+      "name": "Idle Stood",
+      "from": 0,
+      "to": 3,
+      "type": "loop"
+    },
+    {
+      "name": "Idle Crouch",
+      "from": 4,
+      "to": 7,
+      "type": "loop"
+    },
+    {
+      "name": "Walk",
+      "from": 8,
+      "to": 9,
+      "type": "loop"
+    },
+    {
+      "name": "Crouch",
+      "from": 10,
+      "to": 11,
+      "type": "loop"
+    },
+    {
+      "name": "Jump",
+      "from": 12,
+      "to": 12,
+      "type": "loop"
+    },
+    {
+      "name": "Tr Jump Ground",
+      "from": 13,
+      "to": 14,
+      "type": "single"
+    },
+    {
+      "name": "Tr Ground Jump",
+      "from": 15,
+      "to": 15,
+      "type": "single"
+    }],
+    "slices": [
+    {
+      "name": "Origin",
+      "keys": [
+      {
+        "frame": 0,
+        "bounds":
+        {
+          "x": 1,
+          "y": 7,
+          "w": 1,
+          "h": 1
+        },
+        "active": true
+      }]
+    }]
+  }
+}

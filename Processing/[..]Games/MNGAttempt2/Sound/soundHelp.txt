@@ -1,0 +1,7 @@
+music1 =
+sfx1 = Normal - Menu Arrow
+sfx2 = Low - Begin/End Game
+sfx3 = High - Difficulty Arrow
+sfx4 = Muffled - Paint / Unpaint
+sfx5 = - Medium/Low - Person / Select Tool
+sfx6 =  medium - Time Click

@@ -1,0 +1,286 @@
+{
+  "frames":
+  {
+    "#Idle1 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 0,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 400
+    },
+    "#Idle1 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 32,
+        "y": 0,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 400
+    },
+    "#Idle2 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 24,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 100
+    },
+    "#Idle3 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 48,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 100
+    },
+    "#Idle4 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 72,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 100
+    },
+    "#Walk 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 96,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 200
+    },
+    "#Walk 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 32,
+        "y": 96,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 200
+    },
+    "#Climb 0.aseprite":
+    {
+      "frame":
+      {
+        "x": 0,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 300
+    },
+    "#Climb 1.aseprite":
+    {
+      "frame":
+      {
+        "x": 32,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 300
+    },
+    "#Climb 2.aseprite":
+    {
+      "frame":
+      {
+        "x": 64,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 150
+    },
+    "#Climb 3.aseprite":
+    {
+      "frame":
+      {
+        "x": 96,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 150
+    },
+    "#Climb 4.aseprite":
+    {
+      "frame":
+      {
+        "x": 128,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 150
+    },
+    "#Climb 5.aseprite":
+    {
+      "frame":
+      {
+        "x": 160,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 400
+    },
+    "#Climb 6.aseprite":
+    {
+      "frame":
+      {
+        "x": 192,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 350
+    },
+    "#Climb 7.aseprite":
+    {
+      "frame":
+      {
+        "x": 224,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 250
+    },
+    "#Climb 8.aseprite":
+    {
+      "frame":
+      {
+        "x": 256,
+        "y": 120,
+        "w": 32,
+        "h": 24
+      },
+      "duration": 200
+    }
+  },
+  "meta":
+  {
+    "image": "dudeAnimation.png",
+    "size":
+    {
+      "w": 288,
+      "h": 144
+    },
+    "frameTags": [
+    {
+      "name": "Idle1",
+      "from": 0,
+      "to": 1,
+      "type": "loop"
+    },
+    {
+      "name": "Idle2",
+      "from": 2,
+      "to": 2,
+      "type": "single"
+    },
+    {
+      "name": "Idle3",
+      "from": 3,
+      "to": 3,
+      "type": "single"
+    },
+    {
+      "name": "Idle4",
+      "from": 4,
+      "to": 4,
+      "type": "single"
+    },
+    {
+      "name": "Walk",
+      "from": 5,
+      "to": 6,
+      "type": "loop"
+    },
+    {
+      "name": "Climb",
+      "from": 7,
+      "to": 15,
+      "type": "single"
+    }],
+    "layers": [
+    {
+      "name": "Dude",
+      "opacity": 255,
+      "blendMode": "normal"
+    }],
+    "slices": [
+    {
+      "name": "Origin",
+      "keys": [
+      {
+        "frame": 0,
+        "bounds":
+        {
+          "x": 21,
+          "y": 15,
+          "w": 1,
+          "h": 1
+        },
+        "active": true
+      },
+      {
+        "frame": 7,
+        "bounds":
+        {
+          "x": 20,
+          "y": 15,
+          "w": 1,
+          "h": 1
+        },
+        "active": true
+      }]
+    },
+    {
+      "name": "End",
+      "keys": [
+      {
+        "frame": 0,
+        "bounds":
+        {
+          "x": -1,
+          "y": 0,
+          "w": 1,
+          "h": 1
+        },
+        "active": false
+      },
+      {
+        "frame": 7,
+        "bounds":
+        {
+          "x": 25,
+          "y": 7,
+          "w": 1,
+          "h": 1
+        },
+        "active": true
+      }]
+    }]
+  }
+}

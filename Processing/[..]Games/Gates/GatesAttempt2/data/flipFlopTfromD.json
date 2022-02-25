@@ -1,0 +1,112 @@
+{
+  "gates": [
+    {
+      "type": "NAND",
+      "offx": -49.9998779296875,
+      "offy": -162.9998016357422
+    },
+    {
+      "type": "NAND",
+      "offx": -84.9998779296875,
+      "offy": -162.9998016357422
+    },
+    {
+      "type": "NAND",
+      "offx": -49.999755859375,
+      "offy": -127.99980163574219
+    },
+    {
+      "type": "NAND",
+      "offx": -49.999755859375,
+      "offy": -92.99980163574219
+    },
+    {
+      "type": "NAND",
+      "offx": -84.999755859375,
+      "offy": -127.99980163574219
+    },
+    {
+      "type": "NAND",
+      "offx": -84.999755859375,
+      "offy": -92.99980163574219
+    },
+    {
+      "type": "CLOCK",
+      "offx": -49.999755859375,
+      "offy": -22.999786376953125
+    },
+    {
+      "type": "INPUT",
+      "offx": -84.999755859375,
+      "offy": -22.999786376953125
+    },
+    {
+      "type": "XOR",
+      "offx": -119.999755859375,
+      "offy": -92.99980163574219
+    }
+  ],
+  "isBlueprint": true,
+  "connections": [
+    {
+      "gateIn": 5,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 6,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 6,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 3,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 5
+    },
+    {
+      "gateIn": 5,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 7,
+      "gateOut": 8
+    },
+    {
+      "gateIn": 8,
+      "gateOut": 5
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 8
+    }
+  ]
+}

@@ -1,0 +1,100 @@
+{
+  "source": "dudeAnimation.png",
+  "start": "Idle Stood",
+
+  "animations": {
+    "Idle Stood": {
+      "wrap": "loop",
+      "frames": [
+        { "duration": 0.3, "rect": { "x": 0, "y": 0, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.1, "rect": { "x": 3, "y": 0, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.3, "rect": { "x": 6, "y": 0, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.1, "rect": { "x": 9, "y": 0, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } }
+      ]
+    },
+
+    "Idle Crouch": {
+      "wrap": "loop",
+      "frames": [
+        { "duration": 0.3, "rect": { "x": 0, "y": 8, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.1, "rect": { "x": 3, "y": 8, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.3, "rect": { "x": 6, "y": 8, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.1, "rect": { "x": 9, "y": 8, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } }
+      ]
+    },
+
+    "Walk": {
+      "wrap": "loop",
+      "frames": [
+        { "duration": 0.2, "rect": { "x": 0, "y": 16, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.2, "rect": { "x": 3, "y": 16, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } }
+      ]
+    },
+
+    "Crouch": {
+      "wrap": "loop",
+      "frames": [
+        { "duration": 0.2, "rect": { "x": 0, "y": 24, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.2, "rect": { "x": 3, "y": 24, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } }
+      ]
+    },
+
+    "Jump": {
+      "wrap": "loop",
+      "frames": [
+        { "duration": 0.1, "rect": { "x": 0, "y": 32, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } }
+      ]
+    },
+
+    "Tr Jump Ground": {
+      "wrap": "single",
+      "frames": [
+        { "duration": 0.1, "rect": { "x": 0, "y": 40, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } },
+        { "duration": 0.3, "rect": { "x": 3, "y": 40, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } }
+      ]
+    },
+
+    "Attack": {
+      "wrap": "single",
+      "frames": [
+        { "duration": 0.1, "rect": { "x": 0, "y": 48, "w": 3, "h": 8 }, "origin": { "x": 1.5, "y": 8.0 } }
+      ]
+    }
+  },
+
+  "transitions": [
+    { "from": "Idle Stood",   "to": "Idle Crouch",  "requirements": { "isInputCrouching": true } },
+    { "from": "Idle Crouch",  "to": "Idle Stood",   "requirements": { "isInputCrouching": false } },
+
+    { "from": "Idle Crouch",  "to": "Crouch",       "requirements": { "isInputMoving": true } },
+    { "from": "Crouch",       "to": "Idle Crouch",  "requirements": { "isInputMoving": false } },
+
+    { "from": "Idle Stood",    "to": "Walk",        "requirements": { "isInputMoving": true } },
+    { "from": "Walk",          "to": "Idle Stood",  "requirements": { "isInputMoving": false } },
+
+    { "from": "Walk",         "to": "Crouch",       "requirements": { "isInputCrouching": true } },
+    { "from": "Crouch",       "to": "Walk",         "requirements": { "isInputCrouching": false } },
+
+
+    { "from": "Idle Stood",   "to": "Attack", "requirements": { "isAttacking": true } },
+    { "from": "Walk",         "to": "Attack", "requirements": { "isAttacking": true } },
+    { "from": "Idle Crouch",  "to": "Attack", "requirements": { "isAttacking": true } },
+    { "from": "Crouch",       "to": "Attack", "requirements": { "isAttacking": true } },
+
+    { "from": "Attack", "to": "Idle Stood",   "requirements": { "isAttacking": false, "isInputMoving": false, "isInputCrouching": false } },
+    { "from": "Attack", "to": "Idle Crouch",  "requirements": { "isAttacking": false, "isInputMoving": false, "isInputCrouching": true } },
+    { "from": "Attack", "to": "Walk",         "requirements": { "isAttacking": false, "isInputMoving": true, "isInputCrouching": false } },
+    { "from": "Attack", "to": "Crouch",       "requirements": { "isAttacking": false, "isInputMoving": true, "isInputCrouching": true } },
+
+
+    { "from": "Idle Stood",   "to": "Jump", "requirements": { "isJumping": true } },
+    { "from": "Walk",         "to": "Jump", "requirements": { "isJumping": true } },
+    { "from": "Idle Crouch",  "to": "Jump", "requirements": { "isJumping": true } },
+    { "from": "Crouch",       "to": "Jump", "requirements": { "isJumping": true } },
+
+    { "from": "Jump", "to": "Idle Stood",   "requirements": { "isJumping": false, "isInputMoving": false, "isInputCrouching": false } },
+    { "from": "Jump", "to": "Idle Crouch",  "requirements": { "isJumping": false, "isInputMoving": false, "isInputCrouching": true } },
+    { "from": "Jump", "to": "Walk",         "requirements": { "isJumping": false, "isInputMoving": true, "isInputCrouching": false } },
+    { "from": "Jump", "to": "Crouch",       "requirements": { "isJumping": false, "isInputMoving": true, "isInputCrouching": true } }
+  ]
+}

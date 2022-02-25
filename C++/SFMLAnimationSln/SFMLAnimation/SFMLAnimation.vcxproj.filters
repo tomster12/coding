@@ -1,0 +1,60 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Main\Game">
+      <UniqueIdentifier>{0ff2ef8c-72a6-4e4e-b552-ef6eac31e623}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\Game\Animation">
+      <UniqueIdentifier>{ade2c4b5-c08e-4f5b-aaa5-cc96de6bbe5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Main\Other">
+      <UniqueIdentifier>{004aad2b-be12-4c25-9024-b38a72cfa827}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Animator.cpp">
+      <Filter>Main\Game\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Main\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Main\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Main\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Main\Other</Filter>
+    </ClCompile>
+    <ClCompile Include="Animation.cpp">
+      <Filter>Main\Game\Animation</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Animator.h">
+      <Filter>Main\Game\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Main\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Player.h">
+      <Filter>Main\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Main\Other</Filter>
+    </ClInclude>
+    <ClInclude Include="Animation.h">
+      <Filter>Main\Game\Animation</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="RSJparser.cpp">
+      <Filter>Main\Game\Animation</Filter>
+    </None>
+  </ItemGroup>
+</Project>

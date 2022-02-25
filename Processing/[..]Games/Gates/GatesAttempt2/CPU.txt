@@ -1,0 +1,18 @@
+
+
+  Commands
+
+0000 - All Reg Clear
+0001 - Reg -> Acc
+0010 - Acc -> Reg
+0011 - In  -> Acc
+0100 - Acc -> Out
+
+
+  Buses
+
+Address - l1 - 4bit
+Control - l2 - 4bit
+Clock   - l2 - 1bit
+ToReg   - l3 - 4bit
+ToAcc   - l4 - 4bit

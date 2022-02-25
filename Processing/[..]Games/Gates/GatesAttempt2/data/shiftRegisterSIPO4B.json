@@ -1,0 +1,408 @@
+{
+  "gates": [
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 242.4615020751953
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 242.4615020751953
+    },
+    {
+      "type": "NAND",
+      "offx": 240.84613037109375,
+      "offy": 277.46148681640625
+    },
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 277.46148681640625
+    },
+    {
+      "type": "NAND",
+      "offx": 135.84613037109375,
+      "offy": 277.46148681640625
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 277.46148681640625
+    },
+    {
+      "type": "INPUT",
+      "offx": 170.84613037109375,
+      "offy": 347.46148681640625
+    },
+    {
+      "type": "CLOCK",
+      "offx": 310.8460693359375,
+      "offy": 277.4615478515625
+    },
+    {
+      "type": "OR",
+      "offx": 65.84613037109375,
+      "offy": 242.4615020751953
+    },
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 172.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 172.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 240.84613037109375,
+      "offy": 207.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 207.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 135.84613037109375,
+      "offy": 207.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 207.46153259277344
+    },
+    {
+      "type": "OR",
+      "offx": 310.8460693359375,
+      "offy": 207.46153259277344
+    },
+    {
+      "type": "OR",
+      "offx": 65.84613037109375,
+      "offy": 172.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 102.4615249633789
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 102.4615249633789
+    },
+    {
+      "type": "NAND",
+      "offx": 240.84613037109375,
+      "offy": 137.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 137.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 135.84613037109375,
+      "offy": 137.46153259277344
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 137.46153259277344
+    },
+    {
+      "type": "OR",
+      "offx": 310.8460693359375,
+      "offy": 137.46153259277344
+    },
+    {
+      "type": "OR",
+      "offx": 65.84613037109375,
+      "offy": 102.4615249633789
+    },
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 32.46152114868164
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 32.46152114868164
+    },
+    {
+      "type": "NAND",
+      "offx": 240.84613037109375,
+      "offy": 67.4615249633789
+    },
+    {
+      "type": "NAND",
+      "offx": 205.84613037109375,
+      "offy": 67.4615249633789
+    },
+    {
+      "type": "NAND",
+      "offx": 135.84613037109375,
+      "offy": 67.4615249633789
+    },
+    {
+      "type": "NAND",
+      "offx": 170.84613037109375,
+      "offy": 67.4615249633789
+    },
+    {
+      "type": "OR",
+      "offx": 310.8460693359375,
+      "offy": 67.4615249633789
+    },
+    {
+      "type": "OR",
+      "offx": 65.84613037109375,
+      "offy": 32.46152114868164
+    }
+  ],
+  "isBlueprint": true,
+  "connections": [
+    {
+      "gateIn": 5,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 5
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 3,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 6,
+      "gateOut": 5
+    },
+    {
+      "gateIn": 4,
+      "gateOut": 1
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 2,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 5,
+      "gateOut": 3
+    },
+    {
+      "gateIn": 7,
+      "gateOut": 2
+    },
+    {
+      "gateIn": 7,
+      "gateOut": 4
+    },
+    {
+      "gateIn": 1,
+      "gateOut": 0
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 8
+    },
+    {
+      "gateIn": 9,
+      "gateOut": 16
+    },
+    {
+      "gateIn": 10,
+      "gateOut": 9
+    },
+    {
+      "gateIn": 15,
+      "gateOut": 13
+    },
+    {
+      "gateIn": 15,
+      "gateOut": 11
+    },
+    {
+      "gateIn": 14,
+      "gateOut": 12
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 13
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 9
+    },
+    {
+      "gateIn": 13,
+      "gateOut": 10
+    },
+    {
+      "gateIn": 12,
+      "gateOut": 11
+    },
+    {
+      "gateIn": 11,
+      "gateOut": 12
+    },
+    {
+      "gateIn": 9,
+      "gateOut": 10
+    },
+    {
+      "gateIn": 13,
+      "gateOut": 14
+    },
+    {
+      "gateIn": 14,
+      "gateOut": 13
+    },
+    {
+      "gateIn": 22,
+      "gateOut": 21
+    },
+    {
+      "gateIn": 21,
+      "gateOut": 22
+    },
+    {
+      "gateIn": 17,
+      "gateOut": 18
+    },
+    {
+      "gateIn": 19,
+      "gateOut": 20
+    },
+    {
+      "gateIn": 20,
+      "gateOut": 19
+    },
+    {
+      "gateIn": 21,
+      "gateOut": 18
+    },
+    {
+      "gateIn": 19,
+      "gateOut": 17
+    },
+    {
+      "gateIn": 19,
+      "gateOut": 21
+    },
+    {
+      "gateIn": 22,
+      "gateOut": 20
+    },
+    {
+      "gateIn": 23,
+      "gateOut": 19
+    },
+    {
+      "gateIn": 23,
+      "gateOut": 21
+    },
+    {
+      "gateIn": 18,
+      "gateOut": 17
+    },
+    {
+      "gateIn": 17,
+      "gateOut": 24
+    },
+    {
+      "gateIn": 25,
+      "gateOut": 32
+    },
+    {
+      "gateIn": 26,
+      "gateOut": 25
+    },
+    {
+      "gateIn": 31,
+      "gateOut": 29
+    },
+    {
+      "gateIn": 31,
+      "gateOut": 27
+    },
+    {
+      "gateIn": 30,
+      "gateOut": 28
+    },
+    {
+      "gateIn": 27,
+      "gateOut": 29
+    },
+    {
+      "gateIn": 27,
+      "gateOut": 25
+    },
+    {
+      "gateIn": 29,
+      "gateOut": 26
+    },
+    {
+      "gateIn": 28,
+      "gateOut": 27
+    },
+    {
+      "gateIn": 27,
+      "gateOut": 28
+    },
+    {
+      "gateIn": 25,
+      "gateOut": 26
+    },
+    {
+      "gateIn": 29,
+      "gateOut": 30
+    },
+    {
+      "gateIn": 30,
+      "gateOut": 29
+    },
+    {
+      "gateIn": 7,
+      "gateOut": 15
+    },
+    {
+      "gateIn": 15,
+      "gateOut": 23
+    },
+    {
+      "gateIn": 23,
+      "gateOut": 31
+    },
+    {
+      "gateIn": 0,
+      "gateOut": 14
+    },
+    {
+      "gateIn": 9,
+      "gateOut": 22
+    },
+    {
+      "gateIn": 17,
+      "gateOut": 30
+    }
+  ]
+}

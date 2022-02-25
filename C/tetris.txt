@@ -1,0 +1,47 @@
+Everyone is taking this too seriously, and starts with a huge game, and using random libraries.
+
+Write a goddamn tetris from scratch :)
+(simple, monochrome, 2d)
+
+Start with a really simple one, then try to evolve it in small steps.
+
+Use version control from day one.
+
+Add features to it. If a feature is hard to add, your code is bad, and not modular enough, refactor or rewrite it. This way you will learn, how to write flexible code.
+
+Use different feature branches, and merge finished features to the main branch.
+
+Try to add different game modes to it (like snake).
+
+Try to improve graphics quality (3d  bump mapping, shadows)
+
+Try to add sound events.
+
+Try to add physics (small rebound on collision, bricks falling out of the screen when you finish a line)
+
+Try to implement a less trivial, and more modular resource management.
+(load tetrimino shapes as assets, eg as binary data, or as 3d models)
+
+Try to reduce memory usage, or hdd space usage. (compress textures. compress them more. compress tetrimino data). Use memory profilers.
+
+Try to improve speed of the game (frame per sec). Profile cpu/gpu usage.
+
+Try to integrate bigger APIs (like SDL, a sound/physics api, or a game metrics api)
+
+Add multiplayer mode via different keyboard mappings.
+Add multiplayer mode via network (tough one)
+
+Write automatic acceptance tests. Write automatic regression tests.
+
+Make the code clean, easy to understand, and a bit smart.
+Ask others about your code.
+
+Make it work on windows, linux, and on mobile platforms.
+
+Release the game.
+
+Write it into your CV.
+
+Show the code on interviews.
+
+Profit.

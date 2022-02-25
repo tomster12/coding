@@ -1,0 +1,14 @@
+
+Other/
+Software/
+Github/
+
+**/node_modules/
+Processing/**/build/
+Multi/**/build/
+C++/**/bin/
+C++/**/.vs/
+C++/SFML-2.5.1/
+
+Unity/
+Web/
