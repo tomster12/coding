@@ -7,7 +7,7 @@
 <body>
   <ul>
     {% for url in site.static_files %}
-      {% if url.path contains 'Javascript/P5js' %}
+      {% if url.path contains '.html' %}
         <li><a href="{{ site.baseurl | escape }}{{ url.path | escape }}">{{ url.path | escape }}</a> </li>
       {% endif %}
     {% endfor %}
