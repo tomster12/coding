@@ -1,0 +1,19 @@
+<html>
+  <head>
+    <script src="/socket.io/socket.io.js"></script>
+    <link href = "stylesheet.css" rel = "stylesheet" type = "text/css"/>
+    <script src="javascript.js"></script>
+  </head>
+
+
+  <body>
+    <ul id="messages">
+      <li style="text-align: center; background: rgb(100, 200, 100);">Please input a nickname into the chat</li>
+    </ul>
+    
+    <form id = "form1" onsubmit = "form1Complete(event)">
+      <input id = "form1Input" autocomplete="off"/>
+      <button id = "form1Button">send</button>
+    </form>
+  </body>
+</html>
