@@ -1,3 +1,6 @@
+---
+template: default
+---
 
 <body>
   <h1>Javascript</h1>
