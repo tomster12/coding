@@ -628,7 +628,7 @@ class Simulation {
     // Update camera with inputs
     this.cam.pos.x += (input.keys.held[65] ? 1 : 0 + input.keys.held[68] ? -1 : 0) * 3 / this.cam.scale;
     this.cam.pos.y += (input.keys.held[87] ? 1 : 0 + input.keys.held[83] ? -1 : 0) * 3 / this.cam.scale;
-    this.cam.scale *= 1 - input.mouseWheel * 0.02;
+    this.cam.scale *= 1 - (input.mouseWheel > 0 ? 1 : input.mouseWheel == 0 ? 0 : -1) * 0.02;
   }
 
 

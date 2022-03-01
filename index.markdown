@@ -5,9 +5,6 @@ layout: default
 <body>
   <h1>Javascript Notable</h1>
   <ul>
-    <li><a href="{{ site.baseurl | escape }}/Javascript/P5js/[..]Algorithms/Ants/index.html">
-        Ants
-    </a></li>
     <li><a href="{{ site.baseurl | escape }}/Javascript/P5js/[..]Algorithms/Boids2D/index.html">
         Boids
     </a></li>
