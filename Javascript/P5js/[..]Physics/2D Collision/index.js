@@ -2,7 +2,6 @@
 // #region - Setup
 
 let rigidMeshSimulation;
-let rigidMesh0;
 
 
 function setup() {
@@ -14,7 +13,7 @@ function setup() {
 
 function setupVariables() {
   rigidMeshSimulation = new RigidMeshSimulation();
-  RigidMesh.createSquare(
+  let s1 = RigidMesh.createSquare(
     rigidMeshSimulation,
     new Float2(150, 300),
     new Float2(100, 100),
@@ -26,6 +25,8 @@ function setupVariables() {
     new Float2(100, 100),
     2
   );
+  s1.vel.x += 40;
+  s1.rotVel += 0.3;
 }
 
 // #endregion

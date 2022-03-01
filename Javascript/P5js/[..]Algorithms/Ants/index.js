@@ -10,7 +10,7 @@ let ants;
 
 
 function setup() {
-  createCanvas(800, 800);
+  createCanvas(650, 650);
   setupVariables();
 }
 

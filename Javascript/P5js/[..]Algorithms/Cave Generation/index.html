@@ -1,13 +1,63 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="en" dir="ltr">
   <head>
     <meta charset="utf-8">
-    <title>p5.js</title>
+    <title>Cave Generation</title>
+
+    <style>
+      * {
+        margin: 0px;
+        font-family: "Helvetica";
+        color: #202020;
+      }
+      #title {
+        font-size: 40px;
+        text-align: center;
+        margin: 30px 0px;
+        padding: 5px 0px;
+        background-color: #f1f1f1;
+      }
+      main {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 30px;
+      }
+      #defaultCanvas0 {
+        box-shadow: 5px 5px 15px 0px rgba(0,0,0,0.75);
+      }
+
+      #info {
+        width: 400px;
+        padding-bottom: 20px;
+        font-size: 18px;
+        background-color: #f1f1f1;
+        box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+      }
+      #info p {
+        margin-left: 10px;
+      }
+    </style>
+
     <script src="../../../../!JSLib/p5.js"></script>
     <script src="../../../../!JSLib/p5.dom.js"></script>
     <script src="../../../../!JSLib/p5.sound.js"></script>
     <script src="index.js"></script>
   </head>
+
   <body>
+    <p id="title">Cave Generation</p>
+    <main>
+      <div id="info">
+        <h2 style="text-align: center;">Controls</h2><br />
+        <p>q: Generate Map</p>
+        <p>1: Toggle Grid</p>
+        <p>2: Toggle Rooms</p>
+        <p>3: Toggle Mesh (Slow)</p>
+        <p>4: Toggle Mesh Borders (For mesh)</p>
+        <p>5: Toggle Mesh Outline (Without mesh)</p>
+        <p>6: Toggle Connections</p>
+      </div>
+    </main>
   </body>
 </html>

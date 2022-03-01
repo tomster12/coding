@@ -6,13 +6,33 @@
 
 // Declare variables
 let sim;
+let sliders = {};
 
 
 function setup() {
-  createCanvas(800, 800);
+  createCanvas(600, 600);
 
   // Initialize variables
   sim = new Simulation(80, { x: width * 0.5, y: height * 0.5 }, 500);
+  let sliderHolder = document.getElementById("info");
+  sliders.COUNT = createLabelledSlider(sliderHolder, "COUNT", 0, 400, 80, 1);
+  sliders.SEP_DIST = createLabelledSlider(sliderHolder, "SEP_DIST", 0, 150, 25);
+  sliders.SEP_MULT = createLabelledSlider(sliderHolder, "SEP_MULT", 0, 0.02, 0.003);
+  sliders.ALIGN_DIST = createLabelledSlider(sliderHolder, "ALIGN_DIST", 0, 150, 60);
+  sliders.ALIGN_MULT = createLabelledSlider(sliderHolder, "ALIGN_MULT", 0, 0.02, 0.0012);
+  sliders.COH_DIST = createLabelledSlider(sliderHolder, "COH_DIST", 0, 150, 60);
+  sliders.COH_MULT = createLabelledSlider(sliderHolder, "COH_MULT", 0, 0.02, 0.0006);
+  sliders.SPEED = createLabelledSlider(sliderHolder, "SPEED", 0, 8.0, 0.8);
+}
+
+
+function createLabelledSlider(parent, txt, r0, r1, v, int=0) {
+  // Create a labelled slider
+  let label = createDiv("").class("label").parent(parent);
+  let text = createSpan(txt).parent(label);
+  let slider = createSlider(r0, r1, v, int).parent(label);
+  slider.parent(label);
+  return slider;
 }
 
 // #endregion
@@ -22,6 +42,9 @@ function setup() {
 
 function draw() {
   background("#293731");
+
+  // Update sim count
+  sim.updateCount(sliders.COUNT.value());
 
   // Update and draw sim
   sim.update();
@@ -42,7 +65,13 @@ class Simulation {
     this.size = size_;
 
     // Populate boids
-    for (let i = 0; i < numBoids; i++) {
+    this.addBoids(numBoids);
+  }
+
+
+  addBoids(count) {
+    // Add a set amount of boids
+    for (let i = 0; i < count; i++) {
       let angle = random(TWO_PI);
       this.boids.push(new Boid(this,
         { x: this.pos.x + random(this.size * -0.5, this.size * 0.5),
@@ -69,6 +98,19 @@ class Simulation {
 
     // Show boids
     for (let boid of this.boids) boid.show();
+  }
+
+
+  updateCount(count) {
+    if (count != this.boids.length) {
+      console.log("Updating count");
+
+      // Add more boids
+      if (count > this.boids.length) this.addBoids(count - this.boids.length);
+
+      // Remove some boids
+      else if (count < this.boids.length) this.boids = this.boids.splice(0, count);
+    }
   }
 }
 
@@ -112,9 +154,9 @@ class Boid {
     this.vel.x += v1.x + v2.x + v3.x; // + v4.x;
     this.vel.y += v1.y + v2.y + v3.y; // + v4.y;
     let mag = sqrt(this.vel.x * this.vel.x + this.vel.y * this.vel.y) || 1;
-    if (mag > Boid.SPEED) {
-      this.vel.x *= Boid.SPEED / mag;
-      this.vel.y *= Boid.SPEED / mag;
+    if (mag > sliders.SPEED.value()) {
+      this.vel.x *= sliders.SPEED.value() / mag;
+      this.vel.y *= sliders.SPEED.value() / mag;
     }
 
     // Move with velocity
@@ -141,11 +183,11 @@ class Boid {
         let dx = this.pos.x - boid.pos.x;
         let dy = this.pos.y - boid.pos.y;
         let distSq = dx * dx + dy * dy;
-        if (distSq < (Boid.SEP_DIST * Boid.SEP_DIST)) {
+        if (distSq < (sliders.SEP_DIST.value() * sliders.SEP_DIST.value())) {
 
           // Apply seperation
-          dir.x += dx * Boid.SEP_MULT;
-          dir.y += dy * Boid.SEP_MULT;
+          dir.x += dx * sliders.SEP_MULT.value();
+          dir.y += dy * sliders.SEP_MULT.value();
         }
       }
     }
@@ -168,7 +210,7 @@ class Boid {
         let dx = this.pos.x - boid.pos.x;
         let dy = this.pos.y - boid.pos.y;
         let distSq = dx * dx + dy * dy;
-        if (distSq < (Boid.ALIGN_DIST * Boid.ALIGN_DIST)) {
+        if (distSq < (sliders.ALIGN_DIST.value() * sliders.ALIGN_DIST.value())) {
           num += 1;
 
           // Apply seperation
@@ -184,8 +226,8 @@ class Boid {
       ave.y /= num;
     }
     let dir = {
-      x: (ave.x - this.vel.x) * Boid.ALIGN_MULT,
-      y: (ave.y - this.vel.y) * Boid.ALIGN_MULT };
+      x: (ave.x - this.vel.x) * sliders.ALIGN_MULT.value(),
+      y: (ave.y - this.vel.y) * sliders.ALIGN_MULT.value() };
     return dir;
   }
 
@@ -202,7 +244,7 @@ class Boid {
       let dx = this.pos.x - boid.pos.x;
       let dy = this.pos.y - boid.pos.y;
       let distSq = dx * dx + dy * dy;
-      if (distSq < (Boid.COH_DIST * Boid.COH_DIST)) {
+      if (distSq < (sliders.COH_DIST.value() * sliders.COH_DIST.value())) {
         num += 1;
 
         // Apply seperation
@@ -215,8 +257,8 @@ class Boid {
     ctr.x /= num;
     ctr.y /= num;
     let dir = {
-     x: (ctr.x - this.pos.x) * Boid.COH_MULT,
-     y: (ctr.y - this.pos.y) * Boid.COH_MULT }
+     x: (ctr.x - this.pos.x) * sliders.COH_MULT.value(),
+     y: (ctr.y - this.pos.y) * sliders.COH_MULT.value() }
     return dir;
   }
 

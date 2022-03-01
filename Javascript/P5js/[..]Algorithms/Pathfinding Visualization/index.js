@@ -70,6 +70,11 @@ function interpColor(a, b, amount) {
   return "#" + rr.toString(16) + rg.toString(16) + rb.toString(16) + ra.toString(16);
 }
 
+
+function mouseReleased() {
+  vis.mouseReleased();
+}
+
 // #endregion
 
 
@@ -175,7 +180,7 @@ class Visualization {
   // #endregion
 
 
-  // #region - Draw
+  // #region - Main
 
   draw() {
     background("#ffffff");
@@ -203,29 +208,17 @@ class Visualization {
 
 
   nodeClicked(node) {
-    // Unset start node
-    if (node == this.startNode) {
-      this.clearPath(false, true);
+    if (input.mouse.clicked.left) {
 
-    // Unset end node
-    } else if (node == this.endNode) {
-      this.clearPath(true, false);
+      // Unset start / end node
+      if (node == this.startNode) this.clearPath(false, true);
+      else if (node == this.endNode) this.clearPath(true, false);
 
-    } else {
-      // Set any to blocked
-      if (input.mouse.clicked.center) {
-        this.clearPath(true, true);
-        if (node.state != Node.STATE.BLOCKED)
-          node.setState(Node.STATE.BLOCKED);
-        else node.setState(Node.STATE.UNVISITED);
-        this.pathfindStartEnd();
-
-      } else {
+      else if (node.state == Node.STATE.UNVISITED) {
         // Set any to start
         if (this.startNode == null) {
           node.setState(Node.STATE.START);
-          if (this.endNode != null)
-            this.pathfindStartEnd();
+          if (this.endNode != null) this.pathfindStartEnd();
 
         // Set any to end
         } else {
@@ -235,6 +228,25 @@ class Visualization {
         }
       }
     }
+  }
+
+
+  nodeHeld(node) {
+    // Drag walls
+    if (input.mouse.held.right && node.state != Node.STATE.BLOCKED) {
+      node.setState(Node.STATE.BLOCKED);
+      this.clearPath(true, true);
+
+    } else if (input.mouse.held.left && node.state == Node.STATE.BLOCKED) {
+      node.setState(Node.STATE.UNVISITED);
+      this.clearPath(true, true);
+    }
+  }
+
+
+  mouseReleased() {
+    // Pathfind on mouse release
+    if (this.startNode != null && this.endNode != null) this.pathfindStartEnd();
   }
 
 
@@ -402,7 +414,8 @@ class Node {
   draw() {
     // Update hovered and clicked
     this.hovered = dist(mouseX, mouseY, this.pos.x, this.pos.y) < this.nodeSize * 0.5;
-    if (this.hovered && Object.keys(input.mouse.clicked).length != 0) this.click();
+    if (this.hovered && Object.keys(input.mouse.clicked).length != 0) this.vis.nodeClicked(this);
+    if (this.hovered && Object.keys(input.mouse.held).length != 0) this.vis.nodeHeld(this);
 
     // Interpolate size
     this.gotoSize = this.nodeSize * (this.hovered ? Node.CFG.hoverScale : Node.CFG[this.state].scale);
@@ -445,13 +458,6 @@ class Node {
       this.pos.x, this.pos.y,
       node.pos.x, node.pos.y
     );
-  }
-
-
-
-  click() {
-    // Pass clicked through to visualizer
-    this.vis.nodeClicked(this);
   }
 
 

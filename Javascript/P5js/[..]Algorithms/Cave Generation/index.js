@@ -71,9 +71,9 @@ let meshConfigPoints = [
 
 // Config variables
 let toShow = [
-  false,  // cMap
-  false,  // rooms
-  true,   // mesh
+  true,   // cMap
+  true,   // rooms
+  false,  // mesh
   false,  // mesh lines
   true,   // mesh outlines
   false   // connections
@@ -98,15 +98,9 @@ function setup() {
   // Setup p5.js variables
   createCanvas(600, 600);
   pixelDensity(3);
-  console.log("0 - z - map");
-  console.log("1 - x - rooms");
-  console.log("2 - c - mesh");
-  console.log("3 - v - thick borders");
-  console.log("4 - b - meshOutline");
-  console.log("5 - n - connections");
 
   // Setup cave
-  makeMapAndMesh();
+  // makeMapAndMesh();
 }
 
 // #endregion
@@ -120,19 +114,14 @@ function draw() {
 
   // Main draw
   translate(-cSize / 2, -cSize / 2);
-  if (toShow[0] && cMap != null)
-    drawMap();
-  if (toShow[1] && rooms != null)
-    drawRooms();
+  if (toShow[0] && cMap != null) drawMap();
+  if (toShow[1] && rooms != null) drawRooms();
   translate(cSize / 2, cSize / 2);
 
   // Mesh draw
-  if (toShow[2] && mesh != null)
-    drawMesh();
-  if (toShow[4] && meshOutlines != null)
-    drawMeshOutline();
-  if (toShow[5] && rooms != null)
-    drawConnections();
+  if (toShow[2] && mesh != null) drawMesh();
+  if (toShow[4] && meshOutlines != null) drawMeshOutline();
+  if (toShow[5] && rooms != null) drawConnections();
 }
 
 
@@ -579,33 +568,22 @@ function getMeshConfig(x_, y_, config_) {
 
 function getRandom() {
   r = random();
-  if (r < fillPercent) {
-    return 1;
-  } else {
-    return 0;
-  }
+  if (r < fillPercent) return 1;
+  else return 0;
 }
 
- 
+
 function keyPressed() {
-  if (keyCode == 90)
-    toShow[0] = !toShow[0];
-  if (keyCode == 88)
-    toShow[1] = !toShow[1];
-  if (keyCode == 67)
-    toShow[2] = !toShow[2];
-  if (keyCode == 86)
-    toShow[3] = !toShow[3];
-  if (keyCode == 66)
-    toShow[4] = !toShow[4];
-  if (keyCode == 78)
-    toShow[5] = !toShow[5];
+  // Toggle options
+  if (keyCode == 81) makeMapAndMesh();
+  if (keyCode >= 49 && keyCode <= 54) toShow[keyCode - 49] = !toShow[keyCode - 49];
 }
 
 // #endregion
 
 
 class room {
+
   // #region - Main
 
   constructor() {

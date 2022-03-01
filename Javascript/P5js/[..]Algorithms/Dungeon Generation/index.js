@@ -17,6 +17,7 @@ let multiRoom = true;
 let roomChance = 0.5;
 let startDelay = 500;
 let updateDelay = 7;
+let sliders = {};
 
 
 function setup() {
@@ -24,19 +25,33 @@ function setup() {
   createCanvas(700, 700);
   pixelDensity(4);
 
+  // Setup sliders
+  let sliderHolder = document.getElementById("info");
+  sliders.rSize = createLabelledSlider(sliderHolder, "Room Size", 5, 80, 35);
+  sliders.roomChance = createLabelledSlider(sliderHolder, "Room Chance", 0, 1, 0.35);
+
   // Main variables
   rPos = createVector(width / 2 - rSize / 2, height / 2 - rSize / 2);
   rooms = [];
-
-  // Generate dungeon
   resetDungeon();
 }
 
 
 function resetDungeon() {
+  // Generate dungeon
   rooms = [];
-  setTimeout(() => (rooms.push(new Room(createVector(0, 0), [true, true, true, true]))), startDelay);
-  setTimeout(() => (updateRooms()), startDelay + updateDelay);
+  rooms.push(new Room(createVector(0, 0), [true, true, true, true]));
+  updateRooms();
+}
+
+
+function createLabelledSlider(parent, txt, r0, r1, v, int=0) {
+  // Create a labelled slider
+  let label = createDiv("").class("label").parent(parent);
+  let text = createSpan(txt).parent(label);
+  let slider = createSlider(r0, r1, v, int).parent(label);
+  slider.parent(label);
+  return slider;
 }
 
 // #endregion
@@ -45,6 +60,11 @@ function resetDungeon() {
 // #region - Main
 
 function draw() {
+  // Update variables based on sliders
+  rSize = sliders.rSize.value();
+  rWallSize = rSize * 0.2;
+  rDoorSize = rSize * 0.6;
+
   // Draw all rooms
   background(100);
   for (let room of rooms) room.show();
@@ -52,23 +72,17 @@ function draw() {
 
 
 function updateRooms() {
-  // Create list of current rooms
-  let finished = true;
-  let roomsToUpdate = [];
-  for (let room of rooms) roomsToUpdate.push(room);
-
   // Update all current rooms
-  for (let room of roomsToUpdate) {
-    if (!room.done) {
+  let finished = true;
+  for (let i = rooms.length - 1; i >= 0; i--) {
+    if (!rooms[i].done) {
       finished = false;
-      room.update();
+      rooms[i].update();
     }
   }
 
   // Update again if not finished
-  if (!finished) {
-    setTimeout(() => (updateRooms()), updateDelay);
-  }
+  if (!finished) setTimeout(() => (updateRooms()), updateDelay);
 }
 
 
@@ -114,14 +128,12 @@ class Room {
     // If multiRoom then randomize each direction
     if (multiRoom) {
       for (let i = 0; i < this.doors.length; i++) {
-        if (random() < roomChance) {
-          this.doors[i] = true;
-        }
+        if (random() < sliders.roomChance.value()) this.doors[i] = true;
       }
 
     // Else pick 1 random direction
     } else {
-      if (random() < roomChance) {
+      if (random() < sliders.roomChance.value()) {
         this.doors[floor(random(this.doors.length))] = true;
       }
     }
