@@ -7,7 +7,7 @@ let updatePerFrame = 3;
 
 // Setup p5.js functions
 function setup() {
-  createCanvas(500, 300);
+  createCanvas(800, 450);
   rectMode(CENTER);
 }
 
