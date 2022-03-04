@@ -108,6 +108,7 @@ function initVariables() {
       "outputs": ["out 1"],
       calc: (inputs) => [inputs[0] ^ inputs[1]]
     }};
+
   output = createGraphics(width, height);
   input = new Input();
   mainSim = new Simulation({ x: 0, y: 0 }, { x: width, y: height });

@@ -30,7 +30,8 @@ float camGotoScale;
 
 void setup() {
   // Main setup
-  fullScreen();
+  // fullScreen();
+  size(800, 800);
   textSize(20);
   textAlign(CENTER);
   setupVariables();
