@@ -1,1 +1,23 @@
+
 theme: jekyll-theme-tactile
+
+exclude:
+  # - /!JSLib/
+  - /.jekyll-cache/
+  - /AoC/
+  - /Assets/
+  - /Autohotkey/
+  - /C/
+  - /C++/
+  - /Github/
+  - /Java/
+  # - /Javascript/
+  # - /Multi/
+  - /Other/
+  - /Processing/
+  - /Python/
+  - /Software/
+  - /Unity/
+  - /Web/
+  - /Gemfile
+  - /Gemfile.lock

@@ -1,18 +1,24 @@
 
+# Definetly do not include
 /Other/
 /Software/
 /Github/
 /Javascript/Other/
+/C/Vinn/
 
+# Local gh-pages serve byproducts
+_site/
+.jekyll-cache/
+/Gemfile
+/Gemfile.lock
+
+# Clean up project byproducts
 **/node_modules/
 /Processing/**/build/
 /Multi/**/build/
 /C++/**/bin/
 /C++/**/.vs/
 /C++/SFML-2.5.1/
-/C/Vinn/
 
-/Gemfile
-/Gemfile.lock
-
+# Not yet implemented
 /Unity/

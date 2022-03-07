@@ -2,58 +2,35 @@
 // #region - Main
 
 // Declare variables
-let debug;
+let debug = false;
 let game;
 
 
 function setup() {
-  // Initialize canvas
+  // Initialize
   createCanvas(800, 800);
-
-  // Initialize game
-  debug = false;
   game = new Game();
 }
 
 
 function draw() {
-  // Update game
+  // Update
   game.draw();
 }
 
 
-function keyPressed() {
-  // Pass through to game
-  game.callKeyPressed(keyCode);
-}
-
-
-function keyReleased() {
-  // Pass through to game
-  game.callKeyReleased(keyCode);
-}
-
-
-function mousePressed() {
-  // Pass through to game
-  game.callMousePressed(mouseButton);
-}
-
-
-function mouseReleased() {
-  // Pass through to game
-  game.callMouseReleased(mouseButton);
-}
+// Pass input through to game
+keyPressed = () => game.callKeyPressed(keyCode);
+keyReleased = () => game.callKeyReleased(keyCode);
+mousePressed = () => game.callMousePressed(mouseButton);
+mouseReleased = () => game.callMouseReleased(mouseButton);
 
 // #endregion
 
 
 // #region - Other
 
-function sign(num) {
-  // Returns the sign of a number
-  return num >= 0 ? 1 : -1;
-}
+sign = (num) => num >= 0 ? 1 : -1;
 
 
 function lerpAngle(from, to, weight) {
@@ -122,7 +99,7 @@ class Game {
 
 
   getEntities(checkName) {
-    // Returns all entities of a given type
+    // Returns all entities of a given name
     return this.entities.filter(ent => ent.name == checkName);
   }
 
@@ -169,6 +146,8 @@ class Game {
   // #endregion
 }
 
+
+// #region - Entity
 
 class Entity {
 
@@ -274,6 +253,10 @@ class Wall extends Entity {
   // #endregion
 }
 
+// #endregion
+
+
+// #region - Component
 
 class Component {
 
@@ -333,7 +316,6 @@ class TransformComponent extends Component {
   // #endregion
 }
 
-
 // Tags:          Render, Collision
 // Requirements:  0 Collision, 1 Transform
 class CollisionComponent extends Component {
@@ -356,17 +338,12 @@ class CollisionComponent extends Component {
 
 
   update() {
-    if (this.enabled) {
+    if (!this.enabled || this.isKinematic) return;
 
-      // Check collision against all other collision components
-      if (!this.isKinematic) {
-        let clCmps = this.entity.game.getComponents("Collision");
-        for (let otherClCmp of clCmps) {
-          if (otherClCmp != this) {
-            this.collide(otherClCmp);
-          }
-        }
-      }
+    // Check collision against all other collision components
+    let clCmps = this.entity.game.getComponents("Collision");
+    for (let otherClCmp of clCmps) {
+      if (otherClCmp != this) this.checkCollide(otherClCmp);
     }
   }
 
@@ -398,7 +375,7 @@ class CollisionComponent extends Component {
   }
 
 
-  collide(otherClCmp) {
+  checkCollide(otherClCmp) {
     // Check correct collision function
     let clInfo = null;
     if (this.type == Game.CIRCLE) {
@@ -421,7 +398,7 @@ class CollisionComponent extends Component {
 
 
 // Tags:          Movement
-// Requirements:  1, Transform
+// Requirements:  1 Transform
 class MovementComponent extends Component {
 
   // #region - Main
@@ -431,55 +408,51 @@ class MovementComponent extends Component {
     super(entity_, ["Movement"]);
 
     // Component requirements
-    let requirements = this.entity.require([ [0, "Control"], [1, "Transform"] ]);
+    let requirements = this.entity.require([ [1, "Transform"] ]);
     this.tsCmp = requirements[0];
 
     // Initialize variables
+    this.moveVel = { x: 0, y: 0 },
+    this.moveAcc = 0.4;
     this.stats = {
-      moveVel: { x: 0, y: 0 },
-      moveAcc: 0.4,
       moveFrc: 0.75,
-      moveSpeedMax: 2.5
-    };
+      moveSpeedMax: 2.5,
+      aimLerp: 0.2 };
   }
 
 
   update() {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Update transform with velocity
-      this.tsCmp.pos.x += this.stats.moveVel.x;
-      this.tsCmp.pos.y += this.stats.moveVel.y;
-    }
+    // Update transform with velocity
+    this.tsCmp.pos.x += this.moveVel.x;
+    this.tsCmp.pos.y += this.moveVel.y;
   }
 
 
   move(dir) {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Accelerate / decelerate in direction
-      if (dir.x != 0 && this.stats.moveVel.x * sign(dir.x) < this.stats.moveSpeedMax) this.stats.moveVel.x += this.stats.moveAcc * dir.x;
-      else this.stats.moveVel.x *= this.stats.moveFrc;
-      if (dir.y != 0 && this.stats.moveVel.y * sign(dir.y) < this.stats.moveSpeedMax) this.stats.moveVel.y += this.stats.moveAcc * dir.y;
-      else this.stats.moveVel.y *= this.stats.moveFrc;
-    }
+    // Accelerate / decelerate in direction
+    if (dir.x != 0 && this.moveVel.x * sign(dir.x) < this.stats.moveSpeedMax) this.moveVel.x += this.moveAcc * dir.x;
+    else this.moveVel.x *= this.stats.moveFrc;
+    if (dir.y != 0 && this.moveVel.y * sign(dir.y) < this.stats.moveSpeedMax) this.moveVel.y += this.moveAcc * dir.y;
+    else this.moveVel.y *= this.stats.moveFrc;
   }
 
 
   aim(pos) {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Aim at position
-      let dx = pos.x - this.tsCmp.pos.x;
-      let dy = pos.y - this.tsCmp.pos.y;
-      let dir = atan2(dy, dx);
-      this.tsCmp.rotation = lerpAngle(this.tsCmp.rotation, dir, 0.1);
-    }
+    // Aim at position
+    let dx = pos.x - this.tsCmp.pos.x;
+    let dy = pos.y - this.tsCmp.pos.y;
+    let dir = atan2(dy, dx);
+    this.tsCmp.rotation = lerpAngle(this.tsCmp.rotation, dir, this.stats.aimLerp);
   }
 
   // #endregion
 }
-
 
 // Tags:          Control, User
 // Requirements:  0 Control, 1 Movement
@@ -496,29 +469,28 @@ class UserControlComponent extends Component {
     this.mvCmp = requirements[0];
 
     // Initialize variables
-    this.walkSpeedMax = 2.5;
-    this.sprintSpeedMax = 5.0;
+    this.stats = {
+      walkSpeedMax: 2.5,
+      sprintSpeedMax: 5.0 };
   }
 
 
   update() {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Call movement component with user input
-      this.mvCmp.stats.moveSpeedMax = this.entity.game.keyDown[16] ? this.sprintSpeedMax : this.walkSpeedMax;
-      this.mvCmp.move({
-        x: (this.entity.game.keyDown[65] ? -1 : 0) + (this.entity.game.keyDown[68] ? 1 : 0),
-        y: (this.entity.game.keyDown[87] ? -1 : 0) + (this.entity.game.keyDown[83] ? 1 : 0)
-      });
+    // Call movement component with user input
+    this.mvCmp.stats.moveSpeedMax = this.entity.game.keyDown[16] ? this.stats.sprintSpeedMax : this.stats.walkSpeedMax;
+    this.mvCmp.move({
+      x: (this.entity.game.keyDown[65] ? -1 : 0) + (this.entity.game.keyDown[68] ? 1 : 0),
+      y: (this.entity.game.keyDown[87] ? -1 : 0) + (this.entity.game.keyDown[83] ? 1 : 0)
+    });
 
-      // Aim movement component towards mouse
-      this.mvCmp.aim({ x: mouseX, y: mouseY });
-    }
+    // Aim movement component towards mouse
+    this.mvCmp.aim({ x: mouseX, y: mouseY });
   }
 
   // #endregion
 }
-
 
 // Tags:          Control, Enemy
 // Requirements:  0 Control, 1 Movement
@@ -535,17 +507,18 @@ class ZombControlComponent extends Component {
     this.mvCmp = requirements[0];
 
     // Initialize variables
-    this.walkSpeedMax = 2.5;
-    this.sprintSpeedMax = 5.0;
+    this.stats = {
+      walkSpeedMax: 2.5,
+      sprintSpeedMax: 5.0 };
+    this.playerTf = this.entity.game.getEntities("Player")[0].getComponents("Transform")[0];
   }
 
 
   update() {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Aim movement component towards mouse
-      this.mvCmp.aim(this.entity.game.getEntities("Player")[0].getComponents("Transform")[0].pos);
-    }
+    // Aim movement component towards mouse
+    this.mvCmp.aim(this.playerTf.pos);
   }
   // #endregion
 }
@@ -564,34 +537,31 @@ class AttributeComponent extends Component {
     // Initialize variables
     this.stats = {
       maxHealth: 100,
-      health: 70
-    };
+      health: 70 };
   }
 
 
   show() {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Check if has transform
-      let tsCmps = this.entity.getComponents("Transform");
-      if (tsCmps.length > 0) {
+    // Check if has transform
+    let tsCmps = this.entity.getComponents("Transform");
+    if (tsCmps.length > 0) {
 
-        // Draw health as bar
-        push();
-        tsCmps[0].doTranslate();
-        noStroke();
-        fill("#8c2e2e");
-        rect(-50, 20, 100, 10);
-        fill("#38ad41");
-        rect(-50, 20, 100 * this.stats.health / this.stats.maxHealth, 10);
-        pop();
-      }
+      // Draw health as bar
+      push();
+      tsCmps[0].doTranslate();
+      noStroke();
+      fill("#8c2e2e");
+      rect(-50, 20, 100, 10);
+      fill("#38ad41");
+      rect(-50, 20, 100 * this.stats.health / this.stats.maxHealth, 10);
+      pop();
     }
   }
 
   // #endregion
 }
-
 
 // Tags:          Render, Body
 // Requirements:  1 Attribute, 1 Transform
@@ -616,29 +586,27 @@ class BodyComponent extends Component {
 
 
   show() {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Check if has transform
-      let tsCmps = this.entity.getComponents("Transform");
-      if (tsCmps.length > 0) {
+    // Check if has transform
+    let tsCmps = this.entity.getComponents("Transform");
+    if (tsCmps.length > 0) {
 
-        // Draw body as ellipse
-        push();
-        this.tsCmp.doTransform();
-        strokeWeight(2);
-        stroke(0);
-        fill(this.col);
-        ellipse(0, -this.size * 0.45, this.size * 0.5, this.size * 0.5);
-        ellipse(0, this.size * 0.45, this.size * 0.5, this.size * 0.5);
-        ellipse(0, 0, this.size, this.size);
-        pop();
-      }
+      // Draw body as ellipse
+      push();
+      this.tsCmp.doTransform();
+      strokeWeight(2);
+      stroke(0);
+      fill(this.col);
+      ellipse(0, -this.size * 0.45, this.size * 0.5, this.size * 0.5);
+      ellipse(0, this.size * 0.45, this.size * 0.5, this.size * 0.5);
+      ellipse(0, 0, this.size, this.size);
+      pop();
     }
   }
 
   // #endregion
 }
-
 
 // Tags:          Render, Shape
 // Requirements:  1, Transform
@@ -662,33 +630,34 @@ class ShapeComponent extends Component {
 
 
   show() {
-    if (this.enabled) {
+    if (!this.enabled) return;
 
-      // Show as circle
-      if (this.type == Game.CIRCLE) {
-        push();
-        this.tsCmp.doTransform();
-        strokeWeight(2);
-        stroke(0);
-        fill(255);
-        ellipse(0, 0, this.size.x, this.size.x);
-        pop();
+    // Show as circle
+    if (this.type == Game.CIRCLE) {
+      push();
+      this.tsCmp.doTransform();
+      strokeWeight(2);
+      stroke(0);
+      fill(255);
+      ellipse(0, 0, this.size.x, this.size.x);
+      pop();
 
-      // Show as square
-      } else if (this.type == Game.RECT) {
-        push();
-        this.tsCmp.doTransform();
-        strokeWeight(2);
-        stroke(0);
-        fill(255);
-        rect(-this.size.x * 0.5, -this.size.y * 0.5, this.size.x, this.size.y);
-        pop();
-      }
+    // Show as square
+    } else if (this.type == Game.RECT) {
+      push();
+      this.tsCmp.doTransform();
+      strokeWeight(2);
+      stroke(0);
+      fill(255);
+      rect(-this.size.x * 0.5, -this.size.y * 0.5, this.size.x, this.size.y);
+      pop();
     }
   }
 
   // #endregion
 }
+
+// #endregion
 
 
 class Collision {
