@@ -136,7 +136,7 @@ layout: default
   <ul>
     {% for url in site.static_files %}
       {% if url.path contains ".html" %}
-	    	<li><a href="{{ site.baseurl | escape }}{{ url.path | relative_url }}">
+	    	<li><a href="{{ url.path | relative_url }}">
             {{ url.path }}
         </a></li>
       {% endif %}
