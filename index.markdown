@@ -35,98 +35,98 @@ layout: default
 
   <h2>Javascript</h2>
   <div class="gifs">
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Physics/1D Collision/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/1DCollision.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Physics/1D Collision/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/1DCollision.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Boids2D/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Boids.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Boids2D/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Boids.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Cave Generation/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/CaveGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Cave Generation/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/CaveGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Dungeon Generation/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/DungeonGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Dungeon Generation/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/DungeonGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Maths/Fourier/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Fourier.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Maths/Fourier/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Fourier.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Games/Gates Attempt 3/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Gates.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Games/Gates Attempt 3/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Gates.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Pathfinding Visualization/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Pathfinding.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Pathfinding Visualization/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Pathfinding.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Games/Slide/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Slide.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Games/Slide/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Slide.gif' | relative_url }}" /></a>
   </div><br />
 
   <h2>Processing</h2>
   <div class="gifs">
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]Automata/Boids' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/Boids.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]Automata/Boids' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/Boids.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]RayMarching/Camera' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/Camera.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]RayMarching/Camera' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/Camera.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]RayMarching/Camera3D' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/Camera3D.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]RayMarching/Camera3D' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/Camera3D.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]ProceduralGeneration/CaveGeneration' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/CaveGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]ProceduralGeneration/CaveGeneration' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/CaveGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]ProceduralGeneration/DungeonGeneration' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/DungeonGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]ProceduralGeneration/DungeonGeneration' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/DungeonGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]ProceduralGeneration/RoguelikeGeneration' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/RoguelikeGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]ProceduralGeneration/RoguelikeGeneration' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/RoguelikeGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Maths/Chaos/ChaosEquations' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/ChaosEquations.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Maths/Chaos/ChaosEquations' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/ChaosEquations.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Other/CutMesh' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/CutMesh.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Other/CutMesh' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/CutMesh.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Physics/[..]FluidSim/FluidSimMain' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/FluidSimulation.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Physics/[..]FluidSim/FluidSimMain' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/FluidSimulation.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]Automata/GameOfLife' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/GameOfLife.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]Automata/GameOfLife' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/GameOfLife.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Games/Gates/GatesAttempt2' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/Gates.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Games/Gates/GatesAttempt2' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/Gates.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Physics/Gravity' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/Gravity.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Physics/Gravity' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/Gravity.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Maths/LissajousCurves' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/LissajousCurves.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Maths/LissajousCurves' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/LissajousCurves.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Maths/Mandelbrot' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/Mandelbrot.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Maths/Mandelbrot' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/Mandelbrot.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Maths/MarchingSquares' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/MarchingSquares.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Maths/MarchingSquares' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/MarchingSquares.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/MazeGeneration' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/MazeGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/MazeGeneration' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/MazeGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/Sorting' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/SortingAlgorithms.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/Sorting' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/SortingAlgorithms.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Other/ParticleClock' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/ParticleClock.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Other/ParticleClock' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/ParticleClock.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]RayMarching/RayMarching2D' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/RayMarching.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]RayMarching/RayMarching2D' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/RayMarching.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]RayMarching/RayMarching3D' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/RayMarching3D.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]RayMarching/RayMarching3D' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/RayMarching3D.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Algorithms/[..]RayMarching/RayMarching2DShadows' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/RayMarchingShadows.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Algorithms/[..]RayMarching/RayMarching2DShadows' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/RayMarchingShadows.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Processing/[..]Physics/[..]Collision/RBCollision2D' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Processing/RigidbodyCollision.gif' | relative_url }}" /></a>
+    <a href="{{ '/Processing/[..]Physics/[..]Collision/RBCollision2D' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Processing/RigidbodyCollision.gif' | relative_url }}" /></a>
   </div>
 
 
