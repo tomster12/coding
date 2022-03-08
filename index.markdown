@@ -35,29 +35,29 @@ layout: default
 
   <h2>Javascript</h2>
   <div class="gifs">
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Physics/1D Collision/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/1DCollision.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Physics/1D Collision/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/1DCollision.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Boids2D/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Boids.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Boids2D/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Boids.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Cave Generation/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/CaveGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Cave Generation/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/CaveGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Dungeon Generation/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/DungeonGeneration.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Dungeon Generation/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/DungeonGeneration.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Maths/Fourier/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Fourier.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Maths/Fourier/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Fourier.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Games/Gates Attempt 3/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Gates.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Games/Gates Attempt 3/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Gates.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Algorithms/Pathfinding Visualization/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Pathfinding.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Algorithms/Pathfinding Visualization/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Pathfinding.gif' | relative_url }}" /></a>
 
-    <a href="{{ site.baseurl | escape }}{{ '/Javascript/P5js/[..]Games/Slide/index.html' | relative_url }}">
-      <img src="{{ site.baseurl | escape }}{{ '/Assets/Gifs/Javascript/Slide.gif' | relative_url }}" /></a>
+    <a href="{{ '/Javascript/P5js/[..]Games/Slide/index.html' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/Javascript/Slide.gif' | relative_url }}" /></a>
   </div><br />
 
   <h2>Processing</h2>
