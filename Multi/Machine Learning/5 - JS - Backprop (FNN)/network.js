@@ -1,6 +1,4 @@
 
-// #region - Network
-
 class Network {
 
   constructor(inputShape=null, name=null) {
@@ -118,10 +116,6 @@ class Dense {
   }
 }
 
-// #endregion
-
-
-// #region - Trainer
 
 class DenseNetworkTrainer {
 
@@ -303,11 +297,6 @@ class DenseNetworkTrainer {
   }
 }
 
-// #endregion
-
-
-// #region - Activation functions
-
 actvFuncs = {}
 
 actvFuncs.sigmoid = {}
@@ -324,5 +313,3 @@ actvFuncs.reLU = {};
 actvFuncs.reLU.func = x => max(x, 0);
 actvFuncs.reLU.drv = x => (x <= 0) ? (0) : (1);
 actvFuncs.reLU.outputRange = [0, null];
-
-// #endregion
