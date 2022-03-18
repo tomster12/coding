@@ -7,20 +7,19 @@ void setup() {
   noStroke();
 
   // Initial shader load
-  shd = loadShader("noise.frag");
+  shd = loadShader("shapes.frag");
 }
 
 
 void draw() {
+  // Scuffed checks to allow hot loading
   if (shd != null) {
     try {
 
-      // Set uniforms
+      // Set shader and draw
       shd.set("u_resolution", float(width), float(height));
       shd.set("u_mouse", float(mouseX), float(height - mouseY));
       shd.set("u_time", millis() / 1000.0);
-
-      // Set shader and draw
       shader(shd);
       rect(0, 0, width, height);
 
@@ -31,5 +30,5 @@ void draw() {
 
 void keyPressed() {
   // Reload shader
-  shd = loadShader("noise.frag");
+  shd = loadShader("shapes.frag");
 }
