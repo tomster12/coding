@@ -35,12 +35,15 @@ function Train(net, trainingSet) {
 function EToWei(res, net, i, o, p) {
   let Si = res[1][1][i][o]; // Activated output of neuron this weight connects from
   let Dp = EToNeuNet(res, net, i + 1, p); // Partial derivation of error within respect to neuron net this weight connects to
-    return Si * Dp;
+  return Si * Dp;
 }
 
 
 function EToNeuNet(res, net, ly, n) {
-  return EToNeuOut(res, net, ly, n) * sDerivative(res[1][1][ly][n]); // Get partial derivative of cost function to neuron out
+  // Get partial derivative of cost function to neuron out
+  let pdToOut = EToNeuOut(res, net, ly, n);
+  let pdToIn = sDerivative(res[1][1][ly][n]);
+  return pdToOut * pdToIn;
 }
 
 

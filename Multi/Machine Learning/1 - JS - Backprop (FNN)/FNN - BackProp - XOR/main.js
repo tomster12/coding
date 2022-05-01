@@ -12,7 +12,7 @@ function setup() {
   createCanvas(400, 400);
   SetupVariables();
 
-  FullTrain(1500);
+  FullTrain(1000);
 }
 
 

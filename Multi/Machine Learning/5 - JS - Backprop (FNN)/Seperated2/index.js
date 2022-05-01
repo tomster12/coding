@@ -38,19 +38,21 @@ function setupVariables() {
 
   // Create network and trainer
   let net = new Network([ 1, 2 ]);
-  net.add(new Dense(2, activation=actvFuncs.relu));
-  net.add(new Dense(1, activation=actvFuncs.relu));
+  net.add(new Dense(2, activation=actvFuncs.tanh));
+  net.add(new Dense(1, activation=actvFuncs.tanh));
   trainer = new DenseNetworkTrainer(net);
+  let l = -1;
+  let h = 1;
   trainerSettings = {
     trainingData: [
-      { input: [ [-1], [-1] ], expectedOutput: [ [-1] ] },
-      { input: [ [-1], [ 1] ], expectedOutput: [ [ 1] ] },
-      { input: [ [ 1], [-1] ], expectedOutput: [ [ 1] ] },
-      { input: [ [ 1], [ 1] ], expectedOutput: [ [-1] ] } ],
+      { input: [ [h], [h] ], expectedOutput: [ [l] ] },
+      { input: [ [h], [l] ], expectedOutput: [ [h] ] },
+      { input: [ [l], [h] ], expectedOutput: [ [h] ] },
+      { input: [ [l], [l] ], expectedOutput: [ [l] ] } ],
     learningRate: 0.1, momentumRate: 0.25 };
+  net.logLayers();
   interactor.setNetwork(net);
   interactor.setTrainer(trainer, trainerSettings);
-  net.logLayers();
 
 
   // Quick train and print

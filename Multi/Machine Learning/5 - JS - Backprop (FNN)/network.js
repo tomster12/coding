@@ -43,23 +43,29 @@ class Network {
 
   logLayers() {
     // Top line and title
-    console.groupC("%c\tNeural Network", "font-size:17px");
-    if (this.name != null) console.logC("%c\t" + this.name, "font-size:15px");
+    console.group("%c\tNeural Network", "font-size:17px");
+    if (this.name != null) console.log("%c\t" + this.name, "font-size:15px");
 
     // Log info about each layer
     let shapes = [];
     for (let layer of this.layers) shapes.push({ name: layer.name, shape: layer.shapeToString() });
-    console.tableC(shapes);
+    console.table(shapes);
 
+    // Log weights
+    this.logWeights();
+    console.groupEnd();
+  }
+
+
+  logWeights() {
     // Show individual weights in groups
-    console.groupC("%c\tWeights", "font-size:15px");
+    console.group("%c\tWeights", "font-size:15px");
     for (let layer of this.layers) {
-      console.groupC("%c  " + layer.name, "font-size:13px");
-      console.logC(layer.weights.toString());
-      console.groupEndC();
+      console.group("%c  " + layer.name, "font-size:13px");
+      console.log(layer.weights.toString());
+      console.groupEnd();
     }
-    console.groupEndC();
-    console.groupEndC();
+    console.groupEnd();
   }
 
 
@@ -101,6 +107,7 @@ class Dense {
       console.error("inputShape mismatch: " + input.cols + "," + input.rows + " : " + this.inputShape);
       return;
     }
+
 
     // Propogate input through weights (including bias)
     let withBias = new Matrix2([...input.data, [1]]);
@@ -164,17 +171,17 @@ class DenseNetworkTrainer {
 
       // Log Progress
       if (debug) {
-        console.logC(" ");
-        console.groupCollapsedC("Training " + i + ": " + error);
-        console.groupCollapsedC("Input");
-        console.logC(input.toString());
-        console.groupEndC();
-        console.groupCollapsedC("Expected");
-        console.logC(expectedOutput.toString());
-        console.groupEndC();
-        console.groupCollapsedC("Predicted");
-        console.logC(predictedOutput.toString());
-        console.groupEndC();
+        console.log(" ");
+        console.groupCollapsed("Training " + i + ": " + error);
+        console.groupCollapsed("Input");
+        console.log(input.toString());
+        console.groupEnd();
+        console.groupCollapsed("Expected");
+        console.log(expectedOutput.toString());
+        console.groupEnd();
+        console.groupCollapsed("Predicted");
+        console.log(predictedOutput.toString());
+        console.groupEnd();
       }
 
       // Backpropogate based on the predicted values
@@ -186,7 +193,7 @@ class DenseNetworkTrainer {
       }, debug);
 
       // Log Progress
-      if (debug) console.groupEndC();
+      if (debug) console.groupEnd();
     }
 
     // Check if average below preset value
@@ -211,12 +218,14 @@ class DenseNetworkTrainer {
       for (let row = 0; row < this.net.layers[i].weights.rows; row++) {
         for (let col = 0; col < this.net.layers[i].weights.cols; col++) {
           let derivative = this.drvErrToWeight(settings, [i, col, row]);
-          if (debug) console.logC("Calculated for " + [i, row, col] + ":\t" + derivative);
+          if (debug) console.log("Calculated for " + [i, row, col] + ":\t" + derivative);
           weightDrvs[i].setVal(row, col, derivative);
         }
       }
+    }
 
-      // Update weights based on weight derivatives
+    // Update weights based on weight derivatives
+    for (let i = this.net.layers.length - 1; i >= 0; i--) {
       let weightDeltas = weightDrvs[i].multiply(-settings.learningRate);
       let deltaMomentum = this.pWeightDeltas[i].multiply(settings.momentumRate);
       this.net.layers[i].weights = this.net.layers[i].weights.add(weightDeltas).add(deltaMomentum);
