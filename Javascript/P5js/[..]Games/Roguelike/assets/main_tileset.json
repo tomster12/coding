@@ -1,5 +1,5 @@
 {
-  "width": 3,
+  "width": 4,
   "height": 2,
-  "collision": [1, 1, 1, 0, 1, 1]
+  "collision": [1, 1, 1, 0, 1, 1, 1, 1]
 }
