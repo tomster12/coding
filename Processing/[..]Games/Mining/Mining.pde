@@ -45,7 +45,7 @@ void initStatic() {
 // #endregion
 
 
-// #region - Global
+// #region - Driver
 
 Controller CONTROLLER;
 World WORLD;
@@ -93,9 +93,9 @@ void draw() {
   CONTROLLER.update();
   WORLD.update();
   CAM.update();
-  CAM.show();
   WORLD.lateUpdate();
   INP.lateUpdate();
+  CAM.show();
 }
 
 
@@ -266,14 +266,14 @@ class World {
   // #region - Driver
 
   void update() {
-    for (Entity e : bodyEntities) e.update();
-    for (Entity e : itemEntities) e.update();
+    for (Entity body : bodyEntities) body.update();
+    for (Entity item : itemEntities) item.update();
     resolveItemMovements();
   }
 
   void lateUpdate() {
-    for (Entity e : bodyEntities) e.lateUpdate();
-    for (Entity e : itemEntities) e.lateUpdate();
+    for (Entity body : bodyEntities) body.lateUpdate();
+    for (Entity item : itemEntities) item.lateUpdate();
   }
 
 
