@@ -16,7 +16,7 @@ function setMode(mode) {
     SET_DISTANCE = 100;
   }
 }
-setMode(2);
+setMode(0);
 
 let cargo = [
   { name: "passengers", col: "#d15ddf",
