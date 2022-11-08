@@ -30,5 +30,6 @@ void draw() {
 
 void keyPressed() {
   // Reload shader
+  println("Loading shader...");
   shd = loadShader("shapes.frag");
 }
