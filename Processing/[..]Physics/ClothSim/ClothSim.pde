@@ -33,7 +33,7 @@ class Cloth {
     particles = new PParticle[cols][rows];    
     for (int x = 0; x < cols; x++) {
       for (int y = 0; y < rows; y++) {
-        particles[x][y] = new PParticle(px+ x * scaling, py + y * scaling, 1);
+        particles[x][y] = PWORLD.addParticle(px+ x * scaling, py + y * scaling, 1);
       }
     }
     particles[0][0].pin();
@@ -42,8 +42,8 @@ class Cloth {
     sticks = new ArrayList<PStick>();
     for (int x = 0; x < cols; x++) {
       for (int y = 0; y < rows; y++) {
-        if (x < cols - 1) sticks.add(new PStick(particles[x][y], particles[x + 1][y], scaling));
-        if (y < rows - 1) sticks.add(new PStick(particles[x][y], particles[x][y + 1], scaling));
+        if (x < cols - 1) sticks.add(PWORLD.addStick(particles[x][y], particles[x + 1][y], scaling));
+        if (y < rows - 1) sticks.add(PWORLD.addStick(particles[x][y], particles[x][y + 1], scaling));
       }
     }
   }
@@ -51,6 +51,38 @@ class Cloth {
 
 
 class PWorld {
+
+  class PParticle {
+
+    float posX, posY, prevX, prevY, pinX, pinY, accX, accY;
+    float mass;
+    boolean isPinned;
+
+    PParticle(float posX, float posY, float mass) {
+      this.posX = posX;
+      this.posY = posY;
+      this.prevX = posX;
+      this.prevY = posY;
+      this.mass = mass;
+      PWORLD.addParticle(this);
+    }
+
+    void pin() { isPinned = true; pinX = posX; pinY = posY; }
+    void unpin() { isPinned = false; }
+  }
+
+  class PStick {
+
+    PParticle a, b;
+    float length;
+
+    PStick(PParticle a, PParticle b, float length) {
+      this.a = a;
+      this.b = b;
+      this.length = length;
+    }
+  }
+
 
   ArrayList<PParticle> particles;
   ArrayList<PStick> sticks;
@@ -61,8 +93,17 @@ class PWorld {
     sticks = new ArrayList<PStick>();
   }
   
-  void addParticle(PParticle p) { particles.add(p); }
-  void addSpring(PStick s) { sticks.add(s); }
+  PParticle addParticle(float posX, float posY, float mass) {
+    Particle p = new Particle(posX, posY, mass);
+    particles.add(p);
+    return p;
+  }
+
+  PStick addStick(PParticle a, PParticle b, float length) {
+    PStick s = new PStick(a, b, length);
+    sticks.add(s);
+    return s;
+  }
 
 
   void draw() {
@@ -70,7 +111,16 @@ class PWorld {
     show();
   }
 
+
   void update() {
+    updateForce();
+    updatePosition();
+    updateConstraints();
+  }
+
+
+  void updateForce() {
+
     float GRAVITY_ACC = 30;
     float DRAG = 0.005;
     float INTERACT_DIST = 50;
@@ -127,6 +177,16 @@ class PWorld {
       p.prevY = prevY;
     }
 
+  }
+
+  void updatePosition() {
+
+  }
+
+  void updateConstraints() {
+
+  }
+
     for (PStick s : sticks) {
       float diffX = s.b.posX - s.a.posX;
       float diffY = s.b.posY - s.a.posY;
@@ -140,55 +200,22 @@ class PWorld {
   }
 
   void show() {
-    for (PParticle p : particles) p.show();
-    for (PStick s : sticks) s.show();
-  }
-}
-
-class PParticle {
-
-  float posX, posY, prevX, prevY, pinX, pinY;
-  float mass;
-  boolean isPinned;
-
-
-  PParticle(float posX, float posY, float mass) {
-    this.posX = posX;
-    this.posY = posY;
-    this.prevX = posX;
-    this.prevY = posY;
-    this.mass = mass;
-    PWORLD.addParticle(this);
+    showParticles();
+    showSticks();
   }
 
+  void showParticles() {
+    stroke(255);
+    for (PParticle p : particles) {
+      ellipse(p.posX, p.posY, 5, 5);
+    }
+  }
 
-  void show() {
+  void showSticks() {
     fill(255);
     noStroke();
-    ellipse(posX, posY, 5, 5);
-  }
-
-
-  void pin() { isPinned = true; pinX = posX; pinY = posY; }
-  void unpin() { isPinned = false; }
-}
-
-class PStick {
-
-  PParticle a, b;
-  float length;
-
-
-  PStick(PParticle a, PParticle b, float length) {
-    this.a = a;
-    this.b = b;
-    this.length = length;
-    PWORLD.addSpring(this);
-  }
-
-
-  void show() {
-    stroke(255);
-    line(a.posX, a.posY, b.posX, b.posY);
+    for (PStick s : sticks) {
+      line(s.a.posX, s.a.posY, s.b.posX, s.b.posY);
+    }
   }
 }
