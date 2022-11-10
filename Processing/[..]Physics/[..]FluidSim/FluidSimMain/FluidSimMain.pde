@@ -1,9 +1,4 @@
 
-// http://jamie-wong.com/2016/08/05/webgl-fluid-simulation/#the-velocity-field
-// Pretends viscosity is 0
-// Potentially redo in JS with light.js to use webGL and GPU
-
-
 // #region - Setup
 
 // Declare variables

@@ -28,7 +28,6 @@ abstract class Collider {
     } else return new CollisionInfo();
   }
 
-
   public abstract CollisionInfo checkCollision(Transform transform, CircleCollider otherCollider, Transform otherTransform);
   public abstract CollisionInfo checkCollision(Transform transform, RectCollider otherCollider, Transform otherTransform);
 

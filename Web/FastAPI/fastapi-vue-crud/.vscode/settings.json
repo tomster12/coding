@@ -1,0 +1,4 @@
+{
+    "typescript.inlayHints.enumMemberValues.enabled": false,
+    "workbench.iconTheme": "vs-seti"
+}
