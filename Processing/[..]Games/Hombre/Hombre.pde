@@ -6,53 +6,152 @@ import java.lang.reflect.*;
 // #region - Driver
 
 // Globals
+AssetManager ASSETS;
 Input INPUT;
 World WORLD;
+PWorld PWORLD;
 float DT;
 
 
 void setup() {
-    size(800, 800);
+    size(800, 800, P2D);
     rectMode(CENTER);
+    imageMode(CENTER);
+    ((PGraphicsOpenGL)g).textureSampling(3);
+
+    ASSETS = new AssetManager();
+    ASSETS.addImage("ponchoChar", "./assets/ponchoChar.png");
+    ASSETS.addImage("ponchoUV", "./assets/ponchoUV.png");
+    ASSETS.addShader("pixellate", "./assets/pixellate.frag");
+    ASSETS.addShader("outline", "./assets/outline.frag");
+    ASSETS.loadAll();
+
     INPUT = new Input();
     WORLD = new World();
+    PWORLD = new PWorld();
+
+    tmpOut = createGraphics(width, height, P2D);
+    tmpShd1 = ASSETS.getShader("pixellate");
+    tmpShd2 = ASSETS.getShader("outline");
+    tmpImg = ASSETS.getImage("ponchoUV");
+    ((PGraphicsOpenGL)tmpOut).textureSampling(3);
 }
 
 
 void draw() {
     background(0);
-    DT = 1.0 / frameRate;
-    WORLD.draw();
-    INPUT.lateUpdate();
-    // debug();
+    // DT = 1.0f / frameRate;
+    // WORLD.draw();
+    // PWORLD.draw();
+    // INPUT.lateUpdate();
+    debug();
 }
 
 
+PGraphics tmpOut;
+PShader tmpShd1, tmpShd2;
+PImage tmpImg;
+
 void debug() {
-    float aPosX = 400;
-    float aPosY = 400;
-    float bPosX = mouseX;
-    float bPosY = mouseY;
-    float aRadius = 100;
-    float bRadius = 100;
-    OverlapInfo info = Overlap.checkCircleCircle(aPosX, aPosY, aRadius, bPosX, bPosY, bRadius, false);
+    float drawX = mouseX;
+    float drawY = mouseY;
+    float offsetX = (float)drawX / width;
+    float offsetY = (float)drawY / height;
+    float pixelSize = 10.0f;
+    tmpShd1.set("u_offset", offsetX, offsetY);
+    tmpShd1.set("u_pixels", width / pixelSize, height / pixelSize);
 
-    if (info.isOverlapping) stroke(200, 50, 50);
-    else stroke(150);
-    noFill();
-    ellipse(aPosX, aPosY, aRadius * 2, aRadius * 2);
-    ellipse(bPosX, bPosY, bRadius * 2, bRadius * 2);
+    tmpOut.beginDraw();
+    tmpOut.clear();
+    tmpOut.translate(drawX, drawY);
+    tmpOut.rotate(PI * -0.45f);
+    tmpOut.fill(255);
+    tmpOut.noStroke();
+    tmpOut.imageMode(CENTER);
+    tmpOut.image(tmpImg, 0, 0, 250, 250);
+    tmpOut.endDraw();
 
-    if (info.isOverlapping) {
-        stroke(255);
-        noFill();
-        ellipse(info.aPosX, info.aPosY, 6, 6);
-        ellipse(info.bPosX, info.bPosY, 6, 6);
-        line(
-            info.bPosX, info.bPosY,
-            info.bPosX + info.normalX * info.length,
-            info.bPosY + info.normalY * info.length
-        );
+    shader(tmpShd1);
+    image(tmpOut, width * 0.5f, height * 0.5f);
+}
+
+// #endregion
+
+
+// #region - Assets
+
+class AssetManager {
+
+    abstract class Asset {
+
+        boolean isLoaded;
+        String name, path;
+
+        Asset(String name, String path) {
+            this.name = name;
+            this.path = path;
+        }
+
+        abstract void load();
+    }
+
+    class ImageAsset extends Asset {
+
+        PImage img;
+
+        ImageAsset(String name, String path) { super(name, path); }
+
+        void load() {
+            if (isLoaded) return;
+            img = loadImage(path);
+            if (img != null) isLoaded = true;
+        }
+    }
+
+    class ShaderAsset extends Asset {
+
+        PShader shader;
+
+        ShaderAsset(String name, String path) { super(name, path); }
+
+        void load() {
+            if (isLoaded) return;
+            shader = loadShader(path);
+            if (shader != null) isLoaded = true;
+        }
+    }
+
+
+    ArrayList<Asset> assets = new ArrayList<Asset>();
+    Map<String, ImageAsset> imageAssets = new HashMap<String, ImageAsset>();
+    Map<String, ShaderAsset> shaderAssets = new HashMap<String, ShaderAsset>();
+
+
+    AssetManager() { }
+
+
+    void addImage(String name, String path) {
+        imageAssets.put(name, new ImageAsset(name, path));
+        assets.add(imageAssets.get(name));
+    }
+
+    PImage getImage(String name) {
+        return imageAssets.get(name).img;
+    }
+
+
+    void addShader(String name, String path) {
+        shaderAssets.put(name, new ShaderAsset(name, path));
+        assets.add(shaderAssets.get(name));
+    }
+
+    PShader getShader(String name) {
+        return shaderAssets.get(name).shader;
+    }
+
+
+    void loadAll() {
+        for (Asset a : assets) a.load();
     }
 }
 
@@ -103,8 +202,8 @@ class World {
 
     World() {
         addEntity(new Player(this, 150, 150));
-        addEntity(new Ground(this, 375.0, 640.0, 500.0, 80.0, 0.0));
-        addEntity(new Ground(this, 655.0, 485.0, 150.0, 65.0, 0.0));
+        addEntity(new Ground(this, 375.0f, 640.0f, 500.0f, 80.0f, 0.0f));
+        addEntity(new Ground(this, 655.0f, 485.0f, 150.0f, 65.0f, 0.0f));
     }
 
 
@@ -281,8 +380,8 @@ class RigidBody extends Entity {
     }
 
     // Constants
-    final float percent = 0.95;
-    final float slop = 0.01;
+    final float percent = 0.95f;
+    final float slop = 0.01f;
 
     Bounds bounds;
     boolean isStatic = false;
@@ -295,16 +394,6 @@ class RigidBody extends Entity {
     RigidBody(World world, float posX, float posY, boolean isStatic) {
         super(world, posX, posY);
         this.isStatic = isStatic;
-    }
-
-    RigidBody(World world, float posX, float posY, boolean isStatic, float radius) {
-        this(world, posX, posY, isStatic);
-        this.bounds = new CircleBounds(this, radius);
-    }
-
-    RigidBody(World world, float posX, float posY, boolean isStatic, float sizeX, float sizeY, float angle) {
-        this(world, posX, posY, isStatic);
-        this.bounds = new RectBounds(this, sizeX, sizeY, angle);
     }
 
 
@@ -351,16 +440,29 @@ class RigidBody extends Entity {
             }
 
             // Update sides blocked
-            // TODO: Fix this
-            if (c.info.normalX / abs(c.info.normalY) < -1) sidesBlocked[0] = true;
-            if (c.info.normalY / abs(c.info.normalX) > 1) sidesBlocked[1] = true;
-            if (c.info.normalX / abs(c.info.normalY) > 1) sidesBlocked[2] = true;
-            if (c.info.normalY / abs(c.info.normalX) < -1) sidesBlocked[3] = true;
+            if (c.info.normalX > 0 && abs(c.info.normalX) > abs(c.info.normalY)) sidesBlocked[0] = true;
+            if (c.info.normalY < 0 && abs(c.info.normalY) > abs(c.info.normalX)) sidesBlocked[1] = true;
+            if (c.info.normalX < 0 && abs(c.info.normalX) > abs(c.info.normalY)) sidesBlocked[2] = true;
+            if (c.info.normalY > 0 && abs(c.info.normalY) > abs(c.info.normalX)) sidesBlocked[3] = true;
         }
 
         // Update variables
         checked.clear();
         collisions.clear();
+    }
+
+    
+    void setBounds(Bounds bounds) { this.bounds = bounds; }
+}
+
+class Ground extends RigidBody {
+
+    float sizeX, sizeY;
+
+
+    Ground(World world, float posX, float posY, float sizeX, float sizeY, float angle) {
+        super(world, posX, posY, true);
+        setBounds(new RectBounds(this, sizeX, sizeY, angle));
     }
 
 
@@ -370,30 +472,151 @@ class RigidBody extends Entity {
     }
 }
 
-class Ground extends RigidBody {
-
-    float sizeX, sizeY;
-
-
-    Ground(World world, float posX, float posY, float sizeX, float sizeY, float angle) {
-        super(world, posX, posY, true, sizeX, sizeY, angle);
-    }
-}
-
 class Player extends RigidBody {
 
+    class Poncho {
+
+        final int COLS = 4;
+        final int ROWS = 5;
+        final float ROW_0_WIDTH_PCT = 0.45f;
+        final float ROW_1_WIDTH_PCT = 1.0f;
+        final float ROW_WIDTH_PCT = 1.5f;
+        final float OFFSET_Y_PCT = -0.1f;
+        final float GRID_SIZE_Y_PCT = 0.08f;
+        
+        Player player;
+        PWorld pWorld;
+        PWorld.PPoint[][] points;
+        ArrayList<PWorld.PStick> sticks;
+        PImage img;
+        PShader shd1, shd2;
+        PGraphics out;
+        float gridSizeY;
+        float pixelSize;
+
+
+        Poncho(Player player) {
+            this.player = player;
+            pWorld = new PWorld(0.15f, 3000);
+            points = new PWorld.PPoint[COLS][ROWS];
+            sticks = new ArrayList<PWorld.PStick>();
+            img = ASSETS.getImage("ponchoUV");
+            shd1 = ASSETS.getShader("pixellate");
+            shd2 = ASSETS.getShader("outline");
+            out = createGraphics(width, height, P2D);
+            gridSizeY = player.sizeY * GRID_SIZE_Y_PCT;
+            pixelSize = player.sizeX / 6.0f;
+            ((PGraphicsOpenGL)out).textureSampling(3);
+            
+            for (int x = 0; x < COLS; x++) {
+                for (int y = 0; y < ROWS; y++) {
+                    float pct = (float)x / (COLS - 1);
+                    float width = player.sizeX * (y == 0 ? ROW_0_WIDTH_PCT : y == 1 ? ROW_1_WIDTH_PCT : ROW_WIDTH_PCT);
+                    float px = player.posX + width * (-0.5f + pct);
+                    float py = player.posY + player.sizeY * OFFSET_Y_PCT + y * gridSizeY;
+                    points[x][y] = pWorld.addPoint(px, py, 1);
+                    if (y == 0 || y == 1 && (x == 0 || x == COLS - 1)) points[x][y].pin();
+                }
+            }
+
+            for (int x = 0; x < COLS; x++) {
+                for (int y = 0; y < ROWS; y++) {
+                    if (x < COLS - 1) sticks.add(pWorld.addStick(points[x][y], points[x + 1][y]));
+                    if (y < ROWS - 1) sticks.add(pWorld.addStick(points[x][y], points[x][y + 1]));
+                }
+            }
+        }
+
+
+        void update() {
+            for (int x = 0; x < COLS; x++) {
+                for (int y = 0; y < ROWS; y++) {
+                    if (y == 0 || y == 1 && (x == 0 || x == COLS - 1)) {
+                        float pct = (float)x / (COLS - 1);
+                        float width = player.sizeX * (y == 0 ? ROW_0_WIDTH_PCT : y == 1 ? ROW_1_WIDTH_PCT : ROW_WIDTH_PCT);
+                        points[x][y].pinX = player.posX + width * (-0.5f + pct);
+                        points[x][y].pinY = player.posY + player.sizeY * OFFSET_Y_PCT + y * gridSizeY;
+                    }
+                }
+            }
+
+            pWorld.update();
+        }
+
+        void show(PGraphics topOut) {
+            if (out == null) return;
+
+            // Draw poncho into output
+            out.beginDraw();
+            out.clear();
+            out.noFill();
+            out.noStroke();
+            out.textureMode(NORMAL);
+            for (int y = 0; y < ROWS - 1; y++) {
+                out.beginShape(TRIANGLE_STRIP);
+                out.texture(img);
+                for (int x = 0; x < COLS; x++) {
+                    float x1 = points[x][y].posX;
+                    float y1 = points[x][y].posY;
+                    float u = (float)x / (COLS - 1);
+                    float v1 = (float)y / (ROWS - 1);
+                    float x2 = points[x][y + 1].posX;
+                    float y2 = points[x][y + 1].posY;
+                    float v2 = (float)(y + 1) / (ROWS - 1);
+                    out.vertex(x1, y1, u, v1);
+                    out.vertex(x2, y2, u, v2);
+                }
+                out.endShape();
+            }
+            out.endDraw();
+
+            // Draw output to layer above
+            shd1.set("u_offset", player.posX / width, player.posY / height);
+            shd1.set("u_pixels", width / pixelSize, height / pixelSize);
+            topOut.shader(shd1);
+
+            // shd2.set("sprite_size", 100, 100);
+            // shd2.set("outline_color", 255, 0, 0, 0);
+            // shd2.set("include_corners", false);
+            // topOut.shader(shd2);
+            
+            topOut.image(out, width * 0.5f, height * 0.5f);
+            topOut.resetShader();
+        }
+    }
+
+
+    final float HEIGHT = 80;
     final float MOVE_ACC = 30;
-    final float MOVE_VEL_MAX = 250;
-    final float GROUND_DRAG = 0.4;
-    final float AIR_DRAG = 0.98;
+    final float MOVE_VEL_MAX = 250f;
+    final float GROUND_DRAG = 0.28f;
+    final float AIR_DRAG = 0.95f;
     final float JUMP_ACC = -350;
     final float GRAVITY_UP_HOLD = 12;
-    final float GRAVITY_DOWN_HOLD = 15;
-    final float GRAVITY_RELEASE = 19;
+    final float GRAVITY_DOWN_HOLD = 17;
+    final float GRAVITY_RELEASE = 22;
+
+    PImage img;
+    PGraphics out;
+    float sizeX, sizeY;
+    Poncho poncho;
+    boolean isGrounded, isMoving, holdingJump, isFlipped;
 
 
     Player (World world, float posX, float posY) {
-        super(world, posX, posY, false, 18);
+        super(world, posX, posY, false);
+        setBounds(new CircleBounds(this, HEIGHT * 0.5f));
+
+        // Initialize variables
+        img = ASSETS.getImage("ponchoChar");
+        sizeX = HEIGHT * img.width / img.height;
+        sizeY = HEIGHT;
+        poncho = new Poncho(this);
+
+        // Setup output
+        out = createGraphics(width, height, P2D);
+        out.imageMode(CENTER);
+        ((PGraphicsOpenGL)out).textureSampling(3);
     }
 
 
@@ -408,9 +631,10 @@ class Player extends RigidBody {
         if (INPUT.getKeyHeld(87)) inputY--;
         if (INPUT.getKeyHeld(68)) inputX++;
         if (INPUT.getKeyHeld(83)) inputY++;
-        boolean isMoving = inputX != 0 || inputY != 0;
-        boolean isGrounded = sidesBlocked[1];
-        boolean holdingJump = INPUT.getKeyHeld(32);
+        isMoving = inputX != 0 || inputY != 0;
+        isGrounded = sidesBlocked[1];
+        holdingJump = INPUT.getKeyHeld(32);
+        if (inputX != 0) isFlipped = inputX < 0;
 
         // Movement
         if (isMoving) {
@@ -422,7 +646,6 @@ class Player extends RigidBody {
         }
 
         if (isGrounded) {
-
             // Ground drag
             if (!isMoving) velX *= GROUND_DRAG;
 
@@ -444,6 +667,32 @@ class Player extends RigidBody {
                 velY += GRAVITY_RELEASE;
             }
         }
+
+        // Update poncho
+        poncho.update();
+    }
+
+    @Override
+    void show() {
+        // Start
+        out.beginDraw();
+        out.clear();
+
+        // Show image
+        out.push();
+        out.translate(posX, posY);
+        if (isFlipped) out.scale(-1, 1);
+        out.image(img, 0, 0, sizeX, sizeY);
+        out.pop();
+
+        // Show poncho
+        poncho.show(out);
+
+        // End
+        out.endDraw();
+
+        // Show to screen
+        image(out, width * 0.5f, height * 0.5f);
     }
 }
 
