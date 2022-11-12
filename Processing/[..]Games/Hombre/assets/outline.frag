@@ -4,7 +4,6 @@ precision mediump float;
 precision mediump int;
 #endif
 
-
 varying vec4 vertTexCoord;
 uniform sampler2D texture;
 
@@ -35,5 +34,7 @@ void main(void)
             texture2D(texture, vec2(p.x - texelSizeX, p.y + texelSizeY)).a;
     }
 
-    gl_FragColor = mix(u_outline_color, c, ceil(weight));
+	// if (c.a < 0.02) discard;
+    gl_FragColor = vec4(c.a, c.a, c.a, 1.0);
+    // gl_FragColor = c;
 }

@@ -1,7 +1,7 @@
 
 #ifdef GL_ES
-precision highp float;
-precision highp int;
+precision mediump float;
+precision mediump int;
 #endif
 
 varying vec4 vertTexCoord;
@@ -12,23 +12,16 @@ uniform vec2 u_pixels;
 
 void main(void)
 {
-  	vec2 p = vertTexCoord.st;
+	vec2 p = vertTexCoord.st;
 
-	p.x -= mod(1 + p.x - u_offset.x, 1.0 / u_pixels.x);
-	p.y -= mod(1 + p.y + u_offset.y, 1.0 / u_pixels.y);
-
-	vec4 col = texture2D(texture, p).rgba;
+	float l_px = p.x - u_offset.x + 1.0;
+	float l_py = p.y + u_offset.y + 1.0;
+	float l_round_px = float(floor(l_px * u_pixels.x)) / u_pixels.x;
+	float l_round_py = float(floor(l_py * u_pixels.y)) / u_pixels.y;
+	float round_px = l_round_px + u_offset.x - 1.0;
+	float round_py = l_round_py - u_offset.y - 1.0;
+	vec4 col = texture2D(texture, vec2(round_px, round_py));
 	
-	if (col.a < 1.0) discard;
+	if (col.a < 0.02) discard;
 	gl_FragColor = col;
 }
-
-
-// float pct_x = p.x - u_offset.x;
-// float pct_y = p.y - u_offset.y;
-// float pct_mod_x = mod(pct_x, 1.0 / u_pixels.x);
-// float pct_mod_y = mod(pct_y, 1.0 / u_pixels.y);
-// float pct_mod_x_tmp = pct_mod_x / (1.0 / u_pixels.x);
-// float pct_mod_y_tmp = pct_mod_y / (1.0 / u_pixels.y);
-// gl_FragColor = vec4(pct_mod_x_tmp);
-// gl_FragColor = vec4(pct_mod_y_tmp);

@@ -40,11 +40,11 @@ void setup() {
 
 void draw() {
     background(0);
-    // DT = 1.0f / frameRate;
-    // WORLD.draw();
-    // PWORLD.draw();
-    // INPUT.lateUpdate();
-    debug();
+    DT = 1.0f / frameRate;
+    WORLD.draw();
+    PWORLD.draw();
+    INPUT.lateUpdate();
+    // debug();
 }
 
 
@@ -230,7 +230,7 @@ class World {
         ArrayList<T> view = new ArrayList<T>();
         for (Entity e : entities) {
             try { view.add((T)e); }
-            catch (Exception _) { }
+            catch (Exception ex) { }
         }
         return view;
     }
@@ -489,7 +489,7 @@ class Player extends RigidBody {
         PWorld.PPoint[][] points;
         ArrayList<PWorld.PStick> sticks;
         PImage img;
-        PShader shd1, shd2;
+        PShader pixellateShader;
         PGraphics out;
         float gridSizeY;
         float pixelSize;
@@ -501,8 +501,7 @@ class Player extends RigidBody {
             points = new PWorld.PPoint[COLS][ROWS];
             sticks = new ArrayList<PWorld.PStick>();
             img = ASSETS.getImage("ponchoUV");
-            shd1 = ASSETS.getShader("pixellate");
-            shd2 = ASSETS.getShader("outline");
+            pixellateShader = ASSETS.getShader("pixellate");
             out = createGraphics(width, height, P2D);
             gridSizeY = player.sizeY * GRID_SIZE_Y_PCT;
             pixelSize = player.sizeX / 6.0f;
@@ -571,15 +570,9 @@ class Player extends RigidBody {
             out.endDraw();
 
             // Draw output to layer above
-            shd1.set("u_offset", player.posX / width, player.posY / height);
-            shd1.set("u_pixels", width / pixelSize, height / pixelSize);
-            topOut.shader(shd1);
-
-            // shd2.set("sprite_size", 100, 100);
-            // shd2.set("outline_color", 255, 0, 0, 0);
-            // shd2.set("include_corners", false);
-            // topOut.shader(shd2);
-            
+            pixellateShader.set("u_offset", player.posX / width, player.posY / height);
+            pixellateShader.set("u_pixels", width / pixelSize, height / pixelSize);
+            topOut.shader(pixellateShader);
             topOut.image(out, width * 0.5f, height * 0.5f);
             topOut.resetShader();
         }
@@ -597,6 +590,7 @@ class Player extends RigidBody {
     final float GRAVITY_RELEASE = 22;
 
     PImage img;
+    PShader outlineShader;
     PGraphics out;
     float sizeX, sizeY;
     Poncho poncho;
@@ -609,6 +603,7 @@ class Player extends RigidBody {
 
         // Initialize variables
         img = ASSETS.getImage("ponchoChar");
+        outlineShader = ASSETS.getShader("outline");
         sizeX = HEIGHT * img.width / img.height;
         sizeY = HEIGHT;
         poncho = new Poncho(this);
@@ -692,6 +687,10 @@ class Player extends RigidBody {
         out.endDraw();
 
         // Show to screen
+        outlineShader.set("u_sprite_size", sizeX, sizeY);
+        outlineShader.set("outline_color", 1, 1, 1, 1);
+        outlineShader.set("include_corners", false);
+        shader(outlineShader);
         image(out, width * 0.5f, height * 0.5f);
     }
 }
