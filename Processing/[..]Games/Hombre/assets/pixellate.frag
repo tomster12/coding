@@ -1,6 +1,7 @@
 
 // https://gist.github.com/Leland-Kwong/40edb57c87c0755eb7f5ba6f65d9c484
 // https://github.com/cukiakimani/shaders-yo/blob/master/Assets/Sprite%20Outline/Shaders/SpriteOutline.shader
+// https://www.shadertoy.com/view/4dVGzW
 
 #ifdef GL_ES
 precision highp float;
@@ -10,22 +11,25 @@ precision highp int;
 varying vec4 vertTexCoord;
 uniform sampler2D texture;
 
-uniform vec2 u_offset;
-uniform vec2 u_pixels;
+uniform vec2 u_uv_offset;
+uniform vec2 u_grid_size;
+
+vec2 one = vec2(1);
 
 void main(void)
 {
-	vec2 p = vertTexCoord.st;
+	vec2 uv = vertTexCoord.st;
 
-	float l_px = p.x - u_offset.x + 1.0;
-	float l_py = p.y + u_offset.y + 1.0;
-	float l_round_px = float(floor(l_px * u_pixels.x)) / u_pixels.x;
-	float l_round_py = float(floor(l_py * u_pixels.y)) / u_pixels.y;
-	float round_px = l_round_px + u_offset.x - 1.0;
-	float round_py = l_round_py - u_offset.y - 1.0;
-	vec4 col = texture2D(texture, vec2(round_px, round_py));
-	gl_FragColor = col;
+	vec2 l_uv = uv - u_uv_offset + one;
+	vec2 lr_uv = floor(l_uv * u_grid_size) / u_grid_size;
+	vec2 r_uv = lr_uv + u_uv_offset - one;
 
-	// if (col.a < 0.01) discard;
-	// gl_FragColor = vec4(col.r, col.g, col.b, 1.0);
+	// vec4 c = texture2D(texture, r_uv).rgba;
+	// vec4 c = texture2D(texture, r_uv, -100.).rgba;
+	// vec4 c = texture2DLodEXT(texture, r_uv, 0.0).rgba;
+	vec4 c = textureGrad(texture, r_uv, dFdx(uv), dFdy(uv)).rgba;
+
+	if (c.a == 0.0) discard;
+	gl_FragColor = vec4(c.r, c.g, c.b, 1.0);
+	// gl_FragColor = texture2D(texture, uv);
 }

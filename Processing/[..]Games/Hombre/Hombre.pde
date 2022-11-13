@@ -14,7 +14,7 @@ float DT;
 
 
 void setup() {
-    size(800, 800, P2D);
+    size(1000, 1000, P2D);
     rectMode(CENTER);
     imageMode(CENTER);
     ((PGraphicsOpenGL)g).textureSampling(2);
@@ -31,6 +31,7 @@ void setup() {
     PWORLD = new PWorld();
 
     tmpOut = createGraphics(width, height, P2D);
+    tmpOut.imageMode(CENTER);
     tmpShd1 = ASSETS.getShader("pixellate");
     tmpShd2 = ASSETS.getShader("outline");
     tmpImg = ASSETS.getImage("ponchoUV");
@@ -40,11 +41,11 @@ void setup() {
 
 void draw() {
     background(0);
-    // DT = 1.0f / frameRate;
-    // WORLD.draw();
-    // PWORLD.draw();
-    // INPUT.lateUpdate();
-    debug();
+    DT = 1.0f / frameRate;
+    WORLD.draw();
+    PWORLD.draw();
+    INPUT.lateUpdate();
+    // debug();
 }
 
 
@@ -55,24 +56,27 @@ PImage tmpImg;
 void debug() {
     float drawX = mouseX;
     float drawY = mouseY;
-    float offsetX = (float)drawX / width;
-    float offsetY = (float)drawY / height;
-    float pixelSize = 10.0f;
+    float offsetX = drawX / width;
+    float offsetY = -drawY / height;
+    float pixelSize = 5.0f;
+    float drawSize = 250.0f;
 
     tmpOut.beginDraw();
     tmpOut.clear();
     tmpOut.translate(drawX, drawY);
     tmpOut.rotate(PI * -0.45f);
-    tmpOut.fill(255);
-    tmpOut.noStroke();
-    tmpOut.imageMode(CENTER);
-    tmpOut.image(tmpImg, 0, 0, 250, 250);
+    tmpOut.image(tmpImg, 0, 0, drawSize, drawSize);
     tmpOut.endDraw();
 
-    tmpShd1.set("u_offset", offsetX, offsetY);
-    tmpShd1.set("u_pixels", width / pixelSize, height / pixelSize);
+    tmpShd1.set("u_uv_offset", offsetX, offsetY);
+    tmpShd1.set("u_grid_size", width / pixelSize, height / pixelSize);
     shader(tmpShd1);
     image(tmpOut, width * 0.5f, height * 0.5f);
+    resetShader();
+
+    noFill();
+    stroke(255);
+    rect(drawX + pixelSize * 0.5f, drawY + pixelSize * 0.5f, pixelSize, pixelSize);
 }
 
 // #endregion
@@ -468,7 +472,7 @@ class Ground extends RigidBody {
 
     @Override
     void show() {
-        bounds.show();
+        // bounds.show();
     }
 }
 
@@ -478,12 +482,13 @@ class Player extends RigidBody {
 
         final int COLS = 4;
         final int ROWS = 5;
-        final float ROW_0_WIDTH_PCT = 0.45f;
-        final float ROW_1_WIDTH_PCT = 1.0f;
-        final float ROW_WIDTH_PCT = 1.5f;
-        final float LAST_ROW_WIDTH_PCT = 1.1f;
-        final float OFFSET_Y_PCT = -0.1f;
-        final float GRID_SIZE_Y_PCT = 0.1f;
+        final float[] FIRST_ROW_WIDTHS = new float[] { 0.45f, 1.0f };
+        final float ROW_WIDTH = 1.5f;
+        final float LAST_ROW_WIDTH = 1.1f;
+        final float OFFSET_Y = -0.1f;
+        final float GRID_SIZE_Y = 0.075f;
+        final float PWORLD_DRAG = 0.1f;
+        final float PWORLD_GRAVITY = 6000;
         
         Player player;
         PWorld pWorld;
@@ -497,26 +502,25 @@ class Player extends RigidBody {
 
         Poncho(Player player) {
             this.player = player;
-            pWorld = new PWorld(0.22f, 4500);
+            pWorld = new PWorld(PWORLD_DRAG, PWORLD_GRAVITY);
             points = new PWorld.PPoint[COLS][ROWS];
             sticks = new ArrayList<PWorld.PStick>();
             img = ASSETS.getImage("ponchoUV");
             pixellateShader = ASSETS.getShader("pixellate");
             out = createGraphics(width, height, P2D);
             ((PGraphicsOpenGL)out).textureSampling(2);
-            gridSizeY = player.sizeY * GRID_SIZE_Y_PCT;
+            gridSizeY = player.sizeY * GRID_SIZE_Y;
             
             for (int x = 0; x < COLS; x++) {
                 for (int y = 0; y < ROWS; y++) {
                     float pct = (float)x / (COLS - 1);
                     float width = player.sizeX * (
-                        y == 0 ? ROW_0_WIDTH_PCT :
-                        y == 1 ? ROW_1_WIDTH_PCT :
-                        y == ROWS -  1 ? LAST_ROW_WIDTH_PCT :
-                        ROW_WIDTH_PCT);
+                        (y < FIRST_ROW_WIDTHS.length) ? (FIRST_ROW_WIDTHS[y]) :
+                        (y == ROWS -  1) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
                     float px = player.posX + width * (-0.5f + pct);
-                    float py = player.posY + player.sizeY * OFFSET_Y_PCT + y * gridSizeY;
-                    points[x][y] = pWorld.addPoint(px, py, 1);
+                    float py = player.posY + player.sizeY * OFFSET_Y + y * gridSizeY;
+                    if (x == 0 || x == COLS - 1) points[x][y] = pWorld.addPoint(px, py, 0.2f);
+                    else points[x][y] = pWorld.addPoint(px, py, 1.0f);
                     if (y == 0 || y == 1 && (x == 0 || x == COLS - 1)) points[x][y].pin();
                 }
             }
@@ -535,9 +539,11 @@ class Player extends RigidBody {
                 for (int y = 0; y < ROWS; y++) {
                     if (y == 0 || y == 1 && (x == 0 || x == COLS - 1)) {
                         float pct = (float)x / (COLS - 1);
-                        float width = player.sizeX * (y == 0 ? ROW_0_WIDTH_PCT : y == 1 ? ROW_1_WIDTH_PCT : ROW_WIDTH_PCT);
+                        float width = player.sizeX * (
+                            (y < FIRST_ROW_WIDTHS.length) ? (FIRST_ROW_WIDTHS[y]) :
+                            (y == ROWS -  1) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
                         points[x][y].pinX = player.posX + width * (-0.5f + pct);
-                        points[x][y].pinY = player.posY + player.sizeY * OFFSET_Y_PCT + y * gridSizeY;
+                        points[x][y].pinY = player.posY + player.sizeY * OFFSET_Y + y * gridSizeY;
                     }
                 }
             }
@@ -565,16 +571,23 @@ class Player extends RigidBody {
                     float x2 = points[x][y + 1].posX;
                     float y2 = points[x][y + 1].posY;
                     float v2 = (float)(y + 1) / (ROWS - 1);
-                    out.vertex(x1, y1, u, v1);
-                    out.vertex(x2, y2, u, v2);
+                    // out.vertex(x1, y1, u, v1);
+                    // out.vertex(x2, y2, u, v2);
+                    float tx1 = player.posX + (x1 - player.posX) * 4;
+                    float ty1 = player.posY + (y1 - player.posY) * 4;
+                    float tx2 = player.posX + (x2 - player.posX) * 4;
+                    float ty2 = player.posY + (y2 - player.posY) * 4;
+                    out.vertex(tx1, ty1, u, v1);
+                    out.vertex(tx2, ty2, u, v2);
                 }
                 out.endShape();
             }
             out.endDraw();
 
             // Draw output to layer above
-            pixellateShader.set("u_offset", player.posX / width, player.posY / height);
-            pixellateShader.set("u_pixels", width / player.pixelSize, height / player.pixelSize);
+            pixellateShader.set("u_uv_offset", player.posX / width, -player.posY / height);
+            pixellateShader.set("u_grid_size", width / player.pixelSize, height / player.pixelSize);
+            ((PGraphicsOpenGL)topOut).textureSampling(2);
             topOut.shader(pixellateShader);
             topOut.image(out, width * 0.5f, height * 0.5f);
             topOut.resetShader();
@@ -582,15 +595,15 @@ class Player extends RigidBody {
     }
 
 
-    final float HEIGHT = 80;
-    final float MOVE_ACC = 30;
-    final float MOVE_VEL_MAX = 250f;
+    final float HEIGHT = 80.0f;
+    final float MOVE_ACC = 35.0f;
+    final float MOVE_VEL_MAX = 350.0f;
     final float GROUND_DRAG = 0.28f;
     final float AIR_DRAG = 0.95f;
-    final float JUMP_ACC = -350;
-    final float GRAVITY_UP_HOLD = 12;
-    final float GRAVITY_DOWN_HOLD = 17;
-    final float GRAVITY_RELEASE = 22;
+    final float JUMP_ACC = -350.0f;
+    final float GRAVITY_UP_HOLD = 12.0f;
+    final float GRAVITY_DOWN_HOLD = 17.0f;
+    final float GRAVITY_RELEASE = 22.0f;
 
     PImage img;
     PShader outlineShader;
@@ -614,8 +627,8 @@ class Player extends RigidBody {
 
         // Setup output
         out = createGraphics(width, height, P2D);
-        out.imageMode(CENTER);
         ((PGraphicsOpenGL)out).textureSampling(2);
+        out.imageMode(CENTER);
     }
 
 
@@ -674,6 +687,7 @@ class Player extends RigidBody {
     @Override
     void show() {
         // Start
+        ((PGraphicsOpenGL)out).textureSampling(2);
         out.beginDraw();
         out.clear();
 
@@ -691,12 +705,12 @@ class Player extends RigidBody {
         out.endDraw();
 
         // Show to screen
-        // outlineShader.set("u_pixelSize", pixelSize);
+        // outlineShader.set("u_grid_sizeize", pixelSize);
         // outlineShader.set("u_outline_color", 1.0, 1.0, 1.0, 1.0);
         // outlineShader.set("u_include_corners", false);
         // shader(outlineShader);
         image(out, width * 0.5f, height * 0.5f);
-        resetShader();
+        // resetShader();
     }
 }
 

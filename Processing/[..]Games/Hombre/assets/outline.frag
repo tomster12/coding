@@ -9,11 +9,11 @@ precision highp int;
 varying vec4 vertTexCoord;
 uniform sampler2D texture;
 
-uniform float u_pixelsize;
+uniform float u_grid_sizeize;
 uniform vec4 u_outline_color;
 uniform bool u_include_corners;
 
-float pixelSizePct = 1.0 / u_pixelsize;
+float pixelSizePct = 1.0 / u_grid_sizeize;
 
 void main(void)
 {
