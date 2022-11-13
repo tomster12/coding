@@ -109,10 +109,9 @@ class PWorld {
   }
 
   void updatePoints() {
-    // Update all points
+    // Verlet integration
     for (PPoint p : points) {
-
-      // Verlet integration
+      if (p.isPinned) continue;
       float prevX = p.posX;
       float prevY = p.posY;
       p.posX = p.posX + (p.posX - p.prevX) * (1.0 - drag) + p.accX * (1.0 - drag) * DT * DT;
@@ -123,18 +122,22 @@ class PWorld {
   }
 
   void updateSticks() {
-    // Update each stick
+    // Keep points at correct length
     for (PStick s : sticks) {
-
-      // Keep points at correct length
+      if (s.a.isPinned && s.b.isPinned) continue;
       float diffX = s.b.posX - s.a.posX;
       float diffY = s.b.posY - s.a.posY;
       float dst = sqrt(diffX * diffX + diffY * diffY);
-      float diffFactor = (s.length - dst) / dst * 0.5;
-      s.a.posX -= diffX * diffFactor;
-      s.a.posY -= diffY * diffFactor;
-      s.b.posX += diffX * diffFactor;
-      s.b.posY += diffY * diffFactor;
+      float diffFactor = (s.length - dst) / dst * 0.5f;
+      if (s.a.isPinned || s.b.isPinned) diffFactor *= 2.0f;
+      if (!s.a.isPinned) {
+        s.a.posX -= diffX * diffFactor;
+        s.a.posY -= diffY * diffFactor;
+      }
+      if (!s.b.isPinned) {
+        s.b.posX += diffX * diffFactor;
+        s.b.posY += diffY * diffFactor;
+      }
     }
   }
 

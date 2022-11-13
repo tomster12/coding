@@ -12,8 +12,8 @@ World WORLD;
 PWorld PWORLD;
 float DT;
 
-boolean USE_SHADERS = true;
-boolean SHOW_DEBUG = false;
+boolean USE_SHADERS = false;
+boolean SHOW_DEBUG = true;
 
 
 void setup() {
@@ -44,7 +44,7 @@ void setup() {
 
 void draw() {
     background(0);
-    DT = 1.0f / frameRate;
+    DT = 1.0f / 60.0f;
     WORLD.draw();
     PWORLD.draw();
     if (INPUT.getKeyPressed(49)) SHOW_DEBUG = !SHOW_DEBUG;
@@ -210,7 +210,7 @@ class World {
 
 
     World() {
-        addEntity(new Player(this, 150, 150));
+        addEntity(new Player(this, 250, 580));
         addEntity(new Ground(this, 375.0f, 640.0f, 500.0f, 80.0f, 0.0f));
         addEntity(new Ground(this, 655.0f, 485.0f, 150.0f, 65.0f, 0.0f));
     }
@@ -407,7 +407,7 @@ class RigidBody extends Entity {
 
 
     @Override
-    void lateUpdate() {
+    void update() {
         // Update dynamics
         posX += velX * DT;
         posY += velY * DT;
@@ -477,7 +477,7 @@ class Ground extends RigidBody {
 
     @Override
     void show() {
-        // bounds.show();
+        bounds.show();
     }
 }
 
@@ -486,14 +486,14 @@ class Player extends RigidBody {
     class Poncho {
 
         final int COLS = 4;
-        final int ROWS = 5;
-        final float[] FIRST_ROW_WIDTHS = new float[] { 0.45f, 1.0f };
-        final float ROW_WIDTH = 1.5f;
+        final int ROWS = 4;
+        final float[] FIRST_ROW_WIDTHS = new float[] { 0.5f, 0.95f };
+        final float ROW_WIDTH = 1.35f;
         final float LAST_ROW_WIDTH = 1.1f;
-        final float OFFSET_Y = -0.1f;
-        final float GRID_SIZE_Y = 0.075f;
+        final float OFFSET_Y = -0.08f;
+        final float GRID_SIZE_Y = 0.07f;
         final float PWORLD_DRAG = 0.1f;
-        final float PWORLD_GRAVITY = 6000;
+        final float PWORLD_GRAVITY = 7500;
         
         Player player;
         PWorld pWorld;
@@ -518,15 +518,14 @@ class Player extends RigidBody {
             
             for (int x = 0; x < COLS; x++) {
                 for (int y = 0; y < ROWS; y++) {
-                    float pct = (float)x / (COLS - 1);
+                    boolean toPin = (y == 0) || (y == 1 && (x == 0 || x == (COLS - 1)));
                     float width = player.sizeX * (
                         (y < FIRST_ROW_WIDTHS.length) ? (FIRST_ROW_WIDTHS[y]) :
-                        (y == ROWS -  1) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
-                    float px = player.posX + width * (-0.5f + pct);
-                    float py = player.posY + player.sizeY * OFFSET_Y + y * gridSizeY;
-                    if (x == 0 || x == COLS - 1) points[x][y] = pWorld.addPoint(px, py, 0.2f);
-                    else points[x][y] = pWorld.addPoint(px, py, 1.0f);
-                    if (y == 0 || y == 1 && (x == 0 || x == COLS - 1)) points[x][y].pin();
+                        (y == (ROWS -  1)) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
+                    float px = player.posX + width * (-0.5f + (float)x / (COLS - 1));
+                    float py = player.posY + (player.sizeY * OFFSET_Y) + (y * gridSizeY);
+                    points[x][y] = pWorld.addPoint(px, py, 1.0f);
+                    if (toPin) points[x][y].pin();
                 }
             }
 
@@ -542,13 +541,15 @@ class Player extends RigidBody {
         void update() {
             for (int x = 0; x < COLS; x++) {
                 for (int y = 0; y < ROWS; y++) {
-                    if (y == 0 || y == 1 && (x == 0 || x == COLS - 1)) {
-                        float pct = (float)x / (COLS - 1);
+                    boolean toPin = (y == 0) || (y == 1 && (x == 0 || x == (COLS - 1)));
+                    if (toPin) {
                         float width = player.sizeX * (
                             (y < FIRST_ROW_WIDTHS.length) ? (FIRST_ROW_WIDTHS[y]) :
-                            (y == ROWS -  1) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
-                        points[x][y].pinX = player.posX + width * (-0.5f + pct);
-                        points[x][y].pinY = player.posY + player.sizeY * OFFSET_Y + y * gridSizeY;
+                            (y == (ROWS -  1)) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
+                        float px = player.posX + width * (-0.5f + (float)x / (COLS - 1));
+                        float py = player.posY + (player.sizeY * OFFSET_Y) + (y * gridSizeY);
+                        points[x][y].pinX = px;
+                        points[x][y].pinY = py;
                     }
                 }
             }
@@ -603,19 +604,19 @@ class Player extends RigidBody {
 
 
     final float HEIGHT = 55.0f;
-    final float MOVE_ACC = 35.0f;
-    final float MOVE_VEL_MAX = 350.0f;
+    final float MOVE_ACC = 40.0f;
+    final float MOVE_VEL_MAX = 400.0f;
     final float GROUND_DRAG = 0.28f;
     final float AIR_DRAG = 0.95f;
     final float JUMP_ACC = -350.0f;
-    final float GRAVITY_UP_HOLD = 12.0f;
-    final float GRAVITY_DOWN_HOLD = 17.0f;
-    final float GRAVITY_RELEASE = 22.0f;
+    final float GRAVITY_UP_HOLD = 14.0f;
+    final float GRAVITY_DOWN_HOLD = 20.0f;
+    final float GRAVITY_RELEASE = 23.50f;
 
     PImage img;
     PShader outlineShader;
     PGraphics out;
-    float sizeX, sizeY, pixelSize;
+    float sizeX, sizeY, pixelSize, imgSizeX, imgSizeY;
     Poncho poncho;
     boolean isGrounded, isMoving, holdingJump, isFlipped;
 
@@ -629,7 +630,8 @@ class Player extends RigidBody {
         outlineShader = ASSETS.getShader("outline");
         sizeX = HEIGHT * img.width / img.height;
         sizeY = HEIGHT;
-        pixelSize = sizeX / 6.0f;
+        pixelSize = sizeX / 8.0f;
+
         poncho = new Poncho(this);
 
         // Setup output
@@ -641,8 +643,6 @@ class Player extends RigidBody {
 
     @Override
     void update() {
-        super.update();
-
         // Handle input
         float inputX = 0;
         float inputY = 0;
@@ -669,7 +669,10 @@ class Player extends RigidBody {
             if (!isMoving) velX *= GROUND_DRAG;
 
             // Jump
-            if (holdingJump) velY += JUMP_ACC;
+            if (holdingJump) {
+                velY += JUMP_ACC;
+                isGrounded = false;
+            }
 
         } else {
             // Air drag
@@ -686,6 +689,9 @@ class Player extends RigidBody {
                 velY += GRAVITY_RELEASE;
             }
         }
+
+        // Update physics
+        super.update();
 
         // Update poncho
         poncho.update();
