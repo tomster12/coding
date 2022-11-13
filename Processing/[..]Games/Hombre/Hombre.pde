@@ -17,7 +17,7 @@ void setup() {
     size(800, 800, P2D);
     rectMode(CENTER);
     imageMode(CENTER);
-    ((PGraphicsOpenGL)g).textureSampling(3);
+    ((PGraphicsOpenGL)g).textureSampling(2);
 
     ASSETS = new AssetManager();
     ASSETS.addImage("ponchoChar", "./assets/ponchoChar.png");
@@ -34,17 +34,17 @@ void setup() {
     tmpShd1 = ASSETS.getShader("pixellate");
     tmpShd2 = ASSETS.getShader("outline");
     tmpImg = ASSETS.getImage("ponchoUV");
-    ((PGraphicsOpenGL)tmpOut).textureSampling(3);
+    ((PGraphicsOpenGL)tmpOut).textureSampling(2);
 }
 
 
 void draw() {
     background(0);
-    DT = 1.0f / frameRate;
-    WORLD.draw();
-    PWORLD.draw();
-    INPUT.lateUpdate();
-    // debug();
+    // DT = 1.0f / frameRate;
+    // WORLD.draw();
+    // PWORLD.draw();
+    // INPUT.lateUpdate();
+    debug();
 }
 
 
@@ -58,8 +58,6 @@ void debug() {
     float offsetX = (float)drawX / width;
     float offsetY = (float)drawY / height;
     float pixelSize = 10.0f;
-    tmpShd1.set("u_offset", offsetX, offsetY);
-    tmpShd1.set("u_pixels", width / pixelSize, height / pixelSize);
 
     tmpOut.beginDraw();
     tmpOut.clear();
@@ -71,6 +69,8 @@ void debug() {
     tmpOut.image(tmpImg, 0, 0, 250, 250);
     tmpOut.endDraw();
 
+    tmpShd1.set("u_offset", offsetX, offsetY);
+    tmpShd1.set("u_pixels", width / pixelSize, height / pixelSize);
     shader(tmpShd1);
     image(tmpOut, width * 0.5f, height * 0.5f);
 }
@@ -481,8 +481,9 @@ class Player extends RigidBody {
         final float ROW_0_WIDTH_PCT = 0.45f;
         final float ROW_1_WIDTH_PCT = 1.0f;
         final float ROW_WIDTH_PCT = 1.5f;
+        final float LAST_ROW_WIDTH_PCT = 1.1f;
         final float OFFSET_Y_PCT = -0.1f;
-        final float GRID_SIZE_Y_PCT = 0.08f;
+        final float GRID_SIZE_Y_PCT = 0.1f;
         
         Player player;
         PWorld pWorld;
@@ -492,25 +493,27 @@ class Player extends RigidBody {
         PShader pixellateShader;
         PGraphics out;
         float gridSizeY;
-        float pixelSize;
 
 
         Poncho(Player player) {
             this.player = player;
-            pWorld = new PWorld(0.15f, 3000);
+            pWorld = new PWorld(0.22f, 4500);
             points = new PWorld.PPoint[COLS][ROWS];
             sticks = new ArrayList<PWorld.PStick>();
             img = ASSETS.getImage("ponchoUV");
             pixellateShader = ASSETS.getShader("pixellate");
             out = createGraphics(width, height, P2D);
+            ((PGraphicsOpenGL)out).textureSampling(2);
             gridSizeY = player.sizeY * GRID_SIZE_Y_PCT;
-            pixelSize = player.sizeX / 6.0f;
-            ((PGraphicsOpenGL)out).textureSampling(3);
             
             for (int x = 0; x < COLS; x++) {
                 for (int y = 0; y < ROWS; y++) {
                     float pct = (float)x / (COLS - 1);
-                    float width = player.sizeX * (y == 0 ? ROW_0_WIDTH_PCT : y == 1 ? ROW_1_WIDTH_PCT : ROW_WIDTH_PCT);
+                    float width = player.sizeX * (
+                        y == 0 ? ROW_0_WIDTH_PCT :
+                        y == 1 ? ROW_1_WIDTH_PCT :
+                        y == ROWS -  1 ? LAST_ROW_WIDTH_PCT :
+                        ROW_WIDTH_PCT);
                     float px = player.posX + width * (-0.5f + pct);
                     float py = player.posY + player.sizeY * OFFSET_Y_PCT + y * gridSizeY;
                     points[x][y] = pWorld.addPoint(px, py, 1);
@@ -571,7 +574,7 @@ class Player extends RigidBody {
 
             // Draw output to layer above
             pixellateShader.set("u_offset", player.posX / width, player.posY / height);
-            pixellateShader.set("u_pixels", width / pixelSize, height / pixelSize);
+            pixellateShader.set("u_pixels", width / player.pixelSize, height / player.pixelSize);
             topOut.shader(pixellateShader);
             topOut.image(out, width * 0.5f, height * 0.5f);
             topOut.resetShader();
@@ -592,12 +595,12 @@ class Player extends RigidBody {
     PImage img;
     PShader outlineShader;
     PGraphics out;
-    float sizeX, sizeY;
+    float sizeX, sizeY, pixelSize;
     Poncho poncho;
     boolean isGrounded, isMoving, holdingJump, isFlipped;
 
 
-    Player (World world, float posX, float posY) {
+    Player(World world, float posX, float posY) {
         super(world, posX, posY, false);
         setBounds(new CircleBounds(this, HEIGHT * 0.5f));
 
@@ -606,12 +609,13 @@ class Player extends RigidBody {
         outlineShader = ASSETS.getShader("outline");
         sizeX = HEIGHT * img.width / img.height;
         sizeY = HEIGHT;
+        pixelSize = sizeX / 6.0f;
         poncho = new Poncho(this);
 
         // Setup output
         out = createGraphics(width, height, P2D);
         out.imageMode(CENTER);
-        ((PGraphicsOpenGL)out).textureSampling(3);
+        ((PGraphicsOpenGL)out).textureSampling(2);
     }
 
 
@@ -687,11 +691,12 @@ class Player extends RigidBody {
         out.endDraw();
 
         // Show to screen
-        outlineShader.set("u_sprite_size", sizeX, sizeY);
-        outlineShader.set("outline_color", 1, 1, 1, 1);
-        outlineShader.set("include_corners", false);
-        shader(outlineShader);
+        // outlineShader.set("u_pixelSize", pixelSize);
+        // outlineShader.set("u_outline_color", 1.0, 1.0, 1.0, 1.0);
+        // outlineShader.set("u_include_corners", false);
+        // shader(outlineShader);
         image(out, width * 0.5f, height * 0.5f);
+        resetShader();
     }
 }
 

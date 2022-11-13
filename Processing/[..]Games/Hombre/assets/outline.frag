@@ -1,40 +1,38 @@
 
+// https://github.com/genekogan/Processing-Shader-Examples/blob/master/TextureShaders/data/pixelate.glsl
+
 #ifdef GL_ES
-precision mediump float;
-precision mediump int;
+precision highp float;
+precision highp int;
 #endif
 
 varying vec4 vertTexCoord;
 uniform sampler2D texture;
 
-uniform vec2 u_sprite_size;
+uniform float u_pixelsize;
 uniform vec4 u_outline_color;
 uniform bool u_include_corners;
 
-float texelSizeX = 1.0 / u_sprite_size.x;
-float texelSizeY = 1.0 / u_sprite_size.y;
-
+float pixelSizePct = 1.0 / u_pixelsize;
 
 void main(void)
 {
   	vec2 p = vertTexCoord.st;
 	vec4 c = texture2D(texture, p);
 
-    float weight = 
-        texture2D(texture, vec2(p.x + texelSizeX, p.y)).a *
-        texture2D(texture, vec2(p.x,              p.y - texelSizeY)).a *
-        texture2D(texture, vec2(p.x - texelSizeX, p.y)).a *
-        texture2D(texture, vec2(p.x,              p.y + texelSizeY)).a;
-
-    if(u_include_corners) {
-        weight *=
-            texture2D(texture, vec2(p.x + texelSizeX, p.y - texelSizeY)).a *
-            texture2D(texture, vec2(p.x + texelSizeX, p.y + texelSizeY)).a *
-            texture2D(texture, vec2(p.x - texelSizeX, p.y - texelSizeY)).a *
-            texture2D(texture, vec2(p.x - texelSizeX, p.y + texelSizeY)).a;
+    bool hasEdge = false;
+    hasEdge = hasEdge || (texture2D(texture, vec2(p.x + pixelSizePct, p.y              )).a != 0.0);
+    hasEdge = hasEdge || (texture2D(texture, vec2(p.x,               p.y - pixelSizePct)).a != 0.0);
+    hasEdge = hasEdge || (texture2D(texture, vec2(p.x - pixelSizePct, p.y              )).a != 0.0);
+    hasEdge = hasEdge || (texture2D(texture, vec2(p.x,               p.y + pixelSizePct)).a != 0.0);
+    if(u_include_corners)
+    {
+        hasEdge = hasEdge || texture2D(texture, vec2(p.x + pixelSizePct, p.y - pixelSizePct)).a != 0.0;
+        hasEdge = hasEdge || texture2D(texture, vec2(p.x + pixelSizePct, p.y + pixelSizePct)).a != 0.0;
+        hasEdge = hasEdge || texture2D(texture, vec2(p.x - pixelSizePct, p.y - pixelSizePct)).a != 0.0;
+        hasEdge = hasEdge || texture2D(texture, vec2(p.x - pixelSizePct, p.y + pixelSizePct)).a != 0.0;
     }
-
-	// if (c.a < 0.02) discard;
-    gl_FragColor = vec4(c.a, c.a, c.a, 1.0);
-    // gl_FragColor = c;
+    
+    if (hasEdge) gl_FragColor = u_outline_color;
+    else gl_FragColor = c;
 }
