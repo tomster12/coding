@@ -12,6 +12,9 @@ World WORLD;
 PWorld PWORLD;
 float DT;
 
+boolean USE_SHADERS = true;
+boolean SHOW_DEBUG = false;
+
 
 void setup() {
     size(1000, 1000, P2D);
@@ -44,8 +47,10 @@ void draw() {
     DT = 1.0f / frameRate;
     WORLD.draw();
     PWORLD.draw();
-    INPUT.lateUpdate();
+    if (INPUT.getKeyPressed(49)) SHOW_DEBUG = !SHOW_DEBUG;
+    if (INPUT.getKeyPressed(50)) USE_SHADERS = !USE_SHADERS;
     // debug();
+    INPUT.lateUpdate();
 }
 
 
@@ -571,31 +576,33 @@ class Player extends RigidBody {
                     float x2 = points[x][y + 1].posX;
                     float y2 = points[x][y + 1].posY;
                     float v2 = (float)(y + 1) / (ROWS - 1);
-                    // out.vertex(x1, y1, u, v1);
-                    // out.vertex(x2, y2, u, v2);
-                    float tx1 = player.posX + (x1 - player.posX) * 4;
-                    float ty1 = player.posY + (y1 - player.posY) * 4;
-                    float tx2 = player.posX + (x2 - player.posX) * 4;
-                    float ty2 = player.posY + (y2 - player.posY) * 4;
-                    out.vertex(tx1, ty1, u, v1);
-                    out.vertex(tx2, ty2, u, v2);
+                    out.vertex(x1, y1, u, v1);
+                    out.vertex(x2, y2, u, v2);
                 }
                 out.endShape();
             }
             out.endDraw();
 
+            // Draw physics world
+            if (SHOW_DEBUG) {
+                pWorld.show();
+            }
+
             // Draw output to layer above
-            pixellateShader.set("u_uv_offset", player.posX / width, -player.posY / height);
-            pixellateShader.set("u_grid_size", width / player.pixelSize, height / player.pixelSize);
-            ((PGraphicsOpenGL)topOut).textureSampling(2);
-            topOut.shader(pixellateShader);
-            topOut.image(out, width * 0.5f, height * 0.5f);
-            topOut.resetShader();
+            else {
+                if (USE_SHADERS) {
+                    pixellateShader.set("u_uv_offset", player.posX / width, -player.posY / height - (player.pixelSize * 0.5f) / height);
+                    pixellateShader.set("u_grid_size", width / player.pixelSize, height / player.pixelSize);
+                    topOut.shader(pixellateShader);
+                }
+                topOut.image(out, width * 0.5f, height * 0.5f);
+                if (USE_SHADERS) topOut.resetShader();
+            }
         }
     }
 
 
-    final float HEIGHT = 80.0f;
+    final float HEIGHT = 55.0f;
     final float MOVE_ACC = 35.0f;
     final float MOVE_VEL_MAX = 350.0f;
     final float GROUND_DRAG = 0.28f;
@@ -691,12 +698,18 @@ class Player extends RigidBody {
         out.beginDraw();
         out.clear();
 
+        // Show bounds
+        if (SHOW_DEBUG) {
+            bounds.show();
+
         // Show image
-        out.push();
-        out.translate(posX, posY);
-        if (isFlipped) out.scale(-1, 1);
-        out.image(img, 0, 0, sizeX, sizeY);
-        out.pop();
+        } else {
+            out.push();
+            out.translate(posX, posY);
+            if (isFlipped) out.scale(-1, 1);
+            out.image(img, 0, 0, sizeX, sizeY);
+            out.pop();
+        }
 
         // Show poncho
         poncho.show(out);
@@ -705,12 +718,14 @@ class Player extends RigidBody {
         out.endDraw();
 
         // Show to screen
-        // outlineShader.set("u_grid_sizeize", pixelSize);
-        // outlineShader.set("u_outline_color", 1.0, 1.0, 1.0, 1.0);
-        // outlineShader.set("u_include_corners", false);
-        // shader(outlineShader);
+        if (USE_SHADERS) {
+            outlineShader.set("u_grid_size", pixelSize / width, pixelSize / height);
+            outlineShader.set("u_outline_color", 0.11, 0.11, 0.11, 1.0);
+            outlineShader.set("u_include_corners", false);
+            shader(outlineShader);
+        }
         image(out, width * 0.5f, height * 0.5f);
-        // resetShader();
+        if (USE_SHADERS) resetShader();
     }
 }
 
