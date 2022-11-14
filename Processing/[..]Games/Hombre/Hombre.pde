@@ -12,8 +12,8 @@ World WORLD;
 PWorld PWORLD;
 float DT;
 
-boolean USE_SHADERS = false;
-boolean SHOW_DEBUG = true;
+boolean SHOW_DEBUG = false;
+boolean USE_SHADERS = true;
 
 
 void setup() {
@@ -144,23 +144,71 @@ class AssetManager {
         assets.add(imageAssets.get(name));
     }
 
-    PImage getImage(String name) {
-        return imageAssets.get(name).img;
-    }
-
-
     void addShader(String name, String path) {
         shaderAssets.put(name, new ShaderAsset(name, path));
         assets.add(shaderAssets.get(name));
     }
 
-    PShader getShader(String name) {
-        return shaderAssets.get(name).shader;
-    }
+
+    PImage getImage(String name) { return imageAssets.get(name).img; }
+
+    PShader getShader(String name) { return shaderAssets.get(name).shader; }
 
 
     void loadAll() {
         for (Asset a : assets) a.load();
+    }
+}
+
+// #endregion
+
+
+// #region - Animation
+
+class Animation {
+
+    Animation(PImage img, int startX, int startY, int frameSizeX, int frameSizeY, int frameCount) {
+        // TODO
+        // this.img = img;
+        // this.startX = startX;
+        // this.startY = startY;
+        // this.frameSizeX = frameSizeX;
+        // this.frameSizeY = frameSizeY;
+        // this.frameCount = frameCount;
+    }
+
+
+    void show(PGraphics out) {
+        // TODO
+    }
+}
+
+
+class Animator {
+
+    Map<String, Animation> animations = new HashMap<String, Animation>();
+    Animation currentAnimation = null;
+    int currentFrame = -1;
+
+
+    Animator() {}
+
+
+    void update() {
+        // TODO
+    }
+
+    void show(PGraphics out) {
+        // TODO
+    }
+
+
+    void addAnimation(String name, Animation animation) {
+        // TODO
+    }
+
+    void playAnimation(String name, boolean toLoop) {
+        // TODO
     }
 }
 
@@ -485,15 +533,13 @@ class Player extends RigidBody {
 
     class Poncho {
 
-        final int COLS = 4;
-        final int ROWS = 4;
-        final float[] FIRST_ROW_WIDTHS = new float[] { 0.5f, 0.95f };
-        final float ROW_WIDTH = 1.35f;
-        final float LAST_ROW_WIDTH = 1.1f;
-        final float OFFSET_Y = -0.08f;
-        final float GRID_SIZE_Y = 0.07f;
+        final int COLS = 5;
+        final int ROWS = 5;
+        final float[] ROW_WIDTHS = new float[] { 0.5f, 1.05f, 1.48f, 1.52f, 0.9f };
+        final float[] ROW_HEIGHTS = new float[] { 0.0f, 1.175f, 2.0f, 2.95f, 4.0f };
+        final float OFFSET_Y = -0.05f;
         final float PWORLD_DRAG = 0.1f;
-        final float PWORLD_GRAVITY = 7500;
+        final float PWORLD_GRAVITY = 2500;
         
         Player player;
         PWorld pWorld;
@@ -514,16 +560,12 @@ class Player extends RigidBody {
             pixellateShader = ASSETS.getShader("pixellate");
             out = createGraphics(width, height, P2D);
             ((PGraphicsOpenGL)out).textureSampling(2);
-            gridSizeY = player.sizeY * GRID_SIZE_Y;
             
             for (int x = 0; x < COLS; x++) {
                 for (int y = 0; y < ROWS; y++) {
                     boolean toPin = (y == 0) || (y == 1 && (x == 0 || x == (COLS - 1)));
-                    float width = player.sizeX * (
-                        (y < FIRST_ROW_WIDTHS.length) ? (FIRST_ROW_WIDTHS[y]) :
-                        (y == (ROWS -  1)) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
-                    float px = player.posX + width * (-0.5f + (float)x / (COLS - 1));
-                    float py = player.posY + (player.sizeY * OFFSET_Y) + (y * gridSizeY);
+                    float px = player.posX + player.sizeX * ROW_WIDTHS[y] * (-0.5f + (float)x / (COLS - 1));
+                    float py = player.posY + player.sizeY * OFFSET_Y + player.pixelSize * ROW_HEIGHTS[y];
                     points[x][y] = pWorld.addPoint(px, py, 1.0f);
                     if (toPin) points[x][y].pin();
                 }
@@ -533,6 +575,10 @@ class Player extends RigidBody {
                 for (int y = 0; y < ROWS; y++) {
                     if (x < COLS - 1) sticks.add(pWorld.addStick(points[x][y], points[x + 1][y]));
                     if (y < ROWS - 1) sticks.add(pWorld.addStick(points[x][y], points[x][y + 1]));
+                    if (x < COLS - 1 && y < ROWS - 1) {
+                        sticks.add(pWorld.addStick(points[x][y], points[x + 1][y + 1]));
+                        sticks.add(pWorld.addStick(points[x][y + 1], points[x + 1][y]));
+                    }
                 }
             }
         }
@@ -543,11 +589,8 @@ class Player extends RigidBody {
                 for (int y = 0; y < ROWS; y++) {
                     boolean toPin = (y == 0) || (y == 1 && (x == 0 || x == (COLS - 1)));
                     if (toPin) {
-                        float width = player.sizeX * (
-                            (y < FIRST_ROW_WIDTHS.length) ? (FIRST_ROW_WIDTHS[y]) :
-                            (y == (ROWS -  1)) ? (LAST_ROW_WIDTH) : (ROW_WIDTH));
-                        float px = player.posX + width * (-0.5f + (float)x / (COLS - 1));
-                        float py = player.posY + (player.sizeY * OFFSET_Y) + (y * gridSizeY);
+                        float px = player.posX + player.sizeX * ROW_WIDTHS[y] * (-0.5f + (float)x / (COLS - 1));
+                        float py = player.posY + player.sizeY * OFFSET_Y + player.pixelSize * ROW_HEIGHTS[y];
                         points[x][y].pinX = px;
                         points[x][y].pinY = py;
                     }
@@ -592,7 +635,7 @@ class Player extends RigidBody {
             // Draw output to layer above
             else {
                 if (USE_SHADERS) {
-                    pixellateShader.set("u_uv_offset", player.posX / width, -player.posY / height - (player.pixelSize * 0.5f) / height);
+                    pixellateShader.set("u_uv_offset", player.posX / width, -player.posY / height + (player.pixelSize * 0.4f) / height);
                     pixellateShader.set("u_grid_size", width / player.pixelSize, height / player.pixelSize);
                     topOut.shader(pixellateShader);
                 }
@@ -610,8 +653,8 @@ class Player extends RigidBody {
     final float AIR_DRAG = 0.95f;
     final float JUMP_ACC = -350.0f;
     final float GRAVITY_UP_HOLD = 14.0f;
-    final float GRAVITY_DOWN_HOLD = 20.0f;
-    final float GRAVITY_RELEASE = 23.50f;
+    final float GRAVITY_DOWN_HOLD = 22.0f;
+    final float GRAVITY_RELEASE = 25.50f;
 
     PImage img;
     PShader outlineShader;
