@@ -23,6 +23,15 @@ class ImpulseResolver extends Resolver {
       float invMassB = rbB.isKinematic ? 0.0 : 1.0 / rbB.mass;                        // = 1 / mB
       float e = rbA.restitution * rbB.restitution;
 
+      // TODO: Figure out rotation with friction
+      // Float2 point = collision.info.pointA.add(collision.info.pointB).mult(0.5);
+      // float vecAPTnorm = point.sub(rbA.transform.position).transpose().dot(normal);   // = rAP_T . n
+      // float vecBPTnorm = point.sub(rbB.transform.position).transpose().dot(normal);   // = rBP_T . n
+      // float invMomInertiaA = rbA.isKinematic ? 0.0 : 1.0 / rbA.momInertia;            // = 1 / IA
+      // float invMomInertiaB = rbB.isKinematic ? 0.0 : 1.0 / rbB.momInertia;            // = 1 / IB
+      // j = (-(1 + e) * vAB . n) / ((1 / mA) + (1 / mB) + ((rAP_T . n) ^ 2) / IA + ((rBP_T . n) ^ 2) / IB)
+      // float j = (-(1.0f + e) * normVel) / (invMassA + invMassB + vecAPTnorm * vecAPTnorm * invMomInertiaA + vecBPTnorm * vecBPTnorm * invMomInertiaB);
+
       // Calculate and add impulse
       float j = -(1.0f + e) * normVel / (invMassA + invMassB);                        // j = (-(1 + e) * vAB . n) / (1 / mA + 1 / mB)
       Float2 impulse = collision.info.normal.mult(j);                                 // imp = jn
@@ -41,16 +50,6 @@ class ImpulseResolver extends Resolver {
         : tangent.mult(-j * staticMu);                                                //  = (-j * staticMu)t   (otherwise)
       if (!rbA.isKinematic) rbA.velocity.isub(friction.mult(invMassA));               // rA -= fr / mA
       if (!rbB.isKinematic) rbB.velocity.iadd(friction.mult(invMassB));               // rA += fr / mA
-
-      // TODO: Figure out rotation with friction
-      // Float2 point = collision.info.pointA.add(collision.info.pointB).mult(0.5);
-      // float vecAPTnorm = point.sub(rbA.transform.position).transpose().dot(normal);   // = rAP_T . n
-      // float vecBPTnorm = point.sub(rbB.transform.position).transpose().dot(normal);   // = rBP_T . n
-      // float invMomInertiaA = rbA.isKinematic ? 0.0 : 1.0 / rbA.momInertia;            // = 1 / IA
-      // float invMomInertiaB = rbB.isKinematic ? 0.0 : 1.0 / rbB.momInertia;            // = 1 / IB
-
-      // j = (-(1 + e) * vAB . n) / ((1 / mA) + (1 / mB) + ((rAP_T . n) ^ 2) / IA + ((rBP_T . n) ^ 2) / IB)
-      // float j = (-(1.0f + e) * normVel) / (invMassA + invMassB + vecAPTnorm * vecAPTnorm * invMomInertiaA + vecBPTnorm * vecBPTnorm * invMomInertiaB);
 
       // float torqueA = vecAPTnorm * j;                                                 // = rAP . jn
       // float torqueB = vecBPTnorm * j;                                                 // = rBP . jn

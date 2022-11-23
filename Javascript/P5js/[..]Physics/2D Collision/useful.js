@@ -218,7 +218,7 @@ class Shape {
     return totalMomInertPos;
   }
 
-  // #endregions
+  // #endregion
 
 
   // #region - Vertices
