@@ -1,4 +1,11 @@
 
+// TODO:
+// [./] - Move Utility funcs to checkCollision() on collider
+// [./] - Triangulation of meshes with Ear clipping
+// [  ] - Collision with triangles instead
+// [  ] - Collision checks based on AABB, maybe quad tree
+
+
 // #region - Driver
 
 let SIM;
@@ -8,31 +15,28 @@ let IT;
 function setup() {
   createCanvas(600, 600);
 
-  // World 1
+  // World 1 - Bucket
   SIM = new RigidbodySim(true);
-  const s1 = Rigidbody.newSquare(SIM, false, 0.3, new Vector(250, 350), new Vector(100, 100));
+  const s1 = Rigidbody.createSquare(SIM, false, 0.3, new Vector(250, 350), new Vector(100, 100));
   s1.posVel.iAdd({ x: 50, y: 0 });
   s1.rotVel += 1.2;
-  const s2 = Rigidbody.newFunky(SIM, false, 0.3, new Vector(250, 250), new Vector(230, 45));
+  const s2 = Rigidbody.createFunky(SIM, false, 0.3, new Vector(250, 250), new Vector(230, 45));
   s2.rotVel += 0.7;
-  Rigidbody.newSquare(SIM, false, 0.3, new Vector(400, 350), new Vector(80, 80));
-  Rigidbody.newSquare(SIM, false, 0.3, new Vector(300, 0), new Vector(18, 18));
-  Rigidbody.newFunky(SIM, false, 0.3, new Vector(280, -30), new Vector(20, 20));
-  Rigidbody.newSquare(SIM, true, 0.3, new Vector(300, 500), new Vector(500, 25));
-  Rigidbody.newSquare(SIM, true, 0.3, new Vector(100, 300), new Vector(25, 500));
-  Rigidbody.newSquare(SIM, true, 0.3, new Vector(500, 300), new Vector(25, 500));
+  Rigidbody.createSquare(SIM, false, 0.3, new Vector(400, 350), new Vector(80, 80));
+  Rigidbody.createSquare(SIM, false, 0.3, new Vector(300, 0), new Vector(18, 18));
+  Rigidbody.createFunky(SIM, false, 0.3, new Vector(280, -30), new Vector(20, 20));
+  Rigidbody.createSquare(SIM, true, 0.3, new Vector(300, 500), new Vector(500, 25));
+  Rigidbody.createSquare(SIM, true, 0.3, new Vector(100, 300), new Vector(25, 500));
+  Rigidbody.createSquare(SIM, true, 0.3, new Vector(500, 300), new Vector(25, 500));
 
-  // World 2
+  // World 2 - Simple collision ground
   // SIM = new RigidbodySim(false);
-  // const s1 = Rigidbody.newSquare(SIM, false, 1, new Vector(300, 200), new Vector(100, 100));
+  // const s1 = Rigidbody.createSquare(SIM, false, 1, new Vector(300, 200), new Vector(100, 100));
   // s1.posVel.y = 100;
-  // Rigidbody.newSquare(SIM, true, 0.3, new Vector(300, 500), new Vector(250, 25));
+  // Rigidbody.createSquare(SIM, true, 0.3, new Vector(300, 500), new Vector(250, 25));
 
-  // World 3
-  // SIM = new RigidbodySim(false);
-  // const s1 = Rigidbody.newSquare(SIM, false, 1, new Vector(300, 200), new Vector(100, 100));
-  // s1.posVel.y = 100;
-  // Rigidbody.newSquare(SIM, false, 1, new Vector(300, 350), new Vector(100, 100));
+  // World 3 - Simple collision 2 bodies
+  // SIM = new Rsape();
 
   // Setup other variables
   IT = new Interactor();
@@ -74,7 +78,7 @@ class Interactor {
     SIM.rigidbodys.forEach(rb => {
 
       // Calculate if hovered
-      const hovered = Utility.checkPointInPoints(this.mousePos, rb.worldBounds, rb.edges).isOverlapping;
+      const hovered = Utility.checkPointOverlap(this.mousePos, rb).isOverlapping;
       if (hovered && !this.dragInfo.isDragging) {
         hoveredRB = rb;
         const sx = 200, sy = 90;
@@ -208,55 +212,30 @@ class Vector {
 
 class Utility {
 
-  static calculateMass(bounds, density) {
-    // Use density and area of triangles
-    const w = bounds.b.x - bounds.a.x;
-    const h = bounds.b.y - bounds.a.y;
-    const m = density * w * h;
-    return m;
-  }
-
-  static calculateInertia(bounds, mass) {
-    // Use equation online for each triangle
-    // Sum of (mass * perpRad^2) for each point
-    const w = bounds.b.x - bounds.a.x;
-    const h = bounds.b.y - bounds.a.y;
-    return mass * (w * w + h * h) / 12.0;
-  }
-
-  static calculateBounds(points) {
+  static calculateAABB(points) {
     // Calculate min and max points
-    let a = points[0].copy();
-    let b = points[0].copy();
-    for (let p of points) {
-      a.x = min(a.x, p.x);
-      a.y = min(a.y, p.y);
-      b.x = max(b.x, p.x);
-      b.y = max(b.y, p.y);
-    }
-    return { a, b };
+    let ax = points[0].x;
+    let ay = points[0].y;
+    let bx = points[0].x;
+    let by = points[0].y;
+    points.forEach(p => {
+      ax = min(ax, p.x);
+      ay = min(ay, p.y);
+      bx = max(bx, p.x);
+      by = max(by, p.y);
+    });
+    return { a: new Vector(ax, ay), b: new Vector(bx, by) };
   }
 
-
-  static checkPointInPoints(a, bounds, edges) {
-    // Detect overlap through intersections
-    const b = bounds.b.copy().iAdd({ x: 1, y: 1 });
-    const count = edges.reduce((count, e) => this.checkLineOnLine(a, b, e.a, e.b) ? count + 1 : count, 0);
-    if (count % 2 == 1) {
-
-      // Return info for closest edge
-      return edges.reduce((acc, e, i) => {
-        if (e.b.sub(e.a).perp().dot(a.sub(e.a)) <= 0) return acc;
-        const p = this.closestPointOnLine(a, e.a, e.b);
-        const dir = p.sub(a);
-        const depth = dir.getLength();
-        if (acc && acc.depth <= depth) return acc;
-        return { isOverlapping: true, a: a.copy(), p: p, n: dir.norm(), depth: depth, edgeIndex: i };
-      }, null);
-    }
-    
-    // Return empty info
-    else return { isOverlapping: false, p: null, n: null, depth: 0, edgeIndex: -1 };
+  static checkAABBOverlap(a, b) {
+    // Check AABB overlap
+    const d1x = b.a.x - a.b.x;
+    const d1y = b.a.y - a.b.y;
+    const d2x = a.a.x - b.b.x;
+    const d2y = a.a.y - b.b.y;
+    if (d1x > 0.0 || d1y > 0.0) return false;
+    if (d2x > 0.0 || d2y > 0.0) return false;
+    return true;
   }
 
   static checkLineOnLine(a, b, c, d) {
@@ -265,21 +244,154 @@ class Utility {
     return ccw(a, c, d) != ccw(b, c, d) && ccw(a, b, c) != ccw(a, b, d);
   }
 
-  static closestPointOnLine(p, a, b) {
+  static getClosestPointOnLine(p, a, b) {
     // Calculate closest point on a line
     const dir = b.sub(a).norm();
     const v = p.sub(a);
     const d = v.dot(dir);
     return a.add(dir.iMult(d));
   }
+
+
+  static translatePoint(a, pos, rot) {
+    // Translate a point with position and rotation
+    return new Vector(
+      pos.x + rot[0][0] * a.x + rot[0][1] * a.y,
+      pos.y + rot[1][0] * a.x + rot[1][1] * a.y
+    );
+  }
+
+  static triangulate(points) {
+    // Triangulate a simple polygon
+    let triangles = [];
+    let currentPoints = points.map((_, i) => i);
+    while (currentPoints.length > 3) {
+
+      // Find first ear available
+      let i, i1, i2, i3;
+      for (i = 0; i < currentPoints.length; i++) {
+        i1 = currentPoints[i];
+        i2 = currentPoints[(i + 1) % currentPoints.length];
+        i3 = currentPoints[(i + 2) % currentPoints.length];
+        const a = points[i2].sub(points[i1]);
+        const b = points[i3].sub(points[i1]);
+        if (a.perp().dot(b) > 0) break;
+      }
+
+      // Generate triangle and remove point
+      triangles.push([ i1, i2, i3 ]);
+      currentPoints.splice((i + 1) % currentPoints.length, 1);
+    }
+
+    // Create last triangle and return
+    triangles.push([ currentPoints[0], currentPoints[1], currentPoints[2] ]);
+    return triangles;
+  } 
+
+
+  static calculateMass(rb) {
+    // Use density and area of triangles
+    const w = rb.localAABB.b.x - rb.localAABB.a.x;
+    const h = rb.localAABB.b.y - rb.localAABB.a.y;
+    const m = rb.density * w * h;
+    return m;
+  }
+
+  static calculateInertia(rb) {
+    // Use equation online for each triangle
+    // Sum of (mass * perpRad^2) for each point
+    const w = rb.localAABB.b.x - rb.localAABB.a.x;
+    const h = rb.localAABB.b.y - rb.localAABB.a.y;
+    return rb.mass * (w * w + h * h) / 12.0;
+  }
+
+  // static checkCollision(rb1, rb2) {
+  //   console.log(" ");
+  //   console.log("Checking:")
+  //   rb1.triangles.forEach(t => console.log(t));
+  //   rb1.worldVertices.forEach(v => console.log(v.toString()));
+  
+  //   console.log(" ");
+  //   console.log("Against:")
+  //   rb2.triangles.forEach(t => console.log(t));
+  //   rb2.worldVertices.forEach(v => console.log(v.toString()));
+
+  //   console.log(" ");
+  //   const aabbOverlap = Utility.checkAABBOverlap(rb1.worldAABB, rb2.worldAABB);
+  //   console.log("\nAABB Overlap: " + aabbOverlap);
+
+  //   noLoop();
+  //   return [];
+  // }
+
+  static checkCollision(rb1, rb2) {
+    let collisions = [];
+
+    // Check overlap of rbA points inside rbB
+    const check = (rbA, rbB) => {
+      const edgeHits = new Array(rbB.worldVertices.length).fill(null).map(_ => []);
+      rbA.worldVertices.forEach((p1, i) => {
+        const info = Utility.checkPointOverlap(p1, rbB);
+        if (info.isOverlapping) edgeHits[info.edgeIndex].push({ a: rbA, b: rbB, pointIndex: i, edgeindex: info.edgeIndex, info });
+      });
+
+      // Process each collision, handling edges
+      edgeHits.forEach((hits, i) => {
+        if (hits.length == 0) return;
+        if (hits.length == 1) { collisions.push(hits[0]); return; }
+
+        // Average the collision points update
+        for (let i = 1; i < hits.length; i++) hits[0].info.a.iAdd(hits[i].info.a);
+        hits[0].info.a.iMult(1.0 / hits.length);
+        hits[0].info.p = Utility.getClosestPointOnLine(hits[0].info.a, rbB.worldVertices[i], rbB.worldVertices[(i + 1) % rbB.worldVertices.length]);
+        const dir =  hits[0].info.p.sub(hits[0].info.a);
+        hits[0].info.n = dir.norm();
+        hits[0].info.depth = dir.getLength();
+        collisions.push(hits[0]);
+      });
+    };
+
+    // Check each direction and return
+    check(rb1, rb2);
+    check(rb2, rb1);
+    return collisions;
+  }
+
+  static checkPointOverlap(a, rb) {
+    // Detect overlap through intersections
+    const b = rb.worldAABB.b.copy().iAdd({ x: 1, y: 1 });
+    const count = rb.worldVertices.filter((_, i) => Utility.checkLineOnLine(a, b, rb.worldVertices[i], rb.worldVertices[(i + 1) % rb.worldVertices.length])).length;
+    if (count % 2 == 1) {
+
+      // Return info for closest edge
+      let closest = null;
+      rb.worldVertices.forEach((_, i) => {
+        const ea = rb.worldVertices[i];
+        const eb = rb.worldVertices[(i + 1) % rb.worldVertices.length];
+        if (eb.sub(ea).perp().dot(a.sub(ea)) <= 0) return;
+
+        // Calculate point and then check whether shorter
+        const p = Utility.getClosestPointOnLine(a, ea, eb);
+        const dir = p.sub(a);
+        const depth = dir.getLength();
+        if (!closest || depth < closest.depth) closest = { isOverlapping: true, a: a.copy(), p, n: dir.norm(), depth, edgeIndex: i };
+      });
+      
+      // Return best overlap
+      return closest;
+    }
+    
+    // Return empty info
+    else return { isOverlapping: false, p: null, n: null, depth: 0, edgeIndex: -1 };
+  }
 }
 
 class RigidbodySim {
 
   static GRAVITY = new Vector(0.0, 800);
-  static SUB_FRAMES = 10.0;
-  static POS_PCT = 0.9;
-  static POS_SLOP = 0.02;
+  static SUB_FRAMES = 5.0;
+  static POS_PCT = 0.95;
+  static POS_SLOP = 0.01;
   static IMP_E = 0.4;
 
 
@@ -295,12 +407,6 @@ class RigidbodySim {
     // Update physics and show
     this.dt = 1.0 / 60.0;
     this.stepPhysics(this.dt);
-    this.drawRigidbodies();
-  }
-
-  drawRigidbodies() {
-    // Update and show all rigidbodies
-    for (const rb of this.rigidbodys) rb.update();
     for (const rb of this.rigidbodys) rb.show();
   }
 
@@ -328,62 +434,27 @@ class RigidbodySim {
 
   stepDynamics(dt) {
     this.rigidbodys.forEach(rb => {
+      // Cancel out dynamics
       if (rb.isStatic) {
-        // Cancel out dynamics
+        rb.rotVel = 0;
         rb.posVel.iMult(0);
-        rb.rotVel *= 0;
-
-      } else {
-        // Apply gravity force
-        if (this.hasGravity) rb.posVel.iAdd(RigidbodySim.GRAVITY.mult(dt));
-
-        // Update pos / rot
-        rb.pos.iAdd(rb.posVel.mult(dt));
-        rb.rot += rb.rotVel * dt;
-        rb.rot = (rb.rot + TWO_PI) % TWO_PI;
-
-        // Update vertices
-        rb.onPointsMoved();
+        return;
       }
+      
+      // Apply gravity force
+      if (this.hasGravity) rb.posVel.iAdd(RigidbodySim.GRAVITY.mult(dt));
+
+      // Update pos / rot
+      rb.pos.iAdd(rb.posVel.mult(dt));
+      rb.rot += rb.rotVel * dt;
+      rb.rot = (rb.rot + TWO_PI) % TWO_PI;
+
+      // Update vertices
+      rb.updateWorldShape();
     });
   }
 
   detectCollisions() {
-    // Main detection function
-    const findCollisions = (rb1, rb2) => {
-
-      // Check overlap of rb1 points inside rb2
-      const rb2EdgeHits = new Array(rb2.edges.length).fill(null).map(_ => []);
-      let rb1Collided = false;
-      rb1.worldEdgePoints.forEach((p1, i) => {
-        const info = Utility.checkPointInPoints(p1, rb2.worldBounds, rb2.edges);
-        if (info.isOverlapping) {
-          rb2EdgeHits[info.edgeIndex].push({ a: rb1, b: rb2, info, pointIndex: i });
-          rb1Collided = true;
-        }
-      });
-
-      // Process each collision against rb2 edges
-      if (rb1Collided) {
-        rb2EdgeHits.forEach((hits, i) => {
-
-          // None / standard base cases
-          if (hits.length == 0) return;
-          if (hits.length == 1) { this.collisions.push(hits[0]); return; }
-
-          // Average the collision points and add
-          const a = hits[0].info.a;
-          for (let i = 1; i < hits.length; i++) a.iAdd(hits[i].info.a);
-          hits[0].info.a = a.iMult(1.0 / hits.length);
-          hits[0].info.p = Utility.closestPointOnLine(a, rb2.edges[i].a, rb2.edges[i].b);
-          const dir =  hits[0].info.p.sub(hits[0].info.a);
-          hits[0].info.n = dir.norm();
-          hits[0].info.depth = dir.getLength();
-          this.collisions.push(hits[0]);
-        });
-      }
-    };
-
     // Loop over and find all valid pairs
     this.collisions = [];
     for (let i = 0; i < this.rigidbodys.length - 1; i++) {
@@ -391,8 +462,8 @@ class RigidbodySim {
         const rb1 = this.rigidbodys[i];
         const rb2 = this.rigidbodys[j];
         if (rb1.isStatic && rb2.isStatic) continue;
-        findCollisions(rb1, rb2);
-        findCollisions(rb2, rb1);
+        const rb12Collisions = Utility.checkCollision(rb1, rb2);
+        rb12Collisions.forEach(c => this.collisions.push(c));
       }
     }
   }
@@ -440,10 +511,13 @@ class RigidbodySim {
       const correction = c.info.n.mult(amount);
       if (!c.a.isStatic) c.a.deltaPos.iAdd(correction.mult(mI_a));
       if (!c.b.isStatic) c.b.deltaPos.iAdd(correction.mult(-mI_b));
+      c.a.deltaUpdate = !c.a.isStatic;
+      c.b.deltaUpdate = !c.b.isStatic;
     });
     
     // Apply and empty deltas
     this.rigidbodys.forEach(cl => {
+      if (!cl.deltaUpdate) return;
 
       // Add deltas
       if (!cl.isStatic) {
@@ -451,7 +525,7 @@ class RigidbodySim {
         cl.rot += cl.deltaRot;
         cl.posVel.iAdd(cl.deltaPosVel);
         cl.rotVel += cl.deltaRotVel;
-        cl.onPointsMoved();
+        cl.updateWorldShape();
       }
   
       // Empty deltas
@@ -459,11 +533,9 @@ class RigidbodySim {
       cl.deltaPosVel.iMult(0);
       cl.deltaRot *= 0;
       cl.deltaRotVel *= 0;
+      cl.deltaUpdate = false;
     });
   }
-
-
-  addRigidbody = (cl) => this.rigidbodys.push(cl);
 }
 
 class Rigidbody {
@@ -471,121 +543,125 @@ class Rigidbody {
   constructor(world_, isStatic_, density_) {
     // Add to world
     this.world = world_;
-    this.world.addRigidbody(this);
+    this.world.rigidbodys.push(this);
 
-    // Initialize physics
-    this.isStatic = isStatic_;
-    this.density = density_;
-
+    // Dynamics variables
     this.pos = new Vector(0, 0);
     this.posVel = new Vector(0, 0);
     this.rot = 0;
     this.rotVel = 0;
 
+    // Physical attributes
+    this.isStatic = isStatic_;
+    this.density = density_;
+    this.mass = 0;
+    this.inertia = 0;
+
+    // Shape data
+    this.localVertices = [];
+    this.localAABB = null;
+    this.worldVertices = [];
+    this.worldAABB = null;
+    this.triangles = [];
+
+    // Collision deltas
+    this.updateDelta = false;
     this.deltaPos = new Vector(0, 0);
     this.deltaPosVel = new Vector(0, 0);
     this.deltaRot = 0;
     this.deltaRotVel = 0;
-
-    // Initialize mesh
-    this.localEdgePoints = [];
-    this.worldEdgePoints = [];
-    this.localBounds = null;
-    this.worldBounds = null;
-    this.edges = [];
   }
 
-  static newSquare(world_, isStatic_, density_, pos_, size) {
+  static createSquare(world_, isStatic_, density_, pos_, size) {
     // Setup points
     const WOBBLINESS = 0.15;
-    const localEdgePoints = [];
-    localEdgePoints.push(new Vector(-size.x * 0.5, -size.y * 0.5));
-    localEdgePoints.push(new Vector(size.x * 0.5, -size.y * 0.5));
-    localEdgePoints.push(new Vector(size.x * 0.5, size.y * 0.5));
-    localEdgePoints.push(new Vector(-size.x * 0.5, size.y * 0.5));
+    const vertices = [];
+    vertices.push(new Vector(-size.x * 0.5, -size.y * 0.5));
+    vertices.push(new Vector(size.x * 0.5, -size.y * 0.5));
+    vertices.push(new Vector(size.x * 0.5, size.y * 0.5));
+    vertices.push(new Vector(-size.x * 0.5, size.y * 0.5));
 
     // Creatae and return rigidbody
     const newRigidbody = new Rigidbody(world_, isStatic_, density_);
     newRigidbody.pos = pos_;
-    newRigidbody.setPoints(localEdgePoints);
+    newRigidbody.setShape(vertices);
     return newRigidbody;
   }
 
-  static newFunky(world_, isStatic_, density_, pos_, size) {
+  static createFunky(world_, isStatic_, density_, pos_, size) {
       // Setup points
       const WOBBLINESS = 0.15;
-      const localEdgePoints = [];
-      localEdgePoints.push(new Vector(0, -size.y * 0.5));
-      localEdgePoints.push(new Vector(size.x * 0.5, -size.y * 0.5));
-      localEdgePoints.push(new Vector(size.x * 0.3, 0));
-      localEdgePoints.push(new Vector(size.x * 0.5, size.y * 0.2));
-      localEdgePoints.push(new Vector(-size.x * 0.2, size.y * 0.35));
-      localEdgePoints.push(new Vector(-size.x * 0.3, 0));
+      const vertices = [];
+      vertices.push(new Vector(0, -size.y * 0.5));
+      vertices.push(new Vector(size.x * 0.5, -size.y * 0.5));
+      vertices.push(new Vector(size.x * 0.3, 0));
+      vertices.push(new Vector(size.x * 0.5, size.y * 0.2));
+      vertices.push(new Vector(-size.x * 0.2, size.y * 0.35));
+      vertices.push(new Vector(-size.x * 0.3, 0));
   
       // Creatae and return rigidbody
       const newRigidbody = new Rigidbody(world_, isStatic_, density_);
       newRigidbody.pos = pos_;
-      newRigidbody.setPoints(localEdgePoints);
+      newRigidbody.setShape(vertices);
       return newRigidbody;
   }
-
-
-  update() {  
-  }
+  
 
   show() {
-    // Draw outline
-    stroke(255);
     noFill();
+
+    // Draw triangles
+    stroke(120);
+    this.triangles.forEach(t => triangle(
+      this.worldVertices[t[0]].x, this.worldVertices[t[0]].y,
+      this.worldVertices[t[1]].x, this.worldVertices[t[1]].y,
+      this.worldVertices[t[2]].x, this.worldVertices[t[2]].y
+    ));
+
+    // Draw bounds
+    stroke(150, 150, 220);
+    rect(
+      this.worldAABB.a.x, this.worldAABB.a.y,
+      this.worldAABB.b.x - this.worldAABB.a.x,
+      this.worldAABB.b.y - this.worldAABB.a.y
+    );
+
+    // Draw edge
+    stroke(255);
     beginShape();
-    this.worldEdgePoints.forEach(p => vertex(p.x, p.y));
+    this.worldVertices.forEach(v => vertex(v.x, v.y));
     endShape(CLOSE);
+
+    // Draw centre
+    ellipse(this.pos.x, this.pos.y, 5, 5);
   }
 
 
-  setPoints(newPoints) {
+  setShape(newVertices) {
     // Set points and update
-    this.localEdgePoints = newPoints;
-    this.onShapeChanged();
+    this.localVertices = newVertices;
+    this.updateLocalShape();
   }
 
-  onPointsMoved() {
+  updateWorldShape() {
     // Setup rotation matrix
     const rotMat = [
       [cos(this.rot), -sin(this.rot)],
       [sin(this.rot),  cos(this.rot)] ];
-    
-    // Update world points
-    // w = p + R • l
-    for (let i = 0; i < this.localEdgePoints.length; i++) {
-      const p = this.localEdgePoints[i];
-      this.worldEdgePoints[i].x = this.pos.x + rotMat[0][0] * p.x + rotMat[0][1] * p.y;
-      this.worldEdgePoints[i].y = this.pos.y + rotMat[1][0] * p.x + rotMat[1][1] * p.y;
-    }
 
-    // Update world point bounds
-    this.worldBounds = Utility.calculateBounds(this.worldEdgePoints);
+    // Update world vertices and aABB
+    this.worldVertices = this.localVertices.map(v => Utility.translatePoint(v, this.pos, rotMat));
+    this.worldAABB = Utility.calculateAABB(this.worldVertices);
   }
 
-  onShapeChanged() {
-    // Ensure world point array is good
-    if (this.worldEdgePoints.length != this.localEdgePoints.length) {
-      this.worldEdgePoints = [];
-      for (let _ = 0; _ < this.localEdgePoints.length; _++) this.worldEdgePoints.push(new Vector(0, 0));
-    }
-
-    // Recalculate edges with world point references
-    this.edges = this.worldEdgePoints.reduce((edges, _, i) => [...edges, {
-      a: this.worldEdgePoints[i],
-      b: this.worldEdgePoints[(i + 1) % this.worldEdgePoints.length]
-    }], []);
-
+  updateLocalShape() {
     // Recalculate physical attributes
-    this.localBounds = Utility.calculateBounds(this.localEdgePoints);
-    this.mass = Utility.calculateMass(this.localBounds, this.density);
-    this.inertia = Utility.calculateInertia(this.localBounds, this.mass);
+    this.localAABB = Utility.calculateAABB(this.localVertices);
+    this.triangles = Utility.triangulate(this.localVertices); 
+    this.mass = Utility.calculateMass(this);
+    this.inertia = Utility.calculateInertia(this);
 
-    // Reculate world points and bounds
-    this.onPointsMoved();
+    // Reculate world shape
+    this.updateWorldShape();
   }
 }

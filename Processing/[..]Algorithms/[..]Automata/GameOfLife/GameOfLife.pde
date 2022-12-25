@@ -37,7 +37,5 @@ void draw() {
 
 void keyPressed() {
   // key - Toggle isUpdating
-  if (keyCode == 9) {
-    sim.isUpdating = !sim.isUpdating;
-  }
+  if (keyCode == 9) sim.isUpdating = !sim.isUpdating;
 }
