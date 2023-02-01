@@ -418,7 +418,7 @@ class World {
     }
     if (itemGrid[sx][sy].nextPos != null) {
       println("Canot move item entity to " + tx + ", " + ty + ": item is already moving");
-      return false
+      return false;
     }
     itemGrid[sx][sy].nextPos = new PVector(tx, ty);
     movingItemEntities.add(itemGrid[sx][sy]);
