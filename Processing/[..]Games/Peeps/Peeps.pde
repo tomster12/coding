@@ -959,7 +959,7 @@ class SmokeParticle extends Particle {
 
     SmokeParticle(Game game, Int3 pos) {
         // Initialize variables
-        super(game, pos, color(160));
+        super(game, pos, color(0, 100));
         floatInterval = FLOAT_INTERVAL_INTERVAL[0] + (int)random(FLOAT_INTERVAL_INTERVAL[1] - FLOAT_INTERVAL_INTERVAL[0] + 1);
         colShadow = color(0, 50);
     }
