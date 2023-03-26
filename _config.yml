@@ -2,21 +2,11 @@
 theme: jekyll-theme-tactile
 
 exclude:
-  - node_modules/
-
-  # - !JSLib/
+  - ./**/node_modules/
   - AoC/
-  # - Assets/
   - Autohotkey/
-  - C/
-  - C++/
   - Github/
-  - Java/
-  # - Javascript/
-  # - Multi/
   - Other/
-  # - Processing/
-  - Python/
   - Software/
   - Unity/
   - Web/

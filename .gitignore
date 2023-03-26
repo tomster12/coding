@@ -18,6 +18,7 @@ _site/
 /Multi/**/build/
 /C++/**/bin/
 /C++/**/.vs/
+/C++/**/dependencies/
 /C++/SFML-2.5.1/
 
 # Not yet implemented
