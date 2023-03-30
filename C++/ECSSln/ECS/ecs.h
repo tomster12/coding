@@ -262,10 +262,11 @@ namespace ecs {
 			// Process with multiple threads
 			const size_t entityCount = entities.size();
 			const size_t threadCount = threadPool.size();
+			const size_t gap = entityCount / threadCount;
 			std::vector<std::future<void>> results(threadCount);
 			for (size_t i = 0; i < threadCount; i++) {
-				int threadStart = i * entityCount / threadCount;
-				int threadEnd = static_cast<int>(std::min(threadStart + entityCount / threadPool.size(), entityCount));
+				int threadStart = i * gap;
+				int threadEnd = static_cast<int>(std::min(threadStart + gap, entityCount));
 				results[i] = threadPool.enqueue(processSplitter(entities, threadStart, threadEnd));
 			}
 

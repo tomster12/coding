@@ -118,13 +118,13 @@ function initVariables() {
   // Populate objects
   uiCanvas.objects.push(new UIGateSelect(uiCanvas,
     { x: width * 0.5, y: height - (40 + 5) }, { x: width - 10, y: 80 }));
-  uiCanvas.objects.push(new UIPanel(uiCanvas,
-    { x: width - (70 + 15), y: (25 + 15) }, { x: (140 + 20), y: (50 + 20) }, "", 0.5,
-    CFG.COL_BACKGROUND, CFG.COL_TEXT ));
-  uiCanvas.objects.push(new UIButton(uiCanvas,
-    () => { mainSim.compileGates(); },
-    { x: width - (70 + 15), y: (25 + 15) }, { x: (140), y: (50) }, "Compile", 0.5,
-    CFG.COL_BUTTON, CFG.COL_BUTTON_HOVERED, CFG.COL_TEXT ));
+  // uiCanvas.objects.push(new UIPanel(uiCanvas,
+  //   { x: width - (70 + 15), y: (25 + 15) }, { x: (140 + 20), y: (50 + 20) }, "", 0.5,
+  //   CFG.COL_BACKGROUND, CFG.COL_TEXT ));
+  // uiCanvas.objects.push(new UIButton(uiCanvas,
+  //   () => { mainSim.compileGates(); },
+  //   { x: width - (70 + 15), y: (25 + 15) }, { x: (140), y: (50) }, "Compile", 0.5,
+  //   CFG.COL_BUTTON, CFG.COL_BUTTON_HOVERED, CFG.COL_TEXT ));
 
   // Populate main sim gates and connections
   mainSim.addGate(gatePresets["IN"], { x: 0, y: 0 });
