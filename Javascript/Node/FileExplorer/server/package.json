@@ -1,0 +1,11 @@
+{
+  "name": "file-explorer-server",
+  "version": "0.0.1",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "socket.io": "^4.6.1"
+  }
+}

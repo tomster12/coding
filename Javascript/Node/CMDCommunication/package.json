@@ -1,0 +1,7 @@
+{
+  "name": "BasicCommuncation",
+  "version": "0.0.0",
+  "dependencies": {
+    "socket.io": "^2.2.0"
+  }
+}

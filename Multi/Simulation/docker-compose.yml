@@ -1,0 +1,56 @@
+version: "1.0"
+
+services:
+  mongo-database:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mongo
+      MONGO_INITDB_ROOT_PASSWORD: mongo
+    volumes:
+      - ./mongodb:/data/db
+    ports:
+      - 27017:27017
+    networks:
+      - network
+
+  web-backend:
+    build:
+      context: ./web-backend
+      dockerfile: Dockerfile
+    depends_on:
+      - mongo-database
+    environment:
+      MONGO_URI: mongodb://mongo:mongo@mongo-database:27017/
+      PORT: ${BACKEND_PORT}
+    networks:
+      - network
+
+  web-frontend:
+    build:
+      context: ./web-frontend
+      dockerfile: Dockerfile
+    depends_on:
+      - web-backend
+    environment:
+      API_URL: "http://web-backend:${BACKEND_PORT}/"
+      PORT: ${FRONTEND_PORT}
+    ports:
+      - ${FRONTEND_PORT}:${FRONTEND_PORT}
+    networks:
+      - network
+  
+  python-simulation:
+    build:
+      context: ./python-simulation
+      dockerfile: Dockerfile
+    depends_on:
+      - web-backend
+    environment:
+      API_URL: "http://web-backend:${BACKEND_PORT}/"
+    networks:
+      - network
+
+networks:
+  network:
+    driver: bridge
