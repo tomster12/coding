@@ -16,7 +16,7 @@ void preload() {
 
 void setup() {
     // Setup canvas
-    size(1500, 1000);
+    size(1300, 850);
     imageMode(CENTER);
     rectMode(CORNER);
     noSmooth();
@@ -1308,7 +1308,8 @@ color lightenColor(color col) {
     float r = min(red(col) * 1.2, 255);
     float g = min(green(col) * 1.2, 255);
     float b = min(blue(col) * 1.2, 255);
-    return color(r, g, b);
+    float a = alpha(col);
+    return color(r, g, b, a);
 }
 
 // #endregion

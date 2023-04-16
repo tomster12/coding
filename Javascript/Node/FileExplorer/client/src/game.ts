@@ -1,6 +1,8 @@
 
 import blessed from "blessed";
 import Client, { Socket } from "socket.io-client";
+import { Location } from "@backend/gameTypes";
+
 
 class GameScreen {
 
@@ -297,10 +299,11 @@ class GameScreen {
   }
 }
 
+
 class Game {
 
   screen: GameScreen;
-  ioClient: Socket;
+  socket: Socket;
   
 
   constructor() {
@@ -315,14 +318,14 @@ class Game {
   }
 
   initConnection() {
-    this.ioClient = Client("http://localhost:3000");
+    this.socket = Client("http://localhost:3000");
     this.screen.log("Connecting...");
     
-    this.ioClient.on("connect", () => {
+    this.socket.on("connect", () => {
         this.onConnected();
     });
     
-    this.ioClient.on("disconnect", () => {
+    this.socket.on("disconnect", () => {
       this.onDisconnected();
     });
   }
@@ -334,7 +337,7 @@ class Game {
 
 
   onScreenDestroy() {
-    this.ioClient.disconnect();
+    this.socket.disconnect();
   }
 
   onConnected() {
@@ -342,6 +345,10 @@ class Game {
     this.screen.setStatusIcon(true);
     this.screen.log("Connected.\n");
     this.logWelcome();
+
+    this.socket.emit("getLocation", (data: Location) => {
+      this.screen.log("Received: " + data);
+    });
   }
 
   onDisconnected() {
@@ -355,5 +362,6 @@ class Game {
     }
   }
 }
+
 
 export default Game;
