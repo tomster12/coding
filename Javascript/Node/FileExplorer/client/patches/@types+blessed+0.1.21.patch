@@ -1,0 +1,36 @@
+diff --git a/node_modules/@types/blessed/index.d.ts b/node_modules/@types/blessed/index.d.ts
+index a2ac8c0..0814a56 100644
+--- a/node_modules/@types/blessed/index.d.ts
++++ b/node_modules/@types/blessed/index.d.ts
+@@ -526,7 +526,8 @@ export namespace Widgets {
+         type TAlign = "left" | "center" | "right";
+ 
+         interface ListbarCommand {
+-            key: string;
++            text?: string;
++            prefix?: string;
+             callback(): void;
+         }
+ 
+@@ -2281,8 +2282,10 @@ export namespace Widgets {
+     }
+ 
+     type ListElementStyle = {
++        prefix?: any;
+         selected?: any;
+         item?: any;
++        focus?: ListElementStyle;
+     } & Types.TStyle;
+ 
+     interface ListOptions<TStyle extends ListElementStyle> extends BoxOptions {
+@@ -2560,8 +2563,8 @@ export namespace Widgets {
+          * Set buttons using an object with keys as titles of buttons, containing of objects
+          * containing keys of keys and callback.
+          */
+-        commands: Types.ListbarCommand[];
+-        items: Types.ListbarCommand[];
++        commands?: Types.ListbarCommand[];
++        items?: Types.ListbarCommand[];
+ 
+         /**
+          * Automatically bind list buttons to keys 0-9.

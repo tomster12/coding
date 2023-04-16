@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "lib": [ "DOM" ],
+        "target": "ES2015",
+        "module": "ES2015",
+        "moduleResolution": "node",
+        "esModuleInterop": true,
+        "noImplicitReturns": true,
+        "noImplicitThis": true,
+        "noImplicitAny": true
+    },
+    "include": [ "src/**/*" ],
+    "exclude": [ "node_modules", "dist" ]
+}
