@@ -4,9 +4,11 @@
   "description": "",
   "type": "module",
   "dependencies": {
-    "socket.io": "^4.6.1"
+    "socket.io": "^4.6.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/uuid": "^9.0.1",
     "ts-loader": "^9.4.2",
     "webpack": "^5.79.0",
     "webpack-cli": "^5.0.1"

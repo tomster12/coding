@@ -13,6 +13,7 @@ _site/
 
 # Clean up project byproducts
 **/node_modules/
+**/dist/
 /Processing/**/build/
 /Multi/**/build/
 /C++/**/bin/
