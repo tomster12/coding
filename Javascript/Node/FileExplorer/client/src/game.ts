@@ -6,6 +6,7 @@ import {
   UserDetails,
   RegisterResponse
 } from "@backend/globalTypes";
+import { format } from "path";
 
 type LayoutOptions = {
 
@@ -300,6 +301,7 @@ class GameScreen {
       scrollable: true,
       alwaysScroll: true,
       keys: true,
+      tags: true,
       scrollbar: {
         style: {
           bg: "green",
@@ -387,14 +389,17 @@ class GameScreen {
     });
   }
 
-  log(line: string) {
-    this.el_pnlr.pushLine(" " + line);
+  log(line: string, bg?: string, fixedWidth?: number) {
+    let formattedLine = " " + line;
+    if (fixedWidth != undefined) formattedLine = formattedLine.padEnd(fixedWidth, " ");
+    if (bg != undefined) formattedLine = `{${bg}-bg}${formattedLine}{/}`;
+    this.el_pnlr.pushLine(formattedLine);
     this.el_pnlr.setScroll(this.el_pnlr.getLines().length - 1);
     this.rerender();
   }
 
-  logLine() {
-    this.el_pnlr.pushLine("───────────────────────────────────────────\n");
+  logLine(length:number = 45) {
+    this.el_pnlr.pushLine("─".repeat(length));
     this.el_pnlr.setScroll(this.el_pnlr.getLines().length - 1);
     this.rerender();
   }
@@ -417,6 +422,9 @@ class GameScreen {
 }
 
 class Game {
+
+  static CNCT_LOG_COLOR: string = "blue";
+  static CNCT_LOG_WIDTH: number = 95;
 
   screen: GameScreen;
   socket: Socket;
@@ -445,14 +453,17 @@ class Game {
 
   initConnection() {
     this.screen.log("--- Attempting connection and login ---");
-    this.screen.logLine();
+    this.screen.log(" ");
+    this.screen.logLine(Game.CNCT_LOG_WIDTH);
+    this.logConnectionInfo(" ");
     const url = "http://localhost:3000";
     this.socket = Client(url);
-    this.screen.log(`Connecting to ${url}...`);
+    this.logConnectionInfo(`Connecting to ${url}...`);
     
     this.socket.on("connect", () => {
         this.screen.el_statusConnect.setActive(true);
-        this.screen.log("Successfully connected!\n");
+        this.logConnectionInfo("Successfully connected!");
+        this.logConnectionInfo(" ");
         this.initSession();
     });
     
@@ -465,8 +476,9 @@ class Game {
         this.screen.log("Disconnected!\n");
 
         this.screen.log("--- Attempting connection and login ---");
-        this.screen.logLine();
-        this.screen.log(`Reconnecting to ${url}...`);
+        this.screen.logLine(Game.CNCT_LOG_WIDTH);
+        this.logConnectionInfo(" ");
+        this.logConnectionInfo(`Reconnecting to ${url}...`);
       } else {
         console.log("File Explorer exited.");
       }
@@ -476,43 +488,72 @@ class Game {
   initSession(toPrintOpening: boolean = false) {
     if (toPrintOpening) {
       this.screen.log("--- Attempting login ---");
-      this.screen.logLine();
+      this.screen.log(" ");
+      this.screen.logLine(Game.CNCT_LOG_WIDTH);
+      this.logConnectionGap();
     }
-    this.screen.log(`Searching for '.user' file...`);
+    this.logConnectionInfo(`Searching for .user file...`);
     fs.readFile(".user", "utf8", (err, data) => { 
       if (err) {
-        this.screen.log("No '.user' detected! prompting...\n");
+        this.logConnectionInfo("No .user detected! prompting...");
+        this.logConnectionGap();
         this.promptNewUser();
       }
       else {
         const userDetails: UserDetails = JSON.parse(data);
-        this.screen.log(`Found '.user' for '${userDetails.username} : ${userDetails.userID}'.`);
-        this.screen.log("Requesting login...\n");
+        this.logConnectionInfo(`Found .user for ( ${userDetails.username} : ${userDetails.userID} )`);
+        this.logConnectionInfo("Requesting login...");
+        this.logConnectionGap();
         this.sendLoginRequest(userDetails);
       }
     });
   }
-
+  
   promptNewUser() {
-    this.sendRegisterRequest("NewUsername");
+    let el_registerprompt = blessed.prompt({
+      parent: this.screen.el_screen,
+      width: "half", height: "shrink",
+      top: 5
+      , left: "center",
+      label: "{blue-fg}Register{/blue-fg}",
+      tags: true,
+      border: "line"
+    });
+
+    el_registerprompt.input("What is your name?", "", (err, value) => {
+      if (err || value == undefined || value == null || value == "") {
+        this.logConnectionInfo("No username inputted!");
+        this.logConnectionGap();
+        this.screen.logLine(Game.CNCT_LOG_WIDTH);
+      } else {
+        this.logConnectionInfo(`Registering user '${value}'...`);
+        this.logConnectionGap();
+        this.sendRegisterRequest(value);
+      }
+    });
   }
 
   sendRegisterRequest(username: string) {
     this.socket.emit("requestRegister", username, (response?: RegisterResponse) => {
       if (!response.accepted) {
-        this.screen.log(`Could not register username '${username}'.`);
-        this.screen.log(`Reason: ${response.reason}.\n`);
-        this.screen.logLine();
+        this.logConnectionInfo(`Could not register username '${username}'.`);
+        this.logConnectionInfo(`Reason: ${response.reason}.`);
+        this.logConnectionGap();
+        this.screen.logLine(Game.CNCT_LOG_WIDTH);
+        this.screen.log(" ");
       } else {
         this.loggedInUser = response.userDetails;
-        this.screen.log(`Successfully registered account for '${response.userDetails.username}'!`);
-        this.screen.log(`Overwriting '.user' with new user details.\n`);
+        this.logConnectionInfo(`Successfully registered account for '${response.userDetails.username}'!`);
+        this.logConnectionInfo(`Overwriting .user with new user details.`);
+        this.logConnectionGap();
         fs.writeFile(".user", JSON.stringify(response.userDetails), (err) => {
           if (err) {
-            this.screen.log("Failed to write '.user'! You may have issues on next login.");
+            this.logConnectionInfo("Failed to write .user! You may have issues on next login.");
+            this.logConnectionGap();
           }
         });
-        this.screen.logLine();
+        this.screen.logLine(Game.CNCT_LOG_WIDTH);
+        this.screen.log(" ");
         this.onLoggedIn();
       }
     });
@@ -521,13 +562,17 @@ class Game {
   sendLoginRequest(userDetails: UserDetails) {
     this.socket.emit("requestLogin", userDetails, (res: boolean) => {
       if (!res) {
-        this.screen.log(`Could not login with username '${userDetails.username}'.`);
-        this.screen.log(`invalid '.user', deleting...\n`);
-        fs.unlink(".user", (err) => { });
-        this.screen.logLine();
+        this.logConnectionInfo(`Could not login with username '${userDetails.username}'.`);
+        this.logConnectionInfo(`invalid .user, deleting...`);
+          this.logConnectionGap();
+          fs.unlink(".user", (err) => { });
+          this.screen.logLine(Game.CNCT_LOG_WIDTH);
+          this.screen.log(" ");
       } else {
-        this.screen.log(`Successful login, Welcome ${userDetails.username}!\n`);
-        this.screen.logLine();
+        this.screen.log(`Successful login, Welcome ${userDetails.username}!`, Game.CNCT_LOG_COLOR, Game.CNCT_LOG_WIDTH)
+        this.logConnectionGap();
+        this.screen.logLine(Game.CNCT_LOG_WIDTH);
+        this.screen.log(" ");
         this.loggedInUser = userDetails;
         this.onLoggedIn();
       }
@@ -540,6 +585,10 @@ class Game {
     this.screen.log("Welcome to File Explorer! Type 'help' into the prompt to get started.\n");
     this.screen.el_prompt.canInput = true;
   }
+
+  logConnectionInfo(message: string) { this.screen.log(message, Game.CNCT_LOG_COLOR, Game.CNCT_LOG_WIDTH); }
+
+  logConnectionGap() { this.screen.log(" ", Game.CNCT_LOG_COLOR, Game.CNCT_LOG_WIDTH); }
 
   runCommand(command: string) {
     command = command.trimEnd();
