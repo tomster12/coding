@@ -3,10 +3,11 @@ import fs from "fs";
 import blessed from "blessed";
 import Client, { Socket } from "socket.io-client";
 import {
-  UserDetails,
-  RegisterResponse
+  UserAuth,
+  RegisterResponse,
+  Realm,
+  Location
 } from "@backend/globalTypes";
-import { format } from "path";
 
 type LayoutOptions = {
 
@@ -23,11 +24,13 @@ interface IFocusable {
   focus(): void;
 }
 
-class GameDirectory implements IFocusable {
+class GameDirectoryViewerElement implements IFocusable {
 
   gameScreen: GameScreen;
   private el: blessed.Widgets.BoxElement;
   nextEl: blessed.Widgets.BlessedElement;
+  realm: Realm;
+  current: Location;
 
   constructor(
     gameScreen: GameScreen,
@@ -64,7 +67,7 @@ class GameDirectory implements IFocusable {
   }
 }
 
-class GamePrompt implements IFocusable  {
+class UserInputElement implements IFocusable  {
 
   gameScreen: GameScreen;
   private el: blessed.Widgets.TextareaElement;
@@ -209,8 +212,8 @@ class GameScreen {
   el_pnll: blessed.Widgets.BoxElement;
   el_pnlr: blessed.Widgets.BoxElement;
   el_pnlb: blessed.Widgets.BoxElement;
-  el_directory: GameDirectory;
-  el_prompt: GamePrompt;
+  el_directory: GameDirectoryViewerElement;
+  el_prompt: UserInputElement;
   el_statusConnect: GameStatus;
   el_statusLogin: GameStatus;
 
@@ -335,12 +338,12 @@ class GameScreen {
       }
     });
 
-    this.el_directory = new GameDirectory(this, this.el_screen, this.el_pnlr, {
+    this.el_directory = new GameDirectoryViewerElement(this, this.el_screen, this.el_pnlr, {
       left: 0, top: 3, bottom: 3,
       width: GameScreen.PNLL_WIDTH
     });
 
-    this.el_prompt = new GamePrompt(this, this.el_pnlb, this.el_menu, {
+    this.el_prompt = new UserInputElement(this, this.el_pnlb, this.el_menu, {
       left: 4, right: 2,
       width: "100%-7", height: 3
     });
@@ -416,19 +419,19 @@ class GameScreen {
     }
   }
 
-  setUser(username: string) {
-    this.el_user.setContent(`{center}${username}{/}`);
+  setUser(userID: string) {
+    this.el_user.setContent(`{center}${userID}{/}`);
   }
 }
 
 class Game {
 
   static CNCT_LOG_COLOR: string = "blue";
-  static CNCT_LOG_WIDTH: number = 95;
+  static CNCT_LOG_WIDTH: number = 75;
 
   screen: GameScreen;
   socket: Socket;
-  loggedInUser: UserDetails;
+  validAuth: UserAuth;
 
   constructor() {
     this.initScreen();
@@ -440,12 +443,12 @@ class Game {
     this.screen.onDestroy = () => this.socket.disconnect();
     this.screen.el_prompt.onSubmit = (command: string) => this.runCommand(command);
     this.screen.el_screen.key("r", (ch, key) => {
-      if (this.loggedInUser != null) return;
+      if (this.validAuth != null) return;
       this.screen.el_user.focus();
       this.initSession(true);
     });
     this.screen.el_user.key("enter", (ch, key) => {
-      if (this.loggedInUser != null) return;
+      if (this.validAuth != null) return;
       this.screen.el_user.focus();
       this.initSession(true);
     });
@@ -469,7 +472,7 @@ class Game {
     
     this.socket.on("disconnect", () => {
       if (this.screen.isConstructed) {
-        this.loggedInUser = null;
+        this.validAuth = null;
         this.screen.el_prompt.canInput = false;
         this.screen.el_statusConnect.setActive(false);
         this.screen.el_statusLogin.setActive(false);
@@ -500,11 +503,11 @@ class Game {
         this.promptNewUser();
       }
       else {
-        const userDetails: UserDetails = JSON.parse(data);
-        this.logConnectionInfo(`Found .user for ( ${userDetails.username} : ${userDetails.userID} )`);
+        const localAuth: UserAuth = JSON.parse(data);
+        this.logConnectionInfo(`Found .user for ( ${localAuth.userID} : ${localAuth.token} )`);
         this.logConnectionInfo("Requesting login...");
         this.logConnectionGap();
-        this.sendLoginRequest(userDetails);
+        this.sendLoginRequest(localAuth);
       }
     });
   }
@@ -513,16 +516,15 @@ class Game {
     let el_registerprompt = blessed.prompt({
       parent: this.screen.el_screen,
       width: "half", height: "shrink",
-      top: 5
-      , left: "center",
-      label: "{blue-fg}Register{/blue-fg}",
+      top: "center", left: "center",
+      label: " {blue-fg}Register{/blue-fg} ",
       tags: true,
       border: "line"
     });
 
-    el_registerprompt.input("What is your name?", "", (err, value) => {
+    el_registerprompt.input("Username:", "", (err, value) => {
       if (err || value == undefined || value == null || value == "") {
-        this.logConnectionInfo("No username inputted!");
+        this.logConnectionInfo("No userID inputted!");
         this.logConnectionGap();
         this.screen.logLine(Game.CNCT_LOG_WIDTH);
       } else {
@@ -533,20 +535,20 @@ class Game {
     });
   }
 
-  sendRegisterRequest(username: string) {
-    this.socket.emit("requestRegister", username, (response?: RegisterResponse) => {
+  sendRegisterRequest(userID: string) {
+    this.socket.emit("requestRegister", userID, (response?: RegisterResponse) => {
       if (!response.accepted) {
-        this.logConnectionInfo(`Could not register username '${username}'.`);
+        this.logConnectionInfo(`Could not register userID '${userID}'.`);
         this.logConnectionInfo(`Reason: ${response.reason}.`);
         this.logConnectionGap();
         this.screen.logLine(Game.CNCT_LOG_WIDTH);
         this.screen.log(" ");
       } else {
-        this.loggedInUser = response.userDetails;
-        this.logConnectionInfo(`Successfully registered account for '${response.userDetails.username}'!`);
+        this.validAuth = response.userAuth;
+        this.logConnectionInfo(`Successfully registered account for '${response.userAuth.userID}'!`);
         this.logConnectionInfo(`Overwriting .user with new user details.`);
         this.logConnectionGap();
-        fs.writeFile(".user", JSON.stringify(response.userDetails), (err) => {
+        fs.writeFile(".user", JSON.stringify(response.userAuth), (err) => {
           if (err) {
             this.logConnectionInfo("Failed to write .user! You may have issues on next login.");
             this.logConnectionGap();
@@ -559,21 +561,21 @@ class Game {
     });
   }
 
-  sendLoginRequest(userDetails: UserDetails) {
-    this.socket.emit("requestLogin", userDetails, (res: boolean) => {
+  sendLoginRequest(localAuth: UserAuth) {
+    this.socket.emit("requestLogin", localAuth, (res: boolean) => {
       if (!res) {
-        this.logConnectionInfo(`Could not login with username '${userDetails.username}'.`);
+        this.logConnectionInfo(`Could not login with userID '${localAuth.userID}'.`);
         this.logConnectionInfo(`invalid .user, deleting...`);
           this.logConnectionGap();
           fs.unlink(".user", (err) => { });
           this.screen.logLine(Game.CNCT_LOG_WIDTH);
           this.screen.log(" ");
       } else {
-        this.screen.log(`Successful login, Welcome ${userDetails.username}!`, Game.CNCT_LOG_COLOR, Game.CNCT_LOG_WIDTH)
+        this.screen.log(`Successful login, Welcome ${localAuth.userID}!`, Game.CNCT_LOG_COLOR, Game.CNCT_LOG_WIDTH)
         this.logConnectionGap();
         this.screen.logLine(Game.CNCT_LOG_WIDTH);
         this.screen.log(" ");
-        this.loggedInUser = userDetails;
+        this.validAuth = localAuth;
         this.onLoggedIn();
       }
     });
@@ -581,9 +583,13 @@ class Game {
 
   onLoggedIn() {
     this.screen.el_statusLogin.setActive(true);
-    this.screen.setUser(this.loggedInUser.username);
+    this.screen.setUser(this.validAuth.userID);
     this.screen.log("Welcome to File Explorer! Type 'help' into the prompt to get started.\n");
     this.screen.el_prompt.canInput = true;
+
+    this.socket.emit("getRealm", this.validAuth, (data: Realm) => {
+      this.screen.log(JSON.stringify(data));
+    });
   }
 
   logConnectionInfo(message: string) { this.screen.log(message, Game.CNCT_LOG_COLOR, Game.CNCT_LOG_WIDTH); }

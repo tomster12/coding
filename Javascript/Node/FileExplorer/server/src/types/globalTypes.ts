@@ -3,28 +3,35 @@
 
 export type UserID = string;
 
-export type UserDetails = {
-  username: string
+export type UserAuth = {
   userID: UserID
+  token: string
 }
 
-export type UserState = {
-} & UserDetails
+export type User = {
+  auth: UserAuth
+  player: Player
+}
 
 export type RegisterResponse = {
   accepted: boolean
-  userDetails?: UserDetails
+  userAuth?: UserAuth
   reason?: string
 }
 
 // --- Game
 
 export type Entity = {
-  name: string,
+  uuid: string
+  name: string
 }
 
+export type Player = {
+  items: Item[]
+} & Entity;
+
 export type Location = {
-  objects?: Entity[]
+  children: Entity[]
 } & Entity;
 
 export type Realm = {
