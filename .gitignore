@@ -20,6 +20,7 @@ _site/
 /C++/**/.vs/
 /C++/**/dependencies/
 /C++/SFML-2.5.1/
+/Multi/Simulation/mongodb/*
 
 # Not yet implemented
 /Unity/
