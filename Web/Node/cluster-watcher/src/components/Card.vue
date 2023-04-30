@@ -1,8 +1,10 @@
 <template>
     <div class="card">
-        <p class="title">{{ machineState.config.name }}</p>
-        <img class="settings btn" src="../assets/settings-light.png" @click="$emit('onSettings')" />
-        <img class="refresh btn" src="../assets/refresh-light.png" @click="$emit('onRefresh')" />
+        <div class="title-bar">
+            <img class="btn" src="../assets/exit-light.png" @click="$emit('onClose')" />
+            <p class="title">{{ machineState.config.name }}</p>
+            <img :class="{ btn: true, refreshing: machineState.isRefreshing }" src="../assets/refresh-light.png" @click="$emit('onRefresh')" />
+        </div>
         <hr />
         <div class="props">
             <div class="props-key">IP</div>     <div class="props-value">{{ machineState.config.ip }}</div>
@@ -16,21 +18,19 @@
 import { PropType, reactive, ref } from "vue";
 import { MachineState } from "../types/global";
 
-const props = defineProps({
+defineProps({
     machineState: {
         type: Object as PropType<MachineState>,
         required: true
     }
 });
 
-defineEmits([ "onSettings", "onRefresh" ]);
-
 let formatDate = (ms: number): string => ms < (60 * 1000)
     ? (Math.max(0, Math.ceil(ms / 1000)) + "s")
     : (Math.floor(ms / (60 * 1000)) + "m");
 
 let now = ref(Date.now());
-function updateNow() { now.value = Date.now(); }
+const updateNow = () => now.value = Date.now();
 setInterval(() => updateNow(), 1000);
 </script>
 
@@ -43,42 +43,53 @@ setInterval(() => updateNow(), 1000);
     color: white;
     font-size: 17px;
     font-family: "Poppins", sans-serif;
-
+    box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
     border: 1px solid rgb(255, 255, 255);
-    background-color: rgb(24, 24, 24); 
+    background-color: rgb(24, 24, 24);
+    user-select: none;
 
-    .title {
-        margin: 14px;
-        text-align: center;
-        font-size: 21px;
-        font-weight: bold;
-    }
+    .title-bar {
+        display: flex;
+        align-items: center;
+        justify-content: space-around;
 
-    .btn {
-        padding: 7px;
-        width: 20px;
-        cursor: pointer;
-        border-radius: 6px;
+        .title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 21px;
+            margin: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.15s background-color;
 
-        transition: 0.15s background-color;
+            &:hover {
+                background-color: rgb(81, 81, 81);
+                box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
+            }
+        }
 
-        &:hover {
+        .btn {
+            padding: 7px;
+            width: 20px;
+            height: 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: 0.15s background-color;
+        }
+
+        .btn:hover {
             background-color: rgb(81, 81, 81);
             box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
         }
-    }
 
-    .settings {
-        position: absolute;
-        left: 16px;
-        top: 18px;
-    }
-
-    .refresh {
-        position: absolute;
-        top: 16px;
-        right: 16px;
+        .refreshing {
+            background-color: rgb(198, 142, 38);
+        }
+        .refreshing:hover {
+            background-color: rgb(238, 180, 73);
+        }
     }
 
     .props {
@@ -87,6 +98,14 @@ setInterval(() => updateNow(), 1000);
         grid-template-columns: 1fr 1fr;
         padding: 7px 0px;
         row-gap: 7px;
+        cursor: pointer;
+        border-radius: 6px;
+        transition: 0.15s background-color;
+
+        &:hover {
+            background-color: rgb(81, 81, 81);
+            box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
+        }
 
         .props-key {
             font-weight: bold;

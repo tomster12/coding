@@ -48,7 +48,7 @@ function GetMachineState {
 
     Write-Host "Testing remote access"
     try {  
-        $result = Invoke-Command -ComputerName $queryData.ip { 1 } -ErrorAction Stop
+        Invoke-Command -ComputerName $queryData.ip { 1 } -ErrorAction Stop
         Write-Host "Online"
     }
     catch {

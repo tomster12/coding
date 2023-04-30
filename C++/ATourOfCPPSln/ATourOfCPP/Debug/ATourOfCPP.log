@@ -1,0 +1,4 @@
+﻿  main.cpp
+main.obj : error LNK2019: unresolved external symbol "public: __thiscall Vec<float>::Vec<float>(int)" (??0?$Vec@M@@QAE@H@Z) referenced in function _main
+main.obj : error LNK2019: unresolved external symbol "public: __thiscall Vec<float>::~Vec<float>(void)" (??1?$Vec@M@@QAE@XZ) referenced in function _main
+D:\Files\Coding\C++\ATourOfCPPSln\Debug\ATourOfCPP.exe : fatal error LNK1120: 2 unresolved externals

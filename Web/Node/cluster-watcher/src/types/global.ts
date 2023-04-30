@@ -7,5 +7,6 @@ export type MachineConfig = {
 export type MachineState = {
     config: MachineConfig,
     online: boolean,
-    lastUpdated: number
+    lastUpdated: number,
+    isRefreshing: boolean
 }
