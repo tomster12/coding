@@ -1,39 +1,37 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <Filter Include="Main">
+    <Filter Include="Driver">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Game">
+      <UniqueIdentifier>{14de400c-a24f-4208-9fb4-b5eb233e0138}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
-      <Filter>Main</Filter>
+      <Filter>Driver</Filter>
     </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Main</Filter>
+    <ClCompile Include="Window.cpp">
+      <Filter>Driver</Filter>
     </ClCompile>
     <ClCompile Include="stdafx.cpp">
-      <Filter>Main</Filter>
+      <Filter>Driver</Filter>
     </ClCompile>
-    <ClCompile Include="ParticleSystem.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="Entity.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="Particle.cpp">
-      <Filter>Main</Filter>
+    <ClCompile Include="Game.cpp">
+      <Filter>Game</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h">
-      <Filter>Main</Filter>
+    <ClInclude Include="Window.h">
+      <Filter>Driver</Filter>
     </ClInclude>
     <ClInclude Include="stdafx.h">
-      <Filter>Main</Filter>
+      <Filter>Driver</Filter>
     </ClInclude>
-    <ClInclude Include="Entity.h" />
-    <ClInclude Include="Particle.h" />
+    <ClInclude Include="Game.h">
+      <Filter>Game</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
