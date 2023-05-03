@@ -22,6 +22,9 @@
     <ClCompile Include="Game.cpp">
       <Filter>Game</Filter>
     </ClCompile>
+    <ClCompile Include="LiquidSystem.cpp">
+      <Filter>Game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Window.h">
@@ -33,5 +36,9 @@
     <ClInclude Include="Game.h">
       <Filter>Game</Filter>
     </ClInclude>
+    <ClInclude Include="LiquidSystem.h">
+      <Filter>Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h" />
   </ItemGroup>
 </Project>

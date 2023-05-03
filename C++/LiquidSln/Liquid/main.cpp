@@ -1,10 +1,12 @@
 
 #include "stdafx.h"
-#include "Game.h"
+#include "Window.h"
 
 
-int main() {
-	Game game;
-	game.run();
+int main()
+{
+	srand((unsigned)time(NULL));
+	Window window;
+	window.run();
 	return 0;
 }

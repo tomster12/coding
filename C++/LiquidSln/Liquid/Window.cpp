@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "Window.h"
-#include "Particle.h"
 
 
 Window::Window() :
@@ -50,7 +49,7 @@ void Window::update() {
         }
     }
 
-    this->game.update();
+    this->game.update(dt);
 }
 
 void Window::render() {
