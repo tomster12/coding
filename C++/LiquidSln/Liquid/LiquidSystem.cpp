@@ -2,72 +2,99 @@
 #include "stdafx.h"
 #include "LiquidSystem.h"
 #include "Utility.h"
+#include "Window.h"
 
 
 LiquidSystem::LiquidSystem() :
-	circle(LiquidSystem::DROP_RADIUS),
-	drops()
+	circle(LiquidSystem::KERNEL_SIZE * 0.25f),
+	particles()
 {
-	circle.setFillColor(sf::Color::Transparent);
-	circle.setOutlineThickness(1.0f);
+	circle.setFillColor(sf::Color::Blue);
+	circle.setOrigin(LiquidSystem::KERNEL_SIZE * 0.25f, LiquidSystem::KERNEL_SIZE * 0.25f);
 }
 
 
 void LiquidSystem::update(const float& dt)
 {
-	for (size_t i = 0; i < drops.size() - 1; i++)
+	// Calculate pressure
+	for (auto& pi : particles)
 	{
-		Drop& d0 = drops[i];
-		for (size_t j = i + 1; j < drops.size(); j++)
+		pi.density = 0.0f;
+		for (auto& pj : particles)
 		{
-			Drop& d1 = drops[j];
-			
-			float dx = d1.pos.x - d0.pos.x;
-			float dy = d1.pos.y - d0.pos.y;
-			float dst = sqrt(dx * dx + dy * dy);
-			float dirx = dx / dst;
-			float diry = dy / dst;
-			float dstNorm = fmax(0.1f, dst / (LiquidSystem::DROP_RADIUS * 2.0f));
-
-			if (dst < (LiquidSystem::DROP_RADIUS * 2.0f))
+			sf::Vector2f diff = pj.pos - pi.pos;
+			float dstSq = Utility::getLengthSq(diff);
+			if (dstSq < KERNEL_SIZE_SQ)
 			{
-				if (dst == 0.0f)
-				{
-					float angle = Utility::random(0.0f, 2.0f * Utility::PI);
-					dirx = cos(angle);
-					diry = sin(angle);
-				}
-
-				float force = dt * (LiquidSystem::DROP_REPEL_FORCE / dstNorm);
-				d0.vel.x -= dirx * force;
-				d0.vel.y -= diry * force;
-				d1.vel.x += dirx * force;
-				d1.vel.y += diry * force;
-			}
-
-			else if (dst < (LiquidSystem::DROP_RADIUS * 2.0f + LiquidSystem::DROP_ATTRACT_DIST))
-			{
-				float force = dt * (LiquidSystem::DROP_ATTRACT_FORCE / dstNorm);
-				d0.vel.x += dirx * force;
-				d0.vel.y += diry * force;
-				d1.vel.x -= dirx * force;
-				d1.vel.y -= diry * force;
+				// TODO: Check mass
+				pi.density += pi.liquid->mass * SK_POLY6 * std::pow(KERNEL_SIZE_SQ - dstSq, 3.0f);
 			}
 		}
-		
-		d0.pos.x += d0.vel.x * dt;
-		d0.pos.y += d0.vel.y * dt;
-		d0.vel.x *= LiquidSystem::DROP_DRAG;
-		d0.vel.y *= LiquidSystem::DROP_DRAG;
+		pi.pressure = pi.liquid->gasConst * (pi.density - pi.liquid->restDensity);
 	}
+
+	// Calculate forces
+	for (auto& pi : particles)
+	{		
+		for (auto& pj : particles)
+		{
+			if (&pi == &pj) continue;
+			
+			sf::Vector2f diff = pj.pos - pi.pos;
+			float dst = Utility::getLength(diff);
+			if (dst < KERNEL_SIZE)
+			{
+				// TODO: Check mass
+				pi.force += -(diff / dst) * pi.liquid->mass * (pi.pressure + pj.pressure) / (2.0f * pj.density) * SK_SPIKY_GRAD * std::pow(KERNEL_SIZE - dst, 3.0f);
+
+				// TODO: Check mass and viscosity
+				pi.force += pi.liquid->viscosity * pi.liquid->mass * (pj.vel - pi.vel) / pj.density * SK_VISC_LAP * (KERNEL_SIZE - dst);
+			}
+		}
+
+		// Apply gravity
+		pi.force += sf::Vector2f{ 0.0f, 0.1f } * pi.liquid->mass / pi.density;
+	}
+
+	for (auto& pi : particles)
+	{
+		// Euler time step
+		pi.vel *= GROUND_DAMP;
+		pi.vel += dt * pi.force / pi.density;
+		pi.pos += dt * pi.vel;
+		pi.force = sf::Vector2f{ 0.0f, 0.0f };
+
+		// Apply bounds
+		if (pi.pos.x < KERNEL_SIZE / 2.0f)
+		{
+			pi.vel.x *= COLLISION_DAMP;
+			pi.pos.x = KERNEL_SIZE / 2.0f;
+		}
+		if (pi.pos.x > (Window::WINDOW_WIDTH - KERNEL_SIZE / 2.0f))
+		{
+			pi.vel.x *= COLLISION_DAMP;
+			pi.pos.x = (Window::WINDOW_WIDTH - KERNEL_SIZE / 2.0f);
+		}
+		if (pi.pos.y < KERNEL_SIZE / 2.0f)
+		{
+			pi.vel.y *= COLLISION_DAMP;
+			pi.pos.y = KERNEL_SIZE / 2.0f;
+		}
+		if (pi.pos.y > (Window::WINDOW_HEIGHT - KERNEL_SIZE / 2.0f))
+		{
+			pi.vel.y *= COLLISION_DAMP;
+			pi.pos.y = (Window::WINDOW_HEIGHT - KERNEL_SIZE / 2.0f);
+		}
+	}
+
 }
 
 void LiquidSystem::render(sf::RenderWindow* window)
 {
-	for (auto& drop : drops)
+	for (auto& p : particles)
 	{
-		circle.setPosition(drop.pos);
-		circle.setOutlineColor(drop.liquid->color);
+		circle.setPosition(p.pos);
+		circle.setFillColor(p.liquid->color);
 		window->draw(circle);
 	}
 }
@@ -75,5 +102,19 @@ void LiquidSystem::render(sf::RenderWindow* window)
 
 void LiquidSystem::addLiquid(const Liquid* liquid, const sf::Vector2f& pos)
 {
-	drops.push_back({ liquid, pos });
+	particles.push_back(Particle(liquid, pos));
+}
+
+void LiquidSystem::addForce(sf::Vector2f pos, sf::Vector2f force, float range)
+{
+	for (auto& p : particles)
+	{
+		float dstSq = Utility::getLengthSq(p.pos - pos);
+		if (dstSq < (range * range)) p.force += force;
+	}
+}
+
+int LiquidSystem::getParticleCount()
+{
+	return particles.size();
 }

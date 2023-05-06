@@ -32,6 +32,16 @@ layout: default
 
   <hr /><h1>Notable Projects</h1><br />
 
+  <h2>C++</h2>
+  <div class="gifs">
+    <a href="{{ '/C++/LiquidSln' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/C++/Liquid.gif' | relative_url }}" /></a>
+    <a href="{{ '/C++/MachineLearningSln' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/C++/MachineLearning.gif' | relative_url }}" /></a>
+    <a href="{{ '/C++/ECSSln' | relative_url }}">
+      <img src="{{ '/Assets/Gifs/C++/ECS.gif' | relative_url }}" /></a>
+  </div><br />
+
   <h2>Javascript</h2>
   <div class="gifs">
     <a href="{{ '/Javascript/P5js/[..]Physics/1D Collision/index.html' | relative_url }}">

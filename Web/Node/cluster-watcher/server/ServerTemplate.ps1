@@ -50,6 +50,7 @@ function GetMachineState {
     try {  
         Invoke-Command -ComputerName $queryData.ip { 1 } -ErrorAction Stop
         Write-Host "Online"
+        $context.Response.OutputStream.Close()
     }
     catch {
         If ($PSItem.Exception.Message.Contains("Access is denied")) {
@@ -58,6 +59,7 @@ function GetMachineState {
         else {
             Write-Host "Offline (DNS)"
         }
+        $context.Response.OutputStream.Close()
     }
 }
 

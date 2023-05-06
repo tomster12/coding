@@ -4,15 +4,20 @@
 #include "LiquidSystem.h"
 
 
+class Window;
+
 class Game
 {
 public:
-	Game();
-	~Game();
+	Game() = delete;
+	Game(Window* window);
 	void update(const float& dt);
-	void render(sf::RenderWindow* window);
+	void render();
 
 private:
-	sf::CircleShape circle;
+	Window* window = nullptr;
+	int frameCount = 0;
+	sf::Vector2i prevMousePos;
+	sf::Vector2i mousePos;
 	LiquidSystem liquidSystem;
 };
