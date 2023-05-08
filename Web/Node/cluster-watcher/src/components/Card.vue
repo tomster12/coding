@@ -45,7 +45,6 @@ setInterval(() => updateNow(), 1000);
     font-family: "Poppins", sans-serif;
     box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
     border-radius: 10px;
-    border: 1px solid rgb(255, 255, 255);
     background-color: rgb(24, 24, 24);
     user-select: none;
 
@@ -65,7 +64,7 @@ setInterval(() => updateNow(), 1000);
             transition: 0.15s background-color;
 
             &:hover {
-                background-color: rgb(81, 81, 81);
+                background-color: rgb(144, 144, 144);
                 box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
             }
         }
@@ -80,7 +79,7 @@ setInterval(() => updateNow(), 1000);
         }
 
         .btn:hover {
-            background-color: rgb(81, 81, 81);
+            background-color: rgb(144, 144, 144);
             box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
         }
 
@@ -103,7 +102,7 @@ setInterval(() => updateNow(), 1000);
         transition: 0.15s background-color;
 
         &:hover {
-            background-color: rgb(81, 81, 81);
+            background-color: rgb(144, 144, 144);
             box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
         }
 
