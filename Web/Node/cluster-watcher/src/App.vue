@@ -6,18 +6,19 @@
         </div>
     </div>
 
-    <div class="machine-container">
+    <div class="machine-card">
         <Card
             v-for="(machineState, i) in machineStates"
             :machineState=machineState
-            @onClose="closeMachine(i)"
-            @onRefresh="refreshMachine(i)"
+            @close="closeMachine(i)"
+            @refresh="refreshMachine(i)"
+            @update="newMachineState=>updateMachine(i, newMachineState)"
         /> 
     </div>
 
     <div class="footer"></div>
     
-    <transition-group name="notification-transition" tag="div" class="notification-container">
+    <transition-group name="notification-transition" tag="div" class="notification-card">
         <div v-for="notification in notifications" :key="notification.id" class="notification" @click="closeNotification(notification)">
             <p>{{ notification.message }}</p>
         </div>
@@ -25,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive } from "vue";
+import { reactive, DirectiveArguments } from "vue";
 import { MachineState } from "./types/global";
 import Card from "./components/Card.vue";
 
@@ -51,9 +52,9 @@ function closeNotification(notification: Notification) {
 const machineStates: MachineState[] = reactive([
     { config: { name: "Local 1", ip: "127.0.0.1" }, online: false, lastUpdated: Date.now(), isRefreshing: false },
     { config: { name: "Local 2", ip: "127.0.0.23" }, online: true, lastUpdated: Date.now(), isRefreshing: false },
-    { config: { name: "Local 2", ip: "127.0.0.23" }, online: true, lastUpdated: Date.now(), isRefreshing: false },
-    { config: { name: "Local 2", ip: "127.0.0.23" }, online: true, lastUpdated: Date.now(), isRefreshing: false },
-    { config: { name: "Local 2", ip: "127.0.0.23" }, online: true, lastUpdated: Date.now(), isRefreshing: false }
+    { config: { name: "Local 3", ip: "127.0.0.19" }, online: true, lastUpdated: Date.now(), isRefreshing: false },
+    { config: { name: "Local 4", ip: "127.0.0.24" }, online: true, lastUpdated: Date.now(), isRefreshing: false },
+    { config: { name: "Local 5", ip: "127.0.0.28" }, online: true, lastUpdated: Date.now(), isRefreshing: false }
 ]);
 
 function closeMachine(i: number) {
@@ -86,6 +87,10 @@ async function refreshMachine(i: number) {
         machineStates[i].lastUpdated = Date.now();
         machineStates[i].isRefreshing = false;
     }
+}
+
+function updateMachine(i: number, newMachineState: MachineState) {
+    machineStates[i] = newMachineState;
 }
 </script>
 
@@ -150,7 +155,7 @@ body, html {
     }
 }
 
-.machine-container {
+.machine-card {
     padding: 40px;
     display: flex;
     flex-wrap: wrap;
@@ -172,7 +177,7 @@ body, html {
     }
 }
 
-.notification-container {
+.notification-card {
     position: absolute;
     right: 0px;
     bottom: 0px;
