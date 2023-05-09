@@ -6,13 +6,13 @@
         </div>
     </div>
 
-    <div class="machine-card">
+    <div class="machine-cards">
         <Card
             v-for="(machineState, i) in machineStates"
             :machineState=machineState
             @close="closeMachine(i)"
             @refresh="refreshMachine(i)"
-            @update="newMachineState=>updateMachine(i, newMachineState)"
+            @update="(newMachineState: MachineState)=>updateMachine(i, newMachineState)"
         /> 
     </div>
 
@@ -155,7 +155,7 @@ body, html {
     }
 }
 
-.machine-card {
+.machine-cards {
     padding: 40px;
     display: flex;
     flex-wrap: wrap;

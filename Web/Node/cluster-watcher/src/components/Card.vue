@@ -21,8 +21,10 @@
                 @click="editProp(key)"
                 v-click-off="() => closeProp(key)"
             >
-                <div class="props-key"> {{ key }} </div>
-                <div class="props-value"> {{ val }} </div>
+                <div class="container">
+                    <div class="props-key"> {{ key }} </div>
+                    <div class="props-value"> {{ val }} </div>
+                </div>
             </div>
         </div>
         
@@ -75,7 +77,7 @@ function closeProp(key?: string) {
 
 function editProp(propName: string) {
     selectedProp.value = propName;
-    if (propName == "ip") props.machineState.config.ip = "CHANGED";
+    if (propName == "ip") props.machineState.config.ip += ".5";
     else if (propName == "online") props.machineState.online = !props.machineState.online;
     emit("update", props.machineState);
 }
@@ -97,6 +99,7 @@ setInterval(() => updateNow(), 1000);
     padding: 6px;
     width: 200px;
     position: relative;
+    align-self: flex-start;
 
     color: white;
     font-size: 17px;
@@ -153,45 +156,51 @@ setInterval(() => updateNow(), 1000);
         width: 100%;
         
         .prop {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            padding: 7px 0px;
-            row-gap: 7px;
-    
-            cursor: pointer;
-            border-radius: 6px;
-            transition: 0.15s background-color;
+            transition: padding 0.4s;
 
-    
-            &:hover {
-                background-color: rgb(144, 144, 144);
-                box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
-            }
-    
-            .props-key {
-                font-weight: bold;
-                text-align: left;
-                padding-left: 15px;
-            }
-    
-            .props-value {
-                text-align: right;
-                padding-right: 15px;
-            }
-        }
+            .container {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                padding: 7px 0px;
+                row-gap: 7px;
+        
+                cursor: pointer;
+                border-radius: 6px;
+                transition: 0.4s background-color, 0.4s transform;
 
-        .prop.selected {
-            animation: popout 0.1s ease;
-            transform: scale(1.2);
-            background-color: rgb(176, 176, 176);
-        }
-        @keyframes popout {
-            from{transform:scale(1)}
-            to{transform:scale(1.2)}
-        }
-        @-webkit-keyframes popout {
-            from{transform:scale(1.2)}
-            to{-webkit-transform:scale(1)}
+                &:hover {
+                    background-color: rgb(144, 144, 144);
+                    box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
+                }
+        
+                .props-key {
+                    font-weight: bold;
+                    text-align: left;
+                    padding-left: 15px;
+                    overflow: hidden;
+                }
+        
+                .props-value {
+                    text-align: right;
+                    padding-right: 15px;
+                    overflow: hidden;
+                }
+            }
+
+            &.selected {
+                padding: 15px 0px;
+                
+                .container {
+                    transform: scale(1.2);
+                    background-color: rgb(176, 176, 176);
+                    box-shadow: 2px 2px 10px 0px rgba(0, 0, 0, 0.5);
+
+                    &:hover {
+                        background-color: rgb(198, 198, 198);
+                    }
+                }
+
+            }
         }
     }
 
@@ -201,6 +210,11 @@ setInterval(() => updateNow(), 1000);
         margin-right: 4px;
         font-size: 14px;
         text-align: center;
+    }
+
+    @keyframes popout {
+        from{transform:scale(1)}
+        to{transform:scale(1.05)}
     }
 }
 </style>
