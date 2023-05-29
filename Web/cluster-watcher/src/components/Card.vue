@@ -58,7 +58,6 @@ const vClickOff = {
     }
 }
 
-
 // === Machine Props ===
 
 const selectedProp = ref("");
@@ -81,7 +80,6 @@ function editProp(propName: string) {
     else if (propName == "online") props.machineState.online = !props.machineState.online;
     emit("update", props.machineState);
 }
-
 
 // === Date ===
 
