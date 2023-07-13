@@ -34,11 +34,11 @@ layout: default
 
   <h2>C++</h2>
   <div class="gifs">
-    <a href="{{ '/C++/LiquidSln' | relative_url }}">
+    <a href="{{ 'https://github.com/tomster12/Coding/tree/master/C++/LiquidSln' }}">
       <img src="{{ '/Assets/Gifs/C++/Liquid.gif' | relative_url }}" /></a>
-    <a href="{{ '/C++/MachineLearningSln' | relative_url }}">
+    <a href="{{ 'https://github.com/tomster12/Coding/tree/master/C++/MachineLearningSln' }}">
       <img src="{{ '/Assets/Gifs/C++/MachineLearning.gif' | relative_url }}" /></a>
-    <a href="{{ '/C++/ECSSln' | relative_url }}">
+    <a href="{{ 'https://github.com/tomster12/Coding/tree/master/C++/ECSSln' }}">
       <img src="{{ '/Assets/Gifs/C++/ECS.gif' | relative_url }}" /></a>
   </div><br />
 
