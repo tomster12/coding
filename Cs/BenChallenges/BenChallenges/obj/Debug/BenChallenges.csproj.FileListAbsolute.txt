@@ -1,0 +1,7 @@
+C:\Users\tombu\Files\Coding\Cs\BenChallenges\BenChallenges\bin\Debug\BenChallenges.exe.config
+C:\Users\tombu\Files\Coding\Cs\BenChallenges\BenChallenges\bin\Debug\BenChallenges.exe
+C:\Users\tombu\Files\Coding\Cs\BenChallenges\BenChallenges\bin\Debug\BenChallenges.pdb
+C:\Users\tombu\Files\Coding\Cs\BenChallenges\BenChallenges\obj\Debug\BenChallenges.csprojAssemblyReference.cache
+C:\Users\tombu\Files\Coding\Cs\BenChallenges\BenChallenges\obj\Debug\BenChallenges.csproj.CoreCompileInputs.cache
+C:\Users\tombu\Files\Coding\Cs\BenChallenges\BenChallenges\obj\Debug\BenChallenges.exe
+C:\Users\tombu\Files\Coding\Cs\BenChallenges\BenChallenges\obj\Debug\BenChallenges.pdb
