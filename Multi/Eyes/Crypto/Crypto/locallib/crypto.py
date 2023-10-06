@@ -3,9 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import collections
 import math
-import random
 
-# -------------------------------------------------- UTILITY
+# -------- General --------
 
 class UID:
   def __init__(self):
@@ -20,7 +19,7 @@ class UID:
         self.next += 1
       return self.map[val]
 
-def to_base(num,base):
+def to_base(num, base):
     base_num = ""
     while num > 0:
         dig = int(num%base)
@@ -36,20 +35,12 @@ def conv_msgs_to_im(msgs):
   ml = max([ len(m) for m in msgs ])
   return [ m + [np.NaN] * (ml - len(m)) for m in msgs ]
 
-def generate_random():
-  msgs_random = []
-  msgs_random_flat = []
-  for i in range(9):
-    msgs_random.append([ random.randint(0, 125) for _ in range(random.randint(95, 135)) ])
-    msgs_random_flat.append([ np.base_repr(v, base=5).rjust(3, "0") for v in msgs_random[i] ])
-  return msgs_random, msgs_random_flat
-
-def get_blank_im(msgs):
-  _, h = get_length_range(msgs)
+def generate_blank_im(msgs):
+  _, h = calc_length_range(msgs)
   im = np.full((len(msgs), h), np.nan)
   return im
 
-# -------------------------------------------------- CRYPTO CALC
+# -------- Calculation --------
 
 def calc_IoC(msg, alphabetCount):
   # Calculate IoC of the message
@@ -73,38 +64,11 @@ def calc_kappa_test(msg1, msg2, offset):
     m1 = m1[:len(m2)]
     return sum(a == b for a,b in zip(m1, m2)), len(m1)
 
-
-def check_isomorphic(msg1, msg2):
-  # Extract indices from strings
-  dict1 = {}
-  dict2 = {}
-  for i, value in enumerate(msg1): dict1[value] = dict1.get(value, []) + [i]
-  for i, value in enumerate(msg2): dict2[value] = dict2.get(value, []) + [i]
-  repeats = any([ len(dict1[value]) > 1 for value in dict1 ])
-  isIsomorphic = repeats and sorted(dict1.values()) == sorted(dict2.values())
-
-  # Extract pattern from indices
-  uid = UID()
-  isoPattern = None
-  if isIsomorphic:
-    isoPattern = [ uid.get_uid(str(dict1[l])) + 1 if len(dict1[l]) > 1 else np.nan for l in msg1 ]
-
-  return isIsomorphic, isoPattern, uid.next
-
-def check_prime(num):
-  if(num <= 1):
-    return False
-  for i in range(2, int(math.sqrt(num)) + 1):
-      if (num % i == 0):
-        return False
-  return True
-
-
-def get_length_range(msgs):
+def calc_length_range(msgs):
   lengths = [ len(msg) for msg in msgs ]
   return min(lengths), max(lengths)
 
-def get_isomorphs(msg1, msg2, usePosition=False):
+def calc_isomorphs(msg1, msg2, usePosition=False):
   txt_len = min(len(msg1), len(msg2))
   isomorphs = []
 
@@ -117,7 +81,7 @@ def get_isomorphs(msg1, msg2, usePosition=False):
           c1 = msg1[start1:start1+length]
           c2 = msg2[start2:start2+length]
           if c1 == c2: break
-          isIsomorphic, pattern, count = check_isomorphic(c1, c2)
+          isIsomorphic, pattern, count = calc_if_isomorphic(c1, c2)
           if isIsomorphic:
             isomorphs.append(( start1, start1+length, pattern, count, start2, start2+length ))
             break
@@ -128,7 +92,7 @@ def get_isomorphs(msg1, msg2, usePosition=False):
       for end in range(txt_len, start, -1):
         c1, c2 = msg1[start:end], msg2[start:end]
         if c1 == c2: break
-        isIsomorphic, pattern, count = check_isomorphic(c1, c2)
+        isIsomorphic, pattern, count = calc_if_isomorphic(c1, c2)
         if isIsomorphic:
           isomorphs.append(( start, end, pattern, count ))
           break
@@ -151,7 +115,7 @@ def get_isomorphs(msg1, msg2, usePosition=False):
   
   return isomorphs
 
-def get_chains(t1, t2):
+def calc_chains(t1, t2):
   if len(t1) != len(t2):
     raise "Texts must be same length."
   tlen = len(t1)
@@ -181,16 +145,16 @@ def get_chains(t1, t2):
     chains.append("".join(current))
   return chains
 
-def get_shared(msgs):
-  im = get_blank_im(msgs)
+def calc_shared(msgs):
+  im = generate_blank_im(msgs)
   for y in range(len(msgs)):
     for x in range(len(msgs[y])):
       matching = sum([ (other[x] == msgs[y][x]) if len(other) > x else 0 for other in msgs ])
       im[y, x] = msgs[y][x] if matching > 1 else np.nan
   return im
 
-def get_shared_unique(msgs):
-  im = get_blank_im(msgs)
+def calc_shared_unique(msgs):
+  im = generate_blank_im(msgs)
 
   for x in range(im.shape[1]):
     matches = [ ]
@@ -206,8 +170,8 @@ def get_shared_unique(msgs):
   
   return im
 
-def get_gaps(msgs, limit=-1, include_end=False, replace=True):
-  im = get_blank_im(msgs)
+def calc_gaps(msgs, limit=-1, include_end=False, replace=True):
+  im = generate_blank_im(msgs)
   for y in range(len(msgs)):
     msg_len = len(msgs[y])
     for i in range(msg_len):
@@ -220,8 +184,8 @@ def get_gaps(msgs, limit=-1, include_end=False, replace=True):
           break
   return im
 
-def get_repeats(msgs):
-  im = get_blank_im(msgs)
+def calc_repeats(msgs):
+  im = generate_blank_im(msgs)
   for y in range(len(msgs)):
     repeats = 0
     found = set()
@@ -232,16 +196,40 @@ def get_repeats(msgs):
       im[y][x] = repeats
   return im
 
-# -------------------------------------------------- CRYPTO VISUAL
+def calc_if_isomorphic(msg1, msg2):
+  # Extract indices from strings
+  dict1 = {}
+  dict2 = {}
+  for i, value in enumerate(msg1): dict1[value] = dict1.get(value, []) + [i]
+  for i, value in enumerate(msg2): dict2[value] = dict2.get(value, []) + [i]
+  repeats = any([ len(dict1[value]) > 1 for value in dict1 ])
+  isIsomorphic = repeats and sorted(dict1.values()) == sorted(dict2.values())
 
-def plot_msgs(msgs, to_label=False, ascii=False):
-  im = conv_msgs_to_im(msgs)
-  plot_im(im, True, False)
+  # Extract pattern from indices
+  uid = UID()
+  isoPattern = None
+  if isIsomorphic:
+    isoPattern = [ uid.get_uid(str(dict1[l])) + 1 if len(dict1[l]) > 1 else np.nan for l in msg1 ]
 
-def plot_im(im, to_label=False, ascii=False):
+  return isIsomorphic, isoPattern, uid.next
+
+def calc_if_prime(num):
+  if(num <= 1):
+    return False
+  for i in range(2, int(math.sqrt(num)) + 1):
+      if (num % i == 0):
+        return False
+  return True
+
+# -------- Visual --------
+
+def plot_im(im, to_label=False, ascii=False, title=None):
   plt.figure(figsize = (40,5))
   plt.imshow(im, interpolation="nearest")
   plt.axis('off')
+
+  if title is not None:
+    plt.title(title)
 
   if to_label:
     for y in range(len(im)):
@@ -252,8 +240,11 @@ def plot_im(im, to_label=False, ascii=False):
   
   # plt.show()
 
+def plot_msgs(msgs, to_label=False, ascii=False, title=None):
+  im = conv_msgs_to_im(msgs)
+  plot_im(im, True, False, title)
 
-def calc_plot_freq_overall(msgs):
+def plot_msgs_freq_overall(msgs):
   # ---------------------------
   # PULLED FROM ANALYSIS COLAB
   # ---------------------------
@@ -272,17 +263,19 @@ def calc_plot_freq_overall(msgs):
   print(f"Median frequency: {np.median(list(counts.values()))}")
   print(f"Mean frequency: {np.mean(list(counts.values()))}")
   print("")
-
+  
   x = range(max(counts) * 2)
   y = [counts[a] for a in x]
   ax1, ax2 = plt.figure(0, (18, 4)).subplots(1, 2)
+  ax1.set_title("Letter Frequencies (Overall)")
+  ax2.set_title("Letter Frequencies Sorted (Overall)")
   ax1.bar(x, y)
   ax1.set(xlabel="Cipher Letter", ylabel="Count")
   ax2.bar(x, sorted(y, reverse=True))
-  ax2.set(xlabel="Cipher Letter", ylabel="Count")
+  ax2.set(ylabel="Count")
   plt.show()
 
-def calc_plot_freq_individual(msgs):
+def plot_msgs_freq_individual(msgs):
   # ---------------------------
   # PULLED FROM ANALYSIS COLAB
   # ---------------------------
@@ -298,11 +291,12 @@ def calc_plot_freq_individual(msgs):
   print("Letter Frequencies (Per message)")
   print("--------------------------------")
   ax = plt.figure(0, (16, 4)).subplots()
+  plt.title("Letter Frequencies (Individual)")
   ax.set(xlabel="Cipher Letter", ylabel="Message")
   ax.imshow(im)
   plt.show()
 
-def calc_plot_kappa_auto(msgs):
+def plot_msgs_kappa_auto(msgs):
   # ---------------------------
   # PULLED FROM ANALYSIS COLAB
   # ---------------------------
@@ -328,11 +322,12 @@ def calc_plot_kappa_auto(msgs):
   ax.bar(x, results_y, 0.8, label="Coincidences per 1000")
   ax.plot(bounds, (66, 66), 'g', label="Expected (English)")
   ax.plot(bounds, (12, 12), 'r', label="Expected (Random)")
+  plt.title("Kappa Auto-Correlation Test")
   ax.set(xlabel="Offset", ylabel="Count")
   ax.legend()
   plt.show()
 
-def calc_plot_kappa_periodic(msgs):
+def plot_msgs_kappa_periodic(msgs):
   # ---------------------------
   # PULLED FROM ANALYSIS COLAB
   # ---------------------------
@@ -356,9 +351,48 @@ def calc_plot_kappa_periodic(msgs):
   print("Kappa Periodic Test")
   print("-------------------")
   ax = plt.figure(0, (12, 4)).subplots()
+  plt.title("Kappa Periodic Test")
   ax.bar(x, results_y, 0.8, label="Coincidences per 1000")
   ax.plot(bounds, (66, 66), 'g', label="Expected (English)")
   ax.plot(bounds, (12, 12), 'r', label="Expected (Random)")
   ax.set(xlabel="Period Length", ylabel="Count")
   ax.legend()
   plt.show()
+
+def print_msgs_ascii(messages, offset=32):
+  print("Ascii of message (1 - " + str(len(messages)) + ")")
+  print("-------------------------")
+  print("Note: This will break for messages with values > 95\n")
+  for msg in messages:
+    print("".join([ chr(v + offset) for v in msg ]))
+
+def print_msgs_IoC(messages, alphabetCount=None):
+  alphabetCT = set()
+  if alphabetCount == None:
+    for msg in messages:
+        alphabetCT = alphabetCT.union(set(msg))
+  alphabetCount = len(alphabetCT)
+
+  print("IoC Oveview")
+  print("-----------")
+  print("Letters (" + str(alphabetCount) + "): " + str(alphabetCT))
+
+  full = []
+  print("\nIOC of each:")
+  for i, msg in enumerate(messages):
+    print(str(i + 1) + ": " + str(calc_IoC(msg, alphabetCount)))
+    full += msg
+  print("all: " + str(calc_IoC(full, alphabetCount)))
+
+def full_overview(msgs):
+  print("Overview")
+  print("---------")
+  print(f"Messages: {len(msgs)}")
+  print(f"Message lengths: {[len(msg) for msg in msgs]}\n")
+  print_msgs_ascii(msgs)
+  print("")
+  plot_msgs(msgs, title="Messages")
+  print_msgs_IoC(msgs)
+  print("")
+  plot_msgs_freq_overall(msgs)
+  plot_msgs_freq_individual(msgs)

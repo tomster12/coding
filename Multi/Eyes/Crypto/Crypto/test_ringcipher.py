@@ -1,11 +1,9 @@
 
 import random
-import string
-from util import *
+import matplotlib.pyplot as plt
+import locallib.crypto
 
 random.seed(0)
-
-# --------------------------------------------------------------------------
 
 pt_msgs_raw = [
     "aThe FitnessGram Pacer TestTestTest is a multistage aerobic capacity test that is a multistage aerobic gets more difficult as it continues",
@@ -25,19 +23,6 @@ pt_alphabet = set()
 for msg in pt_msgs:
     pt_alphabet.update(list(msg))
 pt_alphabet = list(pt_alphabet)
-
-# --------------------------------------------------------------------------
-
-# Construct CT alphabet
-# current_bucket_end = 0
-# buckets = {}
-# for l in pt_alphabet:
-#     size = random.randrange(2,4)
-#     bucket = [current_bucket_end, current_bucket_end + size, -1]
-#     buckets[l] = bucket
-#     current_bucket_end += size
-# ct_alphabet = list(range(current_bucket_end))
-# random.shuffle(ct_alphabet)
 
 def encode(pt_alphabet, pt_msg, key):
     outer_ring = list(range(len(pt_alphabet)))
@@ -59,17 +44,16 @@ def encode(pt_alphabet, pt_msg, key):
 
     return ct_msg
 
-# --------------------------------------------------------------------------
-
 # Encode all messages and output summaries
 # print(pt_alphabet)
 key = "thisisakeyusedfortiscipher"
 ct_msgs = [ encode(pt_alphabet, pt_msg, key) for pt_msg in pt_msgs ]
 
-gaps = get_gaps(ct_msgs, 16, False, True)
-plot_im(conv_msgs_to_im(ct_msgs), True)
-plot_im(gaps, True)
+# Plot CT messages and gaps
+locallib.crypto.plot_msgs(ct_msgs, True, title="CT Messages")
+gaps = locallib.crypto.calc_gaps(ct_msgs, 16, False, True)
+locallib.crypto.plot_im(gaps, True, title="CT Repeats, Gap Size < 16")
 plt.show()
 
 print(f"{len(pt_alphabet)}: {pt_alphabet}")
-print_overview(ct_msgs)
+locallib.crypto.full_overview(ct_msgs)

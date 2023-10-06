@@ -1,4 +1,6 @@
 
+# -------- Preset Layouts --------
+
 # Lymm CW Top Alt
 # - - - 0 0 0 0 0 0 0 -
 # - - 0 0 0 0 0 0 0 0 -
@@ -35,13 +37,16 @@
 # 1 0 1 0 1 1 1 0 1 1 1 
 # 0 1 1 1 0 1 1 1 1 - -
 
-# --------------------------------------------
+# -------- Main --------
 
+
+# Setup global variables
 portal_cols = 11
 portals = [ [3, 7], [2, 8], [1, 10], [2, 7], [1, 9], [0, 11], [0, 9] ]
 standard_order = [ 0, 1, 2, 3, 4, 5, 6 ]
 lymm_order = [ 0, 1, 4, 5, 6, 2, 3 ]
 
+# Apply ring layout to in world portal layout
 def get_pattern(rings, order=standard_order, to_print=False):
     ring_list = "".join(rings)
     index = 0
@@ -59,6 +64,7 @@ def get_pattern(rings, order=standard_order, to_print=False):
             print(" ".join(output))
     return outputs
 
+# Calculate all possible ring layouts
 all_rings = []
 for i in range(2):
     for o in range(4):
@@ -84,6 +90,7 @@ for ring in all_rings:
     print(ring)
     get_pattern(ring, lymm_order, True)
 
+# Check if any of the patterns are equal
 # def match(x, y):
 #     return get_pattern(all_rings[x], standard_order) == get_pattern(all_rings[y], standard_order)
 # grid = [ [ match(x, y) for y in range(8) ] for x in range(8) ]

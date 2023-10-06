@@ -1,8 +1,6 @@
 
 import string
-from crypto import *
-
-# --------------------------------------------------------------------------
+import locallib.crypto
 
 def encode_caeser(pt, pt_alphabet, shift=3):
     ct = ""
@@ -37,8 +35,6 @@ def text_diff(alphabet, t0, t1):
         diff += "." if (iDiff == 0) else alphabet[iDiff - 1]
     return "".join(diff)
 
-# --------------------------------------------------------------------------
-
 def s0():
     print("\nPlaintext <-> Ciphertext Isomorph (Caeser Cipher)")
     print("----------------------------------------------------------------------------------\n")
@@ -54,12 +50,10 @@ def s0():
         print("= " + text_diff(pt_alphabet, pt, ct[1]))
         print()
     
-    print(check_isomorphic(pt, cts[0][1]))
+    print(locallib.crypto.calc_if_isomorphic(pt, cts[0][1]))
 
     print("\n----------------------------------------------------------------------------------\n")
 s0()
-
-# --------------------------------------------------------------------------
 
 def s1():
     print("\nCiphertext <-> Ciphertext Isomorph (Caeser Progressive Cipher)")
@@ -73,11 +67,9 @@ def s1():
     print(ct)
     print()
 
-    isos = get_isomorphs(ct, ct)
+    isos = locallib.crypto.calc_isomorphs(ct, ct)
     for iso in isos:
         print(iso)
 
     print("\n----------------------------------------------------------------------------------\n")
 s1()
-
-# --------------------------------------------------------------------------

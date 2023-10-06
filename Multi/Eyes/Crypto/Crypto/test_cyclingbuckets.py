@@ -1,30 +1,9 @@
 
-import string
 import random
 import matplotlib.pyplot as plt
-from util import *
+import locallib.crypto
 
 random.seed(0)
-
-def generate_alphabet(pt_alphabet):
-    ct_map = {}
-    ct_alphabet = []
-    current_ct = 0
-    while not all([ l in ct_map for l in pt_alphabet]):
-        letter = random.choice(pt_alphabet)
-        ct_map[letter] = (ct_map.get(letter) or []) + [current_ct]
-        ct_alphabet += letter
-        current_ct += 1
-    return ct_map, ct_alphabet
-
-# sizes = []
-# for i in range(100):
-#     ct_map, ct_alphabet = generate_alphabet(pt_alphabet)
-#     sizes += [len(ct_alphabet)]
-# plt.plot(sizes)
-# plt.show()
-
-# --------------------------------------------------------------------------
 
 pt_msgs_raw = [
     "aThe FitnessGram Pacer TestTestTest is a multistage aerobic capacity test that is a multistage aerobic gets more difficult as it continues",
@@ -38,40 +17,56 @@ pt_msgs_raw = [
     "jTh is F it ness is the secsonds time you fail a lap before the sound aerobic Remember to run in a straight line now The test will begin on the word start mark your test is over"
 ]
 
+# Parse PT alphabet
 pt_msgs = [ msg.lower() for msg in pt_msgs_raw ]
 pt_alphabet = set()
 for msg in pt_msgs:
     pt_alphabet.update(list(msg))
 pt_alphabet = list(pt_alphabet)
-ct_map, ct_alphabet = generate_alphabet(pt_alphabet)
 
-print("")
+# Construct CT buckets and alphabet
+current_bucket_end = 0
+buckets = {}
 for l in pt_alphabet:
-    print(f"{l}: {ct_map[l]}")
-print(f"PT {len(ct_alphabet)}: {''.join(ct_alphabet)}\n")
+    size = random.randrange(2,4)
+    bucket = [current_bucket_end, current_bucket_end + size, -1]
+    buckets[l] = bucket
+    current_bucket_end += size
+ct_alphabet = list(range(current_bucket_end))
+random.shuffle(ct_alphabet)
 
-# --------------------------------------------------------------------------
-
-ct_msgs = []
-for pt_msg in pt_msgs:
-    ct_current = {}
-    for l in pt_alphabet:
-        ct_current[l] = 0
-
+# Encode PT to CT
+#  For each PT letter:
+#  - Take current bucket letter
+#  - Cycle bucket
+#  - Cycle alphabet
+def encode(pt, buckets, ct_alphabet):
+    current_ct_alphabet = ct_alphabet.copy()
+    for l in buckets:
+        buckets[l][2] = buckets[l][0]
     ct_msg = []
-    print(pt_msg)
-    for l in pt_msg:
-        ct_msg += [ct_map[l][ct_current[l]]]
-        if l == " ":
-            for l2 in pt_alphabet:
-                ct_current[l2] = (ct_current[l2] + 1) % len(ct_map[l2])
-    ct_msgs += [ct_msg]
 
-# --------------------------------------------------------------------------
+    for l in pt:
+        # Add ciphertext
+        ct_msg.append(current_ct_alphabet[buckets[l][2]])
 
-gaps = get_gaps(ct_msgs, 6, True, False)
-plot_im(conv_msgs_to_im(ct_msgs), True)
-plot_im(gaps, True)
+        # Cycle bucket
+        buckets[l][2] -= 1
+        if buckets[l][2] < buckets[l][0]:
+            buckets[l][2] = buckets[l][1] - 1
+
+        # Cycle alphabet
+        current_ct_alphabet = current_ct_alphabet[1:] + [current_ct_alphabet[0]]
+    
+    return ct_msg
+
+# Encode all messages and output summaries
+ct_msgs = [ encode(pt, buckets, ct_alphabet) for pt in pt_msgs ]
+
+# Plot CT messages and gaps
+locallib.crypto.plot_msgs(ct_msgs, True, title="CT Messages")
+gaps = locallib.crypto.calc_gaps(ct_msgs, 16, False, True)
+locallib.crypto.plot_im(gaps, True, title="CT Repeats, Gap Size < 16")
 plt.show()
 
-print_overview(ct_msgs)
+locallib.crypto.full_overview(ct_msgs)
