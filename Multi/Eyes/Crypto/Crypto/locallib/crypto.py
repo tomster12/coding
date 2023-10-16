@@ -1,8 +1,12 @@
 
+from queue import Queue
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import collections
 import math
+import itertools
+import time
 
 # -------- General --------
 
@@ -35,9 +39,9 @@ def conv_msgs_to_im(msgs):
   ml = max([ len(m) for m in msgs ])
   return [ m + [np.NaN] * (ml - len(m)) for m in msgs ]
 
-def generate_blank_im(msgs):
+def generate_blank_im(msgs, blank=np.nan):
   _, h = calc_length_range(msgs)
-  im = np.full((len(msgs), h), np.nan)
+  im = np.full((len(msgs), h), blank)
   return im
 
 # -------- Calculation --------
@@ -68,51 +72,72 @@ def calc_length_range(msgs):
   lengths = [ len(msg) for msg in msgs ]
   return min(lengths), max(lengths)
 
-def calc_isomorphs(msg1, msg2, usePosition=False):
-  txt_len = min(len(msg1), len(msg2))
+def calc_if_isomorphic(msgs):
+  # Funky sorted index list method
+  dicts = [ {} for msg in msgs ]
+  i_range = range(len(msgs))
+  for i in i_range:
+    for o, value in enumerate(msgs[i]): dicts[i][value] = dicts[i].get(value, []) + [o]
+  repeats = any([ len(dicts[0][value]) > 1 for value in dicts[0] ])
+  sorted_vals = [ sorted(d.values()) for d in dicts ]
+  is_isomorphic = repeats and (sorted_vals.count(sorted_vals[0])==len(sorted_vals))
+
+  # Extract pattern from indices
+  uid = UID()
+  iso_pattern = None
+  if is_isomorphic:
+    iso_pattern = [ uid.get_uid(str(dicts[0][l])) + 1 if len(dicts[0][l]) > 1 else np.nan for l in msgs[0] ]
+  return is_isomorphic, iso_pattern, uid.next
+
+def calc_isomorphs(msgs, to_print=False, allow_equal=True):
+  if len(msgs) < 2: return
+  time_start = time.time()
   isomorphs = []
+  i_range = range(len(msgs))
+  lengths = [ len(m) for m in msgs ]
+  ranges = [ range(l) for l in lengths ]
+  max_length = [ [ (lengths[i] - o) for o in ranges[i] ] for i in i_range ]
 
-  # Find isomporphs (without position)
-  if not usePosition:
-    for start1 in range(txt_len):
-      for start2 in range(txt_len):
-        if start1 == start2: continue
-        for length in range(txt_len - start1, 0, -1):
-          c1 = msg1[start1:start1+length]
-          c2 = msg2[start2:start2+length]
-          if c1 == c2: break
-          isIsomorphic, pattern, count = calc_if_isomorphic(c1, c2)
-          if isIsomorphic:
-            isomorphs.append(( start1, start1+length, pattern, count, start2, start2+length ))
-            break
+  # Work backwards for all possible lengths
+  max_iso_length = min(lengths) - 1
+  for length in range(max_iso_length, 0, -1):
+    if to_print: print(f"Checking length {length}")
 
-  # Find isomporphs (with position)
-  else:
-    for start in range(txt_len):
-      for end in range(txt_len, start, -1):
-        c1, c2 = msg1[start:end], msg2[start:end]
-        if c1 == c2: break
-        isIsomorphic, pattern, count = calc_if_isomorphic(c1, c2)
-        if isIsomorphic:
-          isomorphs.append(( start, end, pattern, count ))
-          break
+    # Find starts for all but add (msgs0,msgs1) first
+    all_starts = [ range(lengths[i] - length) for i in i_range ]
+    to_check = Queue()
+    for pair in itertools.product(all_starts[0], all_starts[1]):
+      to_check.put([ pair[0], pair[1] ])
 
-  # Find largest encompassing isomorphs
-  isomorphs.sort(key=lambda iso: iso[0] - iso[1])
-  i1, i2 = 0, 0
-  while i1 < len(isomorphs):
-    i1r0 = ( isomorphs[i1][0], isomorphs[i1][1] )
-    i1r1 = ( isomorphs[i1][4], isomorphs[i1][5] )
-    i2 = i1 + 1
-    while i2 < len(isomorphs):
-      i2r = ( isomorphs[i2][0], isomorphs[i2][1] )
-      i2surroundsi1 = (i2r[0] <= i1r0[1]) and (i2r[1] >= i1r0[0]) and (i2r[1] - i2r[0]) < (i1r0[1] - i1r0[0])
-      if i2surroundsi1:
-        isomorphs.remove(isomorphs[i2])
-        i2 -= 1
-      i2 += 1
-    i1 += 1
-  
+    # Grab current pair
+    while not to_check.empty():
+      current = to_check.get()
+
+      # Make sure this option doesnt overlap any existing
+      if any([ length > max_length[i][current[i]] for i in range(len(current)) ]): continue
+
+      # Check if texts covered are isomorphic (and unequal if needed)
+      texts = [ msgs[i][current[i]:current[i]+length] for i in range(len(current)) ]
+      if not allow_equal and texts.count(texts[0]) == len(texts): continue
+      isIsomorphic, pattern, count = calc_if_isomorphic(texts)
+      if isIsomorphic:
+
+        # Pair covers all messages so isomorph and update max lengths
+        if len(current) == len(msgs):
+          matching_ranges = [ [ s, s+length ] for s in current ]
+          isomorphs.append((pattern, count, matching_ranges))
+          if to_print: print(f"Isomorph: {isomorphs[-1]}")
+          for i in i_range:
+            for o in range(current[i]-length+1, current[i]+length):
+              max_length[i][o] = max(current[i] - o, 0)
+
+        # Pair only covers some so populate queue
+        else:
+          for s in all_starts[len(current)]:
+            to_check.put([ *current, s ])
+
+  time_end = time.time()
+  if to_print: print(f"Time taken: {time_end - time_start}")
   return isomorphs
 
 def calc_chains(t1, t2):
@@ -145,12 +170,12 @@ def calc_chains(t1, t2):
     chains.append("".join(current))
   return chains
 
-def calc_shared(msgs):
+def calc_shared(msgs, to_zero=False, zero_value=-1):
   im = generate_blank_im(msgs)
   for y in range(len(msgs)):
     for x in range(len(msgs[y])):
       matching = sum([ (other[x] == msgs[y][x]) if len(other) > x else 0 for other in msgs ])
-      im[y, x] = msgs[y][x] if matching > 1 else np.nan
+      im[y, x] = msgs[y][x] if matching > 1 else (zero_value if to_zero else np.nan)
   return im
 
 def calc_shared_unique(msgs):
@@ -170,18 +195,40 @@ def calc_shared_unique(msgs):
   
   return im
 
-def calc_gaps(msgs, limit=-1, include_end=False, replace=True):
+def calc_gaps(msgs, limit=-1, include_end=False, use_msg_value=True, to_zero=False, zero_value=0):
   im = generate_blank_im(msgs)
   for y in range(len(msgs)):
     msg_len = len(msgs[y])
-    for i in range(msg_len):
-      upper_bounds = msg_len if (limit == -1) else min(i + limit + 2, msg_len)
-      for j in range(i + 1, upper_bounds):
-        if msgs[y][i] == msgs[y][j]:
-          gap = (j - i) if replace else msgs[y][i]
-          im[y][i] = gap
-          if include_end: im[y][j] = gap
+    for x1 in range(msg_len):
+      if to_zero:
+        im[y][x1] = zero_value if np.isnan(im[y][x1]) else im[y][x1]
+      upper_bounds = msg_len if (limit == -1) else min(x1 + limit + 2, msg_len)
+      for x2 in range(x1 + 1, upper_bounds):
+        if msgs[y][x1] == msgs[y][x2]:
+          val = (x2 - x1) if (not use_msg_value) else msgs[y][x1]
+          im[y][x1] = val
+          if include_end: im[y][x2] = val
           break
+  return im
+
+def conv_isomorphs_to_img(msgs, isos, zero_value=0):
+  im = generate_blank_im(msgs, zero_value)
+  count = 1
+  for iso in isos:
+    print(iso)
+    for ri in range(len(iso[2])):
+      for x in range(iso[2][ri][0], iso[2][ri][1]): im[ri][x] = count
+    count += 1
+  return im
+
+def OLD_conv_isomorphs_to_img(msg1, msg2, isos):
+  msgs = [ msg1, msg2 ]
+  im = generate_blank_im(msgs, 0)
+  count = 1
+  for iso in isos:
+    for x in range(iso[0], iso[1]): im[0][x] = count
+    for x in range(iso[4], iso[5]): im[1][x] = count
+    count += 1
   return im
 
 def calc_repeats(msgs):
@@ -196,23 +243,6 @@ def calc_repeats(msgs):
       im[y][x] = repeats
   return im
 
-def calc_if_isomorphic(msg1, msg2):
-  # Extract indices from strings
-  dict1 = {}
-  dict2 = {}
-  for i, value in enumerate(msg1): dict1[value] = dict1.get(value, []) + [i]
-  for i, value in enumerate(msg2): dict2[value] = dict2.get(value, []) + [i]
-  repeats = any([ len(dict1[value]) > 1 for value in dict1 ])
-  isIsomorphic = repeats and sorted(dict1.values()) == sorted(dict2.values())
-
-  # Extract pattern from indices
-  uid = UID()
-  isoPattern = None
-  if isIsomorphic:
-    isoPattern = [ uid.get_uid(str(dict1[l])) + 1 if len(dict1[l]) > 1 else np.nan for l in msg1 ]
-
-  return isIsomorphic, isoPattern, uid.next
-
 def calc_if_prime(num):
   if(num <= 1):
     return False
@@ -223,20 +253,25 @@ def calc_if_prime(num):
 
 # -------- Visual --------
 
-def plot_im(im, to_label=False, ascii=False, title=None):
-  plt.figure(figsize = (40,5))
-  plt.imshow(im, interpolation="nearest")
+def plot_im(im, to_label=False, ascii=False, title=None, labels=None, to_dull=True, cmap_name="Set3", under_color="#d9d9d9", dull_amount=0.1, under_value=0.1, cast_labels=True, figsize=(40,5)):
+  plt.figure(figsize=figsize)
+  cmap = mpl.cm.get_cmap(cmap_name).copy()
+  cmap.set_under(color=under_color)
+  plt.imshow(im, interpolation="nearest", cmap=cmap, vmin=under_value)
+  plt.subplots_adjust(left=0.1, right=0.9, top=0.9, bottom=0.1)
   plt.axis('off')
 
   if title is not None:
     plt.title(title)
 
+  labels = labels if (labels is not None) else im
+
   if to_label:
-    for y in range(len(im)):
-      for x in range(len(im[y])):
-        if not math.isnan(im[y][x]):
-          label = int(im[y][x]) if not ascii else chr(int(im[y][x]) + 32)
-          plt.text(x, y, label, ha="center", va="center", fontsize="6", alpha=(0.1 if im[y][x] == 0 else 0.9))
+    for y in range(len(labels)):
+      for x in range(len(labels[y])):
+        if not math.isnan(labels[y][x]):
+          label = labels[y][x] if not cast_labels else int(labels[y][x]) if not ascii else chr(int(labels[y][x]) + 32)
+          plt.text(x, y, label, ha="center", va="center", fontsize="8", alpha=(dull_amount if im[y][x] < under_value and to_dull else 0.9))
   
   # plt.show()
 
@@ -357,6 +392,19 @@ def plot_msgs_kappa_periodic(msgs):
   ax.plot(bounds, (12, 12), 'r', label="Expected (Random)")
   ax.set(xlabel="Period Length", ylabel="Count")
   ax.legend()
+  plt.show()
+
+def plot_gap_freq(msgs):
+  msgs_gaps = calc_gaps(msgs, use_msg_value=False)
+  counter = collections.Counter()
+  for msg_gaps in msgs_gaps:
+      m = [ int(x) for x in filter(lambda x: not np.isnan(x), msg_gaps) ]
+      counter += collections.Counter(m)
+  x = range(1, 31)
+  for i in x:
+      print(f"{i}: {counter[i]}")
+  y = [ counter[a] for a in x ]
+  plt.bar(x, y)
   plt.show()
 
 def print_msgs_ascii(messages, offset=32):

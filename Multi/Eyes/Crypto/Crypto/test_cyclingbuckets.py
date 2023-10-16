@@ -1,10 +1,10 @@
 
 import random
 import matplotlib.pyplot as plt
-import locallib.crypto
+from locallib import crypto
 
-random.seed(0)
-
+# Set seed and initialize data
+random.seed(1)
 pt_msgs_raw = [
     "aThe FitnessGram Pacer TestTestTest is a multistage aerobic capacity test that is a multistage aerobic gets more difficult as it continues",
     "bThe FitnessGram Pacer getsTestmore is a multistage Student exam that progressive is a multistage Student exam first get ready and then start running",
@@ -22,30 +22,27 @@ pt_msgs = [ msg.lower() for msg in pt_msgs_raw ]
 pt_alphabet = set()
 for msg in pt_msgs:
     pt_alphabet.update(list(msg))
-pt_alphabet = list(pt_alphabet)
+pt_alphabet = sorted(list(pt_alphabet))
 
 # Construct CT buckets and alphabet
 current_bucket_end = 0
 buckets = {}
 for l in pt_alphabet:
     size = random.randrange(2,4)
-    bucket = [current_bucket_end, current_bucket_end + size, -1]
-    buckets[l] = bucket
+    buckets[l] = [current_bucket_end, current_bucket_end + size, -1]
     current_bucket_end += size
 ct_alphabet = list(range(current_bucket_end))
 random.shuffle(ct_alphabet)
 
 # Encode PT to CT
-#  For each PT letter:
-#  - Take current bucket letter
-#  - Cycle bucket
-#  - Cycle alphabet
+# For each PT letter:
+#   - Take current bucket letter
+#   - Cycle bucket
+#   - Cycle alphabet
 def encode(pt, buckets, ct_alphabet):
+    for l in buckets: buckets[l][2] = buckets[l][0]
     current_ct_alphabet = ct_alphabet.copy()
-    for l in buckets:
-        buckets[l][2] = buckets[l][0]
     ct_msg = []
-
     for l in pt:
         # Add ciphertext
         ct_msg.append(current_ct_alphabet[buckets[l][2]])
@@ -57,16 +54,72 @@ def encode(pt, buckets, ct_alphabet):
 
         # Cycle alphabet
         current_ct_alphabet = current_ct_alphabet[1:] + [current_ct_alphabet[0]]
-    
     return ct_msg
 
-# Encode all messages and output summaries
+# Encode all messages
 ct_msgs = [ encode(pt, buckets, ct_alphabet) for pt in pt_msgs ]
 
-# Plot CT messages and gaps
-locallib.crypto.plot_msgs(ct_msgs, True, title="CT Messages")
-gaps = locallib.crypto.calc_gaps(ct_msgs, 16, False, True)
-locallib.crypto.plot_im(gaps, True, title="CT Repeats, Gap Size < 16")
-plt.show()
+# Full overview
+# crypto.full_overview(ct_msgs)
 
-locallib.crypto.full_overview(ct_msgs)
+# Gap frequency
+# crypto.plot_gap_freq(ct_msgs)
+# plt.show()
+
+# Straight messages
+crypto.plot_im(
+    im=crypto.conv_msgs_to_im(ct_msgs),
+    to_label=True,
+    title="Messages",
+    figsize=(50,2.4))
+
+# Shared sections
+shared_im = crypto.calc_shared(
+    msgs=ct_msgs,
+    to_zero=True)
+crypto.plot_im(
+    im=shared_im,
+    to_label=True,
+    labels=ct_msgs,
+    title="Shared Sections",
+    to_dull=True,
+    under_value=1,
+    figsize=(50,2.4))
+
+# Gaps
+gap_im = crypto.calc_gaps(
+    msgs=ct_msgs,
+    limit=16,
+    include_end=True,
+    use_msg_value=False,
+    to_zero=True)
+crypto.plot_im(
+    im=gap_im,
+    to_label=True,
+    labels=ct_msgs,
+    title="Gaps",
+    to_dull=True,
+    figsize=((50,2.4)))
+crypto.plot_im(
+    im=gap_im,
+    to_label=True,
+    title="Gaps (Sizes)",
+    to_dull=True,
+    figsize=((50,2.4)))
+
+# Isomorphs
+# msgs = ct_msgs[0:9]
+msgs = ct_msgs[0:3]
+# msgs = ct_msgs[3:6]
+# msgs = ct_msgs[6:9]
+isos = crypto.calc_isomorphs(msgs)
+isos_im = crypto.conv_isomorphs_to_img(msgs, isos, 0)
+crypto.plot_im(
+    im=isos_im,
+    to_label=True,
+    to_dull=True,
+    labels=msgs,
+    title="Isomorphs",
+    figsize=((28,1.6)))
+
+plt.show()

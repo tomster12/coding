@@ -1,6 +1,7 @@
 
 import string
-import locallib.crypto
+from locallib import crypto
+import matplotlib.pyplot as plt
 
 def encode_caeser(pt, pt_alphabet, shift=3):
     ct = ""
@@ -50,10 +51,10 @@ def s0():
         print("= " + text_diff(pt_alphabet, pt, ct[1]))
         print()
     
-    print(locallib.crypto.calc_if_isomorphic(pt, cts[0][1]))
+    print(crypto.calc_if_isomorphic([ pt, cts[0][1] ]))
 
     print("\n----------------------------------------------------------------------------------\n")
-s0()
+# s0()
 
 def s1():
     print("\nCiphertext <-> Ciphertext Isomorph (Caeser Progressive Cipher)")
@@ -67,9 +68,37 @@ def s1():
     print(ct)
     print()
 
-    isos = locallib.crypto.calc_isomorphs(ct, ct)
+    isos = crypto.calc_isomorphs(ct, ct)
     for iso in isos:
         print(iso)
 
     print("\n----------------------------------------------------------------------------------\n")
-s1()
+# s1()
+
+def s2():
+    pt = "EVERY SUBSTITUTION CIPHER NEEDS A SUBSTITUTION KEY"
+    pt_alphabet = string.ascii_uppercase
+    ct = encode_caeser_progressive(pt, pt_alphabet, 1)
+
+    print(pt)
+    print(ct)
+    isos = crypto.calc_isomorphs(ct, ct)
+    isos_im = crypto.conv_isomorphs_to_img(ct, ct, isos)
+
+    crypto.plot_im(
+        im=isos_im,
+        to_label=True,
+        labels=[pt,pt],
+        cast_labels=False,
+        figsize=(10,2))
+    
+    crypto.plot_im(
+        im=isos_im,
+        to_label=True,
+        labels=[ct,ct],
+        cast_labels=False,
+        figsize=(10,2))
+    
+    plt.show()
+
+s2()

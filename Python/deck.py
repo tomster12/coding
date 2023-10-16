@@ -1,7 +1,7 @@
 
 import random
 
-num = 100
+num = 1000000
 count = 0
 
 deck = []
