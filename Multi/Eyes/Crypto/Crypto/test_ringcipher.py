@@ -50,10 +50,10 @@ key = "thisisakeyusedfortiscipher"
 ct_msgs = [ encode(pt_alphabet, pt_msg, key) for pt_msg in pt_msgs ]
 
 # Plot CT messages and gaps
-locallib.crypto.plot_msgs(ct_msgs, True, title="CT Messages")
-gaps = locallib.crypto.calc_gaps(ct_msgs, 16, False, False)
-locallib.crypto.plot_im(gaps, True, title="CT Repeats, Gap Size < 16")
+locallib.analysis.plot_msgs(ct_msgs, True, title="CT Messages")
+gaps = locallib.analysis.calc_gaps(ct_msgs, 16, False, False)
+locallib.analysis.plot_im(gaps, True, title="CT Repeats, Gap Size < 16")
 plt.show()
 
 print(f"{len(pt_alphabet)}: {pt_alphabet}")
-locallib.crypto.full_overview(ct_msgs)
+locallib.analysis.full_overview(ct_msgs)

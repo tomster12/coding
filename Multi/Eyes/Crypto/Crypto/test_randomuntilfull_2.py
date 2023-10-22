@@ -70,10 +70,10 @@ for pt_msg in pt_msgs:
     ct_msgs += [ct_msg]
 
 # Plot CT messages and gaps
-locallib.crypto.plot_msgs(ct_msgs, True, title="CT Messages")
-gaps = locallib.crypto.calc_gaps(ct_msgs, 6, True, True)
-locallib.crypto.plot_im(gaps, True, title="CT Repeats, Gap Size < 6")
+locallib.analysis.plot_msgs(ct_msgs, True, title="CT Messages")
+gaps = locallib.analysis.calc_gaps(ct_msgs, 6, True, True)
+locallib.analysis.plot_im(gaps, True, title="CT Repeats, Gap Size < 6")
 plt.show()
 
 # Print full overview
-locallib.crypto.full_overview(ct_msgs)
+locallib.analysis.full_overview(ct_msgs)

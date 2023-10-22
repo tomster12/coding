@@ -1,11 +1,11 @@
 
-from locallib import eyeutil, crypto
+from locallib import eyeutil, analysis
 import matplotlib.pyplot as plt
 import numpy as np
 import collections
 
 # Setup data
-msgs_gaps = crypto.calc_gaps(eyeutil.msgs_eye_tri, use_msg_value=False)
+msgs_gaps = analysis.calc_gaps(eyeutil.msgs_eye_tri, use_msg_value=False)
 counter = collections.Counter()
 for msg_gaps in msgs_gaps:
     m = [ int(x) for x in filter(lambda x: not np.isnan(x), msg_gaps) ]

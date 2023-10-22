@@ -1,5 +1,5 @@
 
-from locallib import eyeutil, crypto
+from locallib import eyeutil, analysis
 import matplotlib.pyplot as plt
 import numpy as np
 import collections
