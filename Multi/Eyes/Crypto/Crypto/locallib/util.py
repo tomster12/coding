@@ -12,8 +12,8 @@ class UID:
   def get_uid(self, val):
       if val not in self.map:
         self.map[val] = self.next
-        self.invMap[self.next] = val
         self.next += 1
+        self.invMap[self.next] = val
       return self.map[val]
 
 def to_base(num, base):

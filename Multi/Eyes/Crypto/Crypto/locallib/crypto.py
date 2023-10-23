@@ -91,8 +91,7 @@ def encode_wadsworth(pt, pt_a, ct_a, delta_func=lambda d, pt, l : d):
     for l in pt:
         pt_l_index = pt_a.index(l)
         pt_delta = pt_l_index - pt_index
-        if pt_l_index < pt_index: pt_delta += len(pt_a)
-        if pt_l_index == pt_index: pt_delta += len(pt_a)
+        if pt_delta <= 0: pt_delta += len(pt_a)
         ct_delta = delta_func(pt_delta, pt, l)
 
         pt_index = (pt_index + pt_delta) % len(pt_a)
