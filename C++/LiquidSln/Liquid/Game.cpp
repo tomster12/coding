@@ -46,7 +46,7 @@ void Game::update(const float& dt)
 		sf::Vector2f jitter = sf::Vector2f{ Utility::random(-1.0f, 1.0f), Utility::random(-1.0f, 1.0f) };
 		liquidSystem.addLiquid(&WATER, sf::Vector2f{ Window::WINDOW_WIDTH * 0.25f, Window::WINDOW_HEIGHT * 0.5f } + jitter);
 	}
-	
+
 	liquidSystem.update(dt);
 	++frameCount;
 }
