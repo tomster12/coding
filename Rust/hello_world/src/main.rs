@@ -1,3 +1,6 @@
+#![allow(dead_code)]
+#![allow(unused_variables)]
+
 fn main() {
     // --- List out of range panic ---
 
@@ -44,14 +47,15 @@ fn main() {
     // println!("b: {}", b);
     println!("b2: {}", b2);
 
-    // --- Borrowing ---
+    // --- Ownership movement ---
 
     let s1: String = String::from("hello");
     let s2: String = in_and_out(s1);
-    // println!("s1: {}", s1);
+
+    // println!("s1: {}", s1); // Moved into s2
     println!("s2: {}", s2);
 
-    // --- Mutable borrowing ---
+    // --- Reference borrowing ---
 
     let mut s3: String = String::from("hello");
     // let s4: &String = &s3;
@@ -69,6 +73,63 @@ fn main() {
 
     println!("hello: {}", hello);
     println!("world: {}", world);
+
+    // --- Structs ---
+
+    let user1: User = User {
+        username: String::from("user"),
+        email: String::from("someone@example.com"),
+        sign_in_count: 1,
+        active: true,
+    };
+
+    let user2: User = User {
+        username: String::from("user2"),
+        ..user1
+    };
+
+    let black: Color = Color(0, 0, 0);
+
+    // user1.print(); // Moved into user2
+    user2.print();
+    User::print(&user2);
+
+    println!("black: {} {} {}", black.0, black.1, black.2);
+
+    // let thing: AlwaysEqual = AlwaysEqual;
+    // println!("thing: {:?}", thing);
+
+    // --- Enums ---
+
+    let home: IpAddr = IpAddr::V4(String::from("127.0.0.1"));
+    let loopback: IpAddr = IpAddr::V6(String::from("::1"));
+
+    // println!("home: {}", home);
+    // println!("loopback: {}", loopback);
+
+    // --- Option ---
+
+    let some_number: Option<i32> = Some(5);
+    let absent_number: Option<i32> = None;
+
+    // println!("some_number: {}", some_number);
+    // println!("absent_number: {}", absent_number);
+
+    // --- Match ---
+
+    let coin: Coin = Coin::Quarter;
+    println!("value_in_cents: {}", coin.value_in_cents());
+
+    if let Coin::Quarter = coin {
+        println!("coin is a quarter");
+    }
+
+    match coin {
+        Coin::Quarter => {
+            println!("coin is a quarter");
+        }
+        _ => (),
+    }
 }
 
 fn add(x: i32, y: i32) -> i32 {
@@ -81,4 +142,45 @@ fn in_and_out(s: String) -> String {
 
 fn mutate(s: &mut String) {
     s.push_str(", world");
+}
+
+struct User {
+    username: String,
+    email: String,
+    sign_in_count: u64,
+    active: bool,
+}
+
+impl User {
+    fn print(self: &Self) {
+        println!(
+            "user {} {} {} {}",
+            self.username, self.email, self.sign_in_count, self.active
+        );
+    }
+}
+
+struct Color(i32, i32, i32);
+
+enum IpAddr {
+    V4(String),
+    V6(String),
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter,
+}
+
+impl Coin {
+    fn value_in_cents(&self) -> u8 {
+        match self {
+            Coin::Penny => 1,
+            Coin::Nickel => 5,
+            Coin::Dime => 10,
+            Coin::Quarter => 25,
+        }
+    }
 }
