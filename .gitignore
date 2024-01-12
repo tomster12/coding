@@ -10,8 +10,6 @@ token
 # Local gh-pages serve byproducts
 _site/
 .jekyll-cache/
-/Gemfile
-/Gemfile.lock
 
 # Clean up project byproducts
 **/node_modules/
