@@ -9,11 +9,26 @@ const cComboRed = "#ff3737";
 const cComboBack = "#474747";
 const cComboOut = "#141414";
 
-const cCardTitle = "#1f1f1f";
-const cCardMeta = "#565656";
+const cCardTextTitle = "#1f1f1f";
+const cCardTextMeta = "#494949";
 const cCardOut = "#201f1e";
-const cCardBack = "#d2d2d2";
+const cCardBack1 = "#e9d2f1";
+const cCardBack2 = "#d2d2d2";
+const cCardBack3 = "#848484";
 const cCardComboBack = "#ffffff";
+
+const cardSw = 6;
+const cardEdge = 20;
+const textTopYGap = 18;
+const textSmallXGap = 15;
+const textSmallSize = 20;
+const textTitleSize = 40;
+const metaPct = 0.68;
+const comboEdge1 = 5;
+const comboEdge2 = 7;
+const comboCurve = 10;
+const comboSize = 50;
+const comboGap = 1;
 
 // ----------------------------
 
@@ -30,87 +45,90 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(550, 115);
-    drawCardChoice(0);
-}
+    createCanvas(800, 135);
 
-function keyPressed() {
-    if (keyCode === LEFT_ARROW) {
-        current = (current + choiceCount - 1) % choiceCount;
-    } else if (keyCode === RIGHT_ARROW) {
-        current = (current + choiceCount + 1) % choiceCount;
-    }
-    drawCardChoice(current);
-}
+    // drawCard("🔺", "Quick", "i10,+9", "🌀", "f123", cCardBack1);
+    // drawCard("🔹", "Up - Tornado", "i16", "", "df2,df42,f234", cCardBack1);
+    // drawCard("🔹🔥", "H. Dash - Combo", "", "", "f1+2,b44", cCardBack1);
 
-function drawCardChoice(choice) {
-    if (choice == 0) {
-        drawCard("🔹", "Up - Tornado", "i16", "", "df2,df42,f234");
-    } else if (choice == 1) {
-        drawCard("🔺", "Quick", "i10,+9", "🌀", "f123");
-    } else if (choice == 2) {
-        drawCard("🔹🔥", "H. Dash - Combo", "", "", "f1+2,b44");
-    }
+    // drawCard("🔺", "Slow Long Poke", "i20", "📏🧱", "f3", cCardBack2);
+    // drawCard("🔹", "Power Crush", "i24, +12", "🟥", "b3", cCardBack2);
+    // drawCard("🔻", "Slow Low", "i28", "🌀🧱", "db1+21+2", cCardBack2);
+
+    // drawCard("🔹(🕯️/🔥)", "Heat Dash", "i28", "", "f1+2", cCardBack3);
+    // drawCard("🔹", "Knockup", "i16, +32", "✈️", "df2", cCardBack3);
+    // drawCard(
+    //     "🔺(~🔥)",
+    //     "Quick - H. Slam",
+    //     "i10",
+    //     "🌀🟥",
+    //     "f123df1",
+    //     cCardBack3
+    // );
+    drawCard("🔹🕯️", "Up - Smash", "i16", "", "df2,2+32+3", cCardBack3);
 }
 
 // ----------------------------
 
-function drawCard(lsymbols, name, meta, rsymbols, comboString) {
+function drawCard(lsymbols, name, meta, rsymbols, comboString, cCardBack) {
     clear();
     ellipseMode(CORNER);
 
     // Background
-    const sw = 6;
-    const edge = 15;
     stroke(cCardOut);
-    strokeWeight(sw);
+    strokeWeight(cardSw);
     fill(cCardBack);
-    rect(sw / 2, sw / 2, width - sw, height - sw, edge);
+    rect(cardSw / 2, cardSw / 2, width - cardSw, height - cardSw, cardEdge);
 
     // Text
     noStroke();
     fill(cComboOut);
 
     // - Left Symbols
-    textSize(20);
+    textSize(textSmallSize);
     textFont("Verdana");
     textAlign(LEFT, CENTER);
-    text(lsymbols, sw + 15, sw + 22);
+    text(
+        lsymbols,
+        cardSw + textSmallXGap,
+        cardSw + cardSw + textTopYGap + textSmallSize * 0.1
+    );
 
     // - Title
-    textSize(30);
+    textSize(textTitleSize);
     textFont(fontBold);
     textAlign(CENTER, CENTER);
-    fill(cCardTitle);
-    text(name, width / 2, sw + 20);
+    fill(cCardTextTitle);
+    text(name, width / 2, cardSw + cardSw + textTopYGap);
 
     // - Meta
-    textSize(20);
+    textSize(textSmallSize);
     textFont(fontRegular);
     textAlign(LEFT, CENTER);
-    fill(cCardMeta);
-    text(meta, width * 0.7, sw + 22);
+    fill(cCardTextMeta);
+    text(
+        meta,
+        width * metaPct,
+        cardSw + cardSw + textTopYGap + textSmallSize * 0.1
+    );
 
     // - Right Symbols
-    textSize(20);
+    textSize(textSmallSize);
     textFont("Verdana");
     textAlign(RIGHT, CENTER);
-    text(rsymbols, width - sw - 15, sw + 22);
-
-    // Combo
-    const comboEdge1 = 18;
-    const comboEdge2 = 8;
-    const comboCurve = 8;
-    const comboSize = 35;
-    const comboGap = 1;
+    text(
+        rsymbols,
+        width - cardSw - textSmallXGap,
+        cardSw + cardSw + textTopYGap + textSmallSize * 0.1
+    );
 
     // - Background
     fill(cCardComboBack);
     noStroke();
     rect(
-        comboEdge1 - comboEdge2,
-        height - comboEdge1 - comboSize - comboEdge2,
-        width - comboEdge1 * 2 + comboEdge2 * 2,
+        cardSw + comboEdge1,
+        height - cardSw - comboEdge1 - comboSize - comboEdge2 * 2,
+        width - comboEdge1 * 2 - cardSw * 2,
         comboSize + comboEdge2 * 2,
         comboCurve
     );
@@ -118,8 +136,8 @@ function drawCard(lsymbols, name, meta, rsymbols, comboString) {
     // -Foreground
     drawCombo(
         comboString,
-        comboEdge1,
-        height - comboEdge1 - comboSize,
+        cardSw + comboEdge1 + comboEdge2,
+        height - cardSw - comboEdge1 - comboEdge2 - comboSize,
         comboSize,
         comboGap
     );
@@ -159,7 +177,7 @@ function parseCombo(comboString) {
         else if (actionStrings[i] === "+") {
             actionStrings[i - 1] += actionStrings.splice(i + 1, 1)[0];
             actionStrings.splice(i, 1);
-            i--;
+            i -= 2;
         }
         // Join together moves
         else if (
@@ -176,11 +194,22 @@ function parseCombo(comboString) {
     return actionStrings.map((s) => {
         if (isMove(s)) return new Move(s);
         else if (isAttack(s)) return new Attack(s);
+        else if (isNeutral(s)) return new Neutral();
         else if (isSeperator(s)) return new Seperator();
     });
 }
 
 // ----------------------------
+
+class Neutral {
+    draw(x, y, s) {
+        const gap = s * 0.2;
+        fill(255);
+        stroke(0);
+        strokeWeight(4);
+        ellipse(x + gap, y + gap, s - gap * 2, s - gap * 2);
+    }
+}
 
 class Seperator {
     draw(x, y, s) {
