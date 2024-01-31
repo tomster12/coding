@@ -30,6 +30,20 @@ const comboCurve = 10;
 const comboSize = 50;
 const comboGap = 1;
 
+const presets = [
+    ["🔺", "Quick", "i10,+9", "🌀", "f123", "#e9d2f1"],
+    ["🔹", "Up - Tornado", "i16", "", "df2,df42,f234", "#e9d2f1"],
+    ["🔹🔥", "H. Dash - Combo", "", "", "f1+2,b44", "#e9d2f1"],
+    ["🔺", "Slow Long", "i20", "📏🧱", "f3", "#d2d2d2"],
+    ["🔹", "Crush", "i24, +12", "🟥", "b3", "#d2d2d2"],
+    ["🔻", "Slow Low", "i28", "🌀🧱", "db1+21+2", "#d2d2d2"],
+    ["🔹(🕯️/🔥)", "H. Dash", "i28", "", "f1+2", "#d2d2d2"],
+    ["🔹", "Knockup", "i16, +32", "✈️", "df2", "#d2d2d2"],
+    ["🔺(~🔥)", "Quick - H. Slam", "i10", "🌀🟥", "f123df1", "#d2d2d2"],
+    ["🔹🕯️", "Up - Smash", "i16", "", "df2,2+32+3", "#d2d2d2"],
+    ["🔹🕯️", "H. Burst", "", "🟥", "2+3", "#d2d2d2"],
+];
+
 // ----------------------------
 
 const choiceCount = 3;
@@ -38,6 +52,19 @@ let fontRegular;
 let fontBold;
 let fontItalic;
 
+let presetElements = [];
+let selectedPreset = -1;
+
+let cardInputs = [];
+let inputLeftSymbols;
+let inputTitle;
+let inputMeta;
+let inputRightSymbols;
+let inputComboString;
+let inputCardBack;
+let inputCanvasWidth;
+let inputCanvasHeight;
+
 function preload() {
     fontRegular = loadFont("FontRegular.otf");
     fontBold = loadFont("FontBold.otf");
@@ -45,27 +72,101 @@ function preload() {
 }
 
 function setup() {
-    createCanvas(800, 135);
+    createCanvas(650, 135);
+    setupPresets();
+    setupInput();
+    selectPreset(1);
+}
 
-    // drawCard("🔺", "Quick", "i10,+9", "🌀", "f123", cCardBack1);
-    // drawCard("🔹", "Up - Tornado", "i16", "", "df2,df42,f234", cCardBack1);
-    // drawCard("🔹🔥", "H. Dash - Combo", "", "", "f1+2,b44", cCardBack1);
+function setupPresets() {
+    const presetsContainer = document.getElementById("presets0");
+    presetElements = [];
 
-    // drawCard("🔺", "Slow Long Poke", "i20", "📏🧱", "f3", cCardBack2);
-    // drawCard("🔹", "Power Crush", "i24, +12", "🟥", "b3", cCardBack2);
-    // drawCard("🔻", "Slow Low", "i28", "🌀🧱", "db1+21+2", cCardBack2);
+    presets.forEach((o, i) => {
+        const el = document.createElement("div");
+        el.className = "preset";
+        el.innerHTML = o[1];
+        el.onclick = () => selectPreset(i);
+        presetsContainer.appendChild(el);
+        presetElements.push(el);
+    });
+}
 
-    // drawCard("🔹(🕯️/🔥)", "Heat Dash", "i28", "", "f1+2", cCardBack3);
-    // drawCard("🔹", "Knockup", "i16, +32", "✈️", "df2", cCardBack3);
-    // drawCard(
-    //     "🔺(~🔥)",
-    //     "Quick - H. Slam",
-    //     "i10",
-    //     "🌀🟥",
-    //     "f123df1",
-    //     cCardBack3
-    // );
-    drawCard("🔹🕯️", "Up - Smash", "i16", "", "df2,2+32+3", cCardBack3);
+function setupInput() {
+    // Card inputs
+    inputLeftSymbols = createInput();
+    inputTitle = createInput();
+    inputMeta = createInput();
+    inputRightSymbols = createInput();
+    inputComboString = createInput();
+    inputCardBack = createInput();
+
+    cardInputs = [
+        inputLeftSymbols,
+        inputTitle,
+        inputMeta,
+        inputRightSymbols,
+        inputComboString,
+        inputCardBack,
+    ];
+
+    const cardInputContainer = document.getElementById("card-inputs");
+    cardInputs.forEach((i) => i.class("input"));
+    cardInputs.forEach((i) => i.input(onInput));
+    cardInputs.forEach((i) => i.parent(cardInputContainer));
+
+    // Canvas inputs
+    inputCanvasWidth = createInput("", "number");
+    inputCanvasHeight = createInput("", "number");
+
+    const canvasInputContainer = document.getElementById("canvas-inputs");
+    inputCanvasWidth.class("input");
+    inputCanvasHeight.class("input");
+    inputCanvasWidth.input(onCanvasInput);
+    inputCanvasHeight.input(onCanvasInput);
+    inputCanvasWidth.parent(canvasInputContainer);
+    inputCanvasHeight.parent(canvasInputContainer);
+
+    inputCanvasWidth.value(width);
+    inputCanvasHeight.value(height);
+    onCanvasInput();
+}
+
+function selectPreset(i) {
+    const [lsymbols, name, meta, rsymbols, comboString, cCardBack] = presets[i];
+
+    selectedPreset = i;
+    presetElements.forEach((el) => el.classList.remove("selected"));
+    presetElements[i].classList.add("selected");
+
+    inputLeftSymbols.value(lsymbols);
+    inputTitle.value(name);
+    inputMeta.value(meta);
+    inputRightSymbols.value(rsymbols);
+    inputComboString.value(comboString);
+    inputCardBack.value(cCardBack);
+
+    drawCard(lsymbols, name, meta, rsymbols, comboString, cCardBack);
+}
+
+function onInput() {
+    selectedPreset = -1;
+    presetElements.forEach((el) => el.classList.remove("selected"));
+
+    drawCard(
+        inputLeftSymbols.value(),
+        inputTitle.value(),
+        inputMeta.value(),
+        inputRightSymbols.value(),
+        inputComboString.value(),
+        inputCardBack.value()
+    );
+}
+
+function onCanvasInput() {
+    resizeCanvas(inputCanvasWidth.value(), inputCanvasHeight.value());
+    if (selectedPreset != -1) selectPreset(selectedPreset);
+    else onInput();
 }
 
 // ----------------------------
