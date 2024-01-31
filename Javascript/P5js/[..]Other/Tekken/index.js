@@ -30,20 +30,6 @@ const comboCurve = 10;
 const comboSize = 50;
 const comboGap = 1;
 
-const presets = [
-    ["🔺", "Quick", "i10,+9", "🌀", "f123", "#e9d2f1"],
-    ["🔹", "Up - Tornado", "i16", "", "df2,df42,f234", "#e9d2f1"],
-    ["🔹🔥", "H. Dash - Combo", "", "", "f1+2,b44", "#e9d2f1"],
-    ["🔺", "Slow Long", "i20", "📏🧱", "f3", "#d2d2d2"],
-    ["🔹", "Crush", "i24, +12", "🟥", "b3", "#d2d2d2"],
-    ["🔻", "Slow Low", "i28", "🌀🧱", "db1+21+2", "#d2d2d2"],
-    ["🔹(🕯️/🔥)", "H. Dash", "i28", "", "f1+2", "#d2d2d2"],
-    ["🔹", "Knockup", "i16, +32", "✈️", "df2", "#d2d2d2"],
-    ["🔺(~🔥)", "Quick - H. Slam", "i10", "🌀🟥", "f123df1", "#d2d2d2"],
-    ["🔹🕯️", "Up - Smash", "i16", "", "df2,2+32+3", "#d2d2d2"],
-    ["🔹🕯️", "H. Burst", "", "🟥", "2+3", "#d2d2d2"],
-];
-
 // ----------------------------
 
 const choiceCount = 3;
@@ -52,7 +38,10 @@ let fontRegular;
 let fontBold;
 let fontItalic;
 
-let presetElements = [];
+let presetsContainer = null;
+let defaultPresetsData = [];
+let presetsData = [];
+let presetsElement = [];
 let selectedPreset = -1;
 
 let cardInputs = [];
@@ -66,30 +55,22 @@ let inputCanvasWidth;
 let inputCanvasHeight;
 
 function preload() {
-    fontRegular = loadFont("FontRegular.otf");
-    fontBold = loadFont("FontBold.otf");
-    fontItalic = loadFont("FontItalic.otf");
+    presetsContainer = document.getElementById("presets");
+    fontRegular = loadFont("assets/FontRegular.otf");
+    fontBold = loadFont("assets/FontBold.otf");
+    loadJSON("assets/presets.json", (presets) => {
+        defaultPresetsData = presets;
+        if (!loadCache()) {
+            defaultPresetsData.forEach((preset) => createPreset(preset));
+            setStatus("No browser cache found, defaults loaded.");
+        }
+    });
 }
 
 function setup() {
     createCanvas(650, 135);
-    setupPresets();
     setupInput();
-    selectPreset(1);
-}
-
-function setupPresets() {
-    const presetsContainer = document.getElementById("presets0");
-    presetElements = [];
-
-    presets.forEach((o, i) => {
-        const el = document.createElement("div");
-        el.className = "preset";
-        el.innerHTML = o[1];
-        el.onclick = () => selectPreset(i);
-        presetsContainer.appendChild(el);
-        presetElements.push(el);
-    });
+    selectPreset(0);
 }
 
 function setupInput() {
@@ -129,15 +110,93 @@ function setupInput() {
 
     inputCanvasWidth.value(width);
     inputCanvasHeight.value(height);
-    onCanvasInput();
+
+    // Save preset
+    document.getElementById("add-preset").onclick = addPreset;
+    document.getElementById("clear-presets").onclick = clearPresets;
+    document.getElementById("save-cache").onclick = saveCache;
+    document.getElementById("load-cache").onclick = loadCache;
+    document.getElementById("clear-cache").onclick = clearCache;
+    document.getElementById("export").onclick = exportPresets;
+}
+
+function addPreset() {
+    const preset = [
+        inputLeftSymbols.value(),
+        inputTitle.value(),
+        inputMeta.value(),
+        inputRightSymbols.value(),
+        inputComboString.value(),
+        inputCardBack.value(),
+    ];
+
+    createPreset(preset);
+    setStatus("Added preset.");
+}
+
+function clearPresets() {
+    presetsData = [];
+    presetsElement = [];
+    presetsContainer.innerHTML = "";
+    setStatus("Cleared presets.");
+}
+
+function saveCache() {
+    localStorage.setItem("presets", JSON.stringify(presetsData));
+    setStatus("Saved presets to browser cache.");
+}
+
+function loadCache() {
+    const localPresets = localStorage.getItem("presets");
+
+    if (localPresets) {
+        clearPresets();
+        const loadedPresets = JSON.parse(localPresets);
+        loadedPresets.forEach((preset) => createPreset(preset));
+        setStatus("Loaded presets from browser cache.");
+        return true;
+    }
+
+    setStatus("No presets in browser cache.");
+    return false;
+}
+
+function clearCache() {
+    localStorage.removeItem("presets");
+    setStatus("Cleared browser cache.");
+}
+
+function exportPresets() {
+    saveJSON(presetsData, "presets.json");
+    setStatus("Exported presets.json.");
+}
+
+function createPreset(p) {
+    const el1 = document.createElement("div");
+    el1.className = "button";
+    el1.innerHTML = p[1];
+    const i = presetsElement.length;
+    el1.onclick = () => selectPreset(presetsElement.indexOf(el1));
+
+    const el2 = document.createElement("div");
+    el2.className = "delete";
+    el2.innerHTML = "x";
+    el2.onclick = () => deletePreset(presetsElement.indexOf(el1));
+
+    el1.appendChild(el2);
+
+    presetsData.push(p);
+    presetsContainer.appendChild(el1);
+    presetsElement.push(el1);
 }
 
 function selectPreset(i) {
-    const [lsymbols, name, meta, rsymbols, comboString, cCardBack] = presets[i];
+    const [lsymbols, name, meta, rsymbols, comboString, cCardBack] =
+        presetsData[i];
 
     selectedPreset = i;
-    presetElements.forEach((el) => el.classList.remove("selected"));
-    presetElements[i].classList.add("selected");
+    presetsElement.forEach((el) => el.classList.remove("selected"));
+    presetsElement[i].classList.add("selected");
 
     inputLeftSymbols.value(lsymbols);
     inputTitle.value(name);
@@ -149,9 +208,19 @@ function selectPreset(i) {
     drawCard(lsymbols, name, meta, rsymbols, comboString, cCardBack);
 }
 
+function deletePreset(i) {
+    console.log("Deleting " + i);
+    presetsData.splice(i, 1);
+    presetsElement[i].remove();
+    presetsElement.splice(i, 1);
+    if (selectedPreset == i) selectPreset(0);
+    else if (selectedPreset > i) selectPreset(selectedPreset - 1);
+    setStatus("Deleted preset.");
+}
+
 function onInput() {
     selectedPreset = -1;
-    presetElements.forEach((el) => el.classList.remove("selected"));
+    presetsElement.forEach((el) => el.classList.remove("selected"));
 
     drawCard(
         inputLeftSymbols.value(),
@@ -167,6 +236,10 @@ function onCanvasInput() {
     resizeCanvas(inputCanvasWidth.value(), inputCanvasHeight.value());
     if (selectedPreset != -1) selectPreset(selectedPreset);
     else onInput();
+}
+
+function setStatus(s) {
+    document.getElementById("status").innerHTML = s;
 }
 
 // ----------------------------
