@@ -1,0 +1,59 @@
+/* Load me both regular and bald at Font_ */
+@font-face {
+    font-family: "Tekken";
+    src: url("FontRegular.otf");
+    font-weight: normal;
+}
+
+@font-face {
+    font-family: "Tekken";
+    src: url("FontBold.otf");
+    font-weight: bold;
+}
+
+* {
+    font-family: "Tekken";
+    font-weight: normal;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+.container {
+    margin: auto;
+    margin-top: 30px;
+    width: 700px;
+    min-height: 500px;
+    padding: 20px 20px;
+    background-color: #f2f2f2;
+    box-shadow: 0px 0px 30px #00000060;
+}
+
+h1 {
+    text-align: center;
+    font-size: 50px;
+}
+
+.option-list {
+    display: flex;
+    column-count: 2;
+    margin: 40px auto;
+    width: 550px;
+    gap: 5px;
+}
+
+.option {
+    display: flexbox;
+    flex-grow: 1;
+    background-color: #d4d4d4;
+    border-radius: 4px;
+    border: 3px solid #201f1e;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+#defaultCanvas0 {
+    display: block;
+    margin: auto;
+}
