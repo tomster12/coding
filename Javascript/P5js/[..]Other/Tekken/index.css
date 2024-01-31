@@ -1,13 +1,13 @@
 /* Load me both regular and bald at Font_ */
 @font-face {
     font-family: "Tekken";
-    src: url("Assets/FontRegular.otf");
+    src: url("assets/FontRegular.otf");
     font-weight: normal;
 }
 
 @font-face {
     font-family: "Tekken";
-    src: url("Assets/FontBold.otf");
+    src: url("assets/FontBold.otf");
     font-weight: bold;
 }
 
