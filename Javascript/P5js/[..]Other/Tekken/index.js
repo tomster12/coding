@@ -334,46 +334,90 @@ function parseCombo(comboString) {
     let parsedActions = [];
 
     const isMove = (s) =>
+        s.length > 0 &&
         s.split("").every((n) => singleMoves.includes(n.toLowerCase()));
-    const isAttack = (s) => s.split("").every((n) => singleAttacks.includes(n));
+    const isAttack = (s) =>
+        s.length > 0 && s.split("").every((n) => singleAttacks.includes(n));
     const isNeutral = (s) => s === "n";
     const isSeperator = (s) => s === ",";
+    const isNote = (s) =>
+        s.length >= 2 && s[0] == "(" && s[s.length - 1] == ")";
 
     // Split into actions
     const actionStrings = comboString.split("");
     for (let i = 0; i < actionStrings.length; i++) {
-        // Ignore spaces
-        if (actionStrings[i] === " ") {
-            actionStrings.splice(i, 1);
-            i--;
-        }
         // Join numbers eitherside of "+"
-        else if (actionStrings[i] === "+") {
+        if (
+            i > 0 &&
+            actionStrings.length - i >= 2 &&
+            actionStrings[i] === "+" &&
+            isAttack(actionStrings[i - 1]) &&
+            isAttack(actionStrings[i + 1])
+        ) {
             actionStrings[i - 1] += actionStrings.splice(i + 1, 1)[0];
             actionStrings.splice(i, 1);
             i -= 2;
         }
+
         // Join together moves
         else if (
-            isMove(actionStrings[i]) &&
-            actionStrings[i].length == 1 &&
             i < actionStrings.length - 1 &&
+            actionStrings[i].length == 1 &&
+            isMove(actionStrings[i]) &&
             isMove(actionStrings[i + 1]) &&
             actionStrings[i].toLowerCase() != actionStrings[i + 1].toLowerCase()
         ) {
             actionStrings[i] += actionStrings.splice(i + 1, 1)[0];
         }
+
+        // Notes
+        else if (actionStrings[i] === "(") {
+            let note = "";
+            for (let j = i; j < actionStrings.length; j++) {
+                if (actionStrings[j] !== ")") continue;
+                note = actionStrings.splice(i + 1, j - i).join("");
+                break;
+            }
+            actionStrings[i] = actionStrings[i] + note;
+        }
     }
-    // Parse action strings into actions
-    return actionStrings.map((s) => {
-        if (isMove(s)) return new Move(s);
-        else if (isAttack(s)) return new Attack(s);
-        else if (isNeutral(s)) return new Neutral();
-        else if (isSeperator(s)) return new Seperator();
+
+    // Only parse action strings into actions
+    let actions = [];
+    actionStrings.forEach((as) => {
+        if (isMove(as)) actions.push(new Move(as));
+        else if (isAttack(as)) actions.push(new Attack(as));
+        else if (isNeutral(as)) actions.push(new Neutral());
+        else if (isSeperator(as)) actions.push(new Seperator());
+        else if (isNote(as)) actions.push(new Note(as));
     });
+    return actions;
 }
 
 // ----------------------------
+
+class Note {
+    constructor(note) {
+        console.log(note);
+        this.note = note.slice(1, note.length - 1);
+    }
+
+    draw(x, y, s) {
+        const w = s * 0.8;
+        const h = s * 0.45;
+        const ts = h * 0.7;
+        const e = s * 0.1;
+
+        noStroke();
+        fill("#bd4b4b");
+        rect(x + (s - w) / 2, y + (s - h) / 2, w, h, e);
+
+        fill(255);
+        textAlign(CENTER, CENTER);
+        textSize(ts);
+        text(this.note, x + s / 2, y + s / 2);
+    }
+}
 
 class Neutral {
     draw(x, y, s) {
