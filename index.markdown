@@ -117,7 +117,7 @@ layout: default
     {% for url in site.static_files %}
       {% if (url.path contains '/C++/') and (url.path contains '.cpp' or url.path contains '.h') %}
         {% unless ((url.path contains '/dependencies/') or (url.path contains 'SFML-2.5.1')) %}
-          <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+          <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
         {% endunless %}
       {% endif %}
     {% endfor %}
@@ -125,59 +125,59 @@ layout: default
     <h2>Java</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/Java/' and url.path contains '.java' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     <br />
     <h2>PowerShell</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/PowerShell/' and url.path contains '.ps1' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     <br />
     <h2>C</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/C/' and url.path contains '.c' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     <br />
     <h2>Python</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/Python/' and url.path contains '.py' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     <br />
     <h2>Processing</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/Processing/' and url.path contains '.pde' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     <br />
     <h2>Javascript</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/Javascript/' and url.path contains '.html' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     <br />
     <h2>Multi</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/Multi/' and url.path contains '.html' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     {% for url in site.static_files %}
       {% if url.path contains '/Multi/' and url.path contains '.pde' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
     {% for url in site.static_files %}
       {% if url.path contains '/Multi/' and url.path contains '.py' %}
-        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path | relative_url }}">{{ url.path }}</a></li>
+        <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
       {% endif %}
     {% endfor %}
   </ul>
