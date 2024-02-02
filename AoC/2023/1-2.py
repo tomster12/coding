@@ -17,7 +17,7 @@ with open("1-data.txt") as f:
     sum = 0
 
     for line in lines:
-        
+
         l_digit = None
         for l_index in range(len(line)):
             for word in word_digit_map:

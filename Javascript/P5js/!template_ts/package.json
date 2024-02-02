@@ -1,0 +1,19 @@
+{
+    "name": "templatets",
+    "version": "1.0.0",
+    "description": "Parcel / TS dev server + p5js project.",
+    "author": "",
+    "license": "ISC",
+    "scripts": {
+        "serve": "parcel serve src/index.html --open",
+        "build": "parcel build src/index.html"
+    },
+    "devDependencies": {
+        "parcel": "^2.11.0",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "@types/p5": "^1.7.6",
+        "p5": "^1.9.0"
+    }
+}
