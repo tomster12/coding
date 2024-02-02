@@ -16,7 +16,7 @@ services:
 
   web-backend:
     build:
-      context: ./web-backend
+      context: ./web_backend
       dockerfile: Dockerfile
     depends_on:
       - mongo-database
@@ -28,7 +28,7 @@ services:
 
   web-frontend:
     build:
-      context: ./web-frontend
+      context: ./web_frontend
       dockerfile: Dockerfile
     depends_on:
       - web-backend
@@ -42,7 +42,7 @@ services:
   
   python-simulation:
     build:
-      context: ./python-simulation
+      context: ./python_simulation
       dockerfile: Dockerfile
     depends_on:
       - web-backend
