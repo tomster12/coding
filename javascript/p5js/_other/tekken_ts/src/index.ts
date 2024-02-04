@@ -177,7 +177,6 @@ class App extends p5 {
 
         this.inputCanvasWidth = this.createInput("", "number") as InputElement;
         this.inputCanvasHeight = this.createInput("", "number") as InputElement;
-        console.log(this.inputCanvasWidth);
 
         const canvasInputsContainer = document.getElementById("canvas-inputs")!;
         this.inputCanvasWidth.class("input");
@@ -190,13 +189,15 @@ class App extends p5 {
         this.inputCanvasWidth.value(this.width);
         this.inputCanvasHeight.value(this.height);
 
-        document.getElementById("add-preset")!.onclick =
-            this.addPresetFromInputs;
-        document.getElementById("clear-presets")!.onclick = this.clearPresets;
-        document.getElementById("save-cache")!.onclick = this.saveCache;
-        document.getElementById("load-cache")!.onclick = this.loadCache;
-        document.getElementById("clear-cache")!.onclick = this.clearCache;
-        document.getElementById("export")!.onclick = this.exportPresets;
+        document.getElementById("add-preset")!.onclick = () =>
+            this.addPresetFromInputs();
+        document.getElementById("clear-presets")!.onclick = () =>
+            this.clearPresets();
+        document.getElementById("save-cache")!.onclick = () => this.saveCache();
+        document.getElementById("load-cache")!.onclick = () => this.loadCache();
+        document.getElementById("clear-cache")!.onclick = () =>
+            this.clearCache();
+        document.getElementById("export")!.onclick = () => this.exportPresets();
     }
 
     // ----------------------------------
@@ -235,6 +236,8 @@ class App extends p5 {
     }
 
     selectPreset(i: number) {
+        if (i == -1) return;
+
         const [lsymbols, name, meta, rsymbols, comboString, cCardBack] =
             this.presetsData[i];
 
@@ -253,7 +256,6 @@ class App extends p5 {
     }
 
     deletePreset(i: number) {
-        console.log("Deleting " + i);
         this.presetsData.splice(i, 1);
         this.presetsElement[i].remove();
         this.presetsElement.splice(i, 1);
