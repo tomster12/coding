@@ -1,27 +1,25 @@
 
 # Definetly do not include
-/Other/
-/Software/
-/Github/
-/C/Vinn/
-/Rust/**/target/
+/other/
+/software/
+/github/
+/c/vinn/
+/unity/
 token
 
-# Local gh-pages serve byproducts
+# Local gh-pages byproducts
 _site/
 .jekyll-cache/
 
-# Clean up project byproducts
+# Project byproducts
+/c++/**/bin/
+/c++/**/.vs/
+/c++/**/dependencies/
+/c++/SFML-2.5.1/
+/general/**/build/
+/general/docker/docker_network/mongodb/
+/rust/**/target/
 **/node_modules/
-**/.parcel-cache
+**/.parcel-cache/
 **/dist/
-/Processing/**/build/
-/Multi/**/build/
-/C++/**/bin/
-/C++/**/.vs/
-/C++/**/dependencies/
-/C++/SFML-2.5.1/
-/Multi/Simulation/mongodb/
-
-# Not yet implemented
-/Unity/
+/processing/**/build/
