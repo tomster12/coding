@@ -1,10 +1,8 @@
-
 #pragma once
 #include "ecs.h"
 
-
-class Game {
-
+class Game
+{
 public:
 	// Public constructors
 	Game();
@@ -12,7 +10,6 @@ public:
 
 	// Public functions
 	void run();
-
 
 private:
 	// Private variables
@@ -28,7 +25,7 @@ private:
 
 	// Private functions
 	void initWindow();
-	void initVariables();
+	void init();
 	void update();
 	void render();
 };

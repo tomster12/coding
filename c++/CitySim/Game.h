@@ -1,21 +1,22 @@
 #pragma once
+#include "Simulation.h"
 
 class Game
 {
+public:
+	Game();
+	~Game();
+	void run();
+
 private:
 	sf::RenderWindow* window;
 	sf::Event sfEvent;
 	sf::Clock dtClock;
 	float dt;
 
-	sf::CircleShape testCircle;
+	Simulation sim;
 
-	void initVariables();
+	void init();
 	void update();
 	void render();
-
-public:
-	Game();
-	~Game();
-	void run();
 };

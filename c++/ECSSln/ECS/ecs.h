@@ -1,17 +1,14 @@
-
 #pragma once
 #include <bitset>
 #include "ThreadPool.h"
 
-
 // https://www.david-colson.com/2020/02/09/making-a-simple-ecs.html
 
-namespace ecs {
-
+namespace ecs
+{
 	// Constants
 	const int MAX_COMPONENTS = 4;
 	const int MAX_ENTITIES = 1'000'100;
-
 
 	#pragma region Base System
 
@@ -21,62 +18,63 @@ namespace ecs {
 	typedef unsigned long long EntityID;
 	typedef std::bitset<MAX_COMPONENTS> ComponentMask;
 
-
 	// Helper functions for Entity ID
-	inline EntityID createEntityID(EntityIndex index, EntityVersion version) {
-		return ((EntityID)index << 32) | ((EntityID)version); }
+	inline EntityID createEntityID(EntityIndex index, EntityVersion version)
+	{
+		return ((EntityID)index << 32) | ((EntityID)version);
+	}
 	inline EntityIndex getEntityIndex(EntityID id) { return id >> 32; }
 	inline EntityVersion getEntityVersion(EntityID id) { return (EntityVersion)id; }
 	inline bool isEntityValid(EntityID id) { return (id >> 32) != EntityIndex(-1); }
 	#define INVALID_ENTITY createEntityID(EntityIndex(-1), 0)
 
-
 	// Returns unique ID for each type
 	static unsigned int s_componentCounter = 0;
 	template <class T>
-	unsigned int getID() {
+	unsigned int getID()
+	{
 		static unsigned int s_componentID = s_componentCounter++;
 		return s_componentID;
 	}
 
-
-	struct Entity {
-
+	struct Entity
+	{
 		EntityID id;
 		ComponentMask mask;
 	};
 
-
-	struct ComponentPool {
-
+	struct ComponentPool
+	{
 		char* pData{ nullptr };
 		size_t elementSize{ 0 };
 
-		ComponentPool(size_t elementSize_) {
+		ComponentPool(size_t elementSize_)
+		{
 			elementSize = elementSize_;
 			pData = new char[elementSize * MAX_ENTITIES];
 		}
 
 		~ComponentPool() { delete[] pData; }
 
-		inline void* get(size_t entityIndex) {
+		inline void* get(size_t entityIndex)
+		{
 			return pData + entityIndex * elementSize;
 		}
 	};
 
-
-	struct Scene {
-
+	struct Scene
+	{
 		// Declare variables
 		std::vector<Entity> entities;
 		std::vector<EntityIndex> freeEntities;
 		std::vector<ComponentPool*> componentPools;
 		std::map<unsigned long, std::vector<EntityID>> viewCache;
 
-
-		EntityID createEntity() {
+		EntityID createEntity()
+		{
 			// Check free entities first
-			if (!freeEntities.empty()) {
+			if (!freeEntities.empty())
+			{
 				EntityIndex newIndex = freeEntities.back();
 				freeEntities.pop_back();
 				EntityID newID = createEntityID(newIndex, getEntityVersion(entities[newIndex].id));
@@ -90,8 +88,8 @@ namespace ecs {
 			return entities.back().id;
 		}
 
-
-		void destroyEntity(EntityID entityID) {
+		void destroyEntity(EntityID entityID)
+		{
 			// Override ID and mask for the given ID to null
 			const EntityID newID = createEntityID(EntityIndex(-1), getEntityVersion(entityID) + 1);
 			entities[getEntityIndex(entityID)].id = newID;
@@ -100,9 +98,9 @@ namespace ecs {
 			viewCache.clear();
 		}
 
-
 		template<typename T>
-		T* assign(EntityID entityID) {
+		T* assign(EntityID entityID)
+		{
 			// Ensure entity still exists
 			if (entities[getEntityIndex(entityID)].id != entityID) return nullptr;
 
@@ -122,9 +120,9 @@ namespace ecs {
 			return component;
 		}
 
-
 		template<typename T>
-		T* get(EntityID entityID, bool check = true) {
+		T* get(EntityID entityID, bool check = true)
+		{
 			// Ensure entity still exists
 			if (check && entities[getEntityIndex(entityID)].id != entityID) return nullptr;
 
@@ -139,9 +137,9 @@ namespace ecs {
 			return component;
 		}
 
-
 		template<typename T>
-		void remove(EntityID entityID) {
+		void remove(EntityID entityID)
+		{
 			// Ensure entity still exists
 			if (entities[getEntityIndex(entityID)].id != entityID) return;
 
@@ -150,8 +148,8 @@ namespace ecs {
 			entities[getEntityIndex(entityID)].mask.reset(componentID);
 		}
 
-
-		void log() {
+		void log()
+		{
 			std::cout << "-- Scene Information --" << std::endl;
 			std::cout << "Entity Count: " << entities.size() << " / " << MAX_ENTITIES << std::endl;
 			std::cout << "Component Count: " << MAX_COMPONENTS << std::endl;
@@ -159,9 +157,9 @@ namespace ecs {
 		}
 	};
 
-
 	template<typename... ComponentTypes>
-	std::vector<EntityID> getSceneView(Scene& scene) {
+	std::vector<EntityID> getSceneView(Scene& scene)
+	{
 		// Setup variables
 		bool all = false;
 		ComponentMask mask;
@@ -171,9 +169,11 @@ namespace ecs {
 		if (sizeof...(ComponentTypes) == 0) all = true;
 
 		// Unpack the components into list and mask
-		else {
+		else
+		{
 			const unsigned int componentIDs[] = { 0, getID<ComponentTypes>() ... };
-			for (int i = 1; i < (sizeof...(ComponentTypes) + 1); i++) {
+			for (int i = 1; i < (sizeof...(ComponentTypes) + 1); i++)
+			{
 				mask.set(componentIDs[i]);
 			}
 		}
@@ -182,9 +182,11 @@ namespace ecs {
 		if (scene.viewCache.count(mask.to_ulong()) > 0) return scene.viewCache[mask.to_ulong()];
 
 		// Get all entities
-		for (size_t i = 0; i < scene.entities.size(); i++) {
+		for (size_t i = 0; i < scene.entities.size(); i++)
+		{
 			if (isEntityValid(scene.entities[i].id)
-				&& (all || mask == (mask & scene.entities[i].mask))) {
+				&& (all || mask == (mask & scene.entities[i].mask)))
+			{
 				entities.emplace_back(scene.entities[i].id);
 			}
 		}
@@ -195,7 +197,6 @@ namespace ecs {
 	}
 
 	#pragma endregion
-
 
 	#pragma region Implementation
 
@@ -223,38 +224,41 @@ namespace ecs {
 	// - 5%			get
 	// 3%		threadpoolProcess
 
-
 	// Potential optimizations
 	// - (calculations consist of scene->getView and scene->get)
 	// - Cache components along with scene view
 	// - Move process() lambda to seperate function for each
 	// - Look up GPU instancing(?)
 
-
-	struct Transform {
+	struct Transform
+	{
 		sf::Vector2f pos{ 0.0f, 0.0f };
 		float scale{ 1.0f };
 	};
 
-	struct Attractor {
+	struct Attractor
+	{
 		float strength{ 1.0f };
 	};
 
-	struct Particle {
+	struct Particle
+	{
 		sf::Vertex vtx;
 	};
 
-	struct DynamicBody {
+	struct DynamicBody
+	{
 		sf::Vector2f vel{ 0.0f, 0.0f };
 	};
 
-
-	namespace system {
-
+	namespace system
+	{
 		static ThreadPool threadPool;
-		static void threadpoolProcess(std::function<void(std::vector<EntityID>)> process, std::vector<EntityID> entities) {
+		static void threadpoolProcess(std::function<void(std::vector<EntityID>)> process, std::vector<EntityID> entities)
+		{
 			// Function to split process into multiple sub functions
-			auto processSplitter = [=](std::vector<EntityID> entities, size_t start, size_t end) {
+			auto processSplitter = [=](std::vector<EntityID> entities, size_t start, size_t end)
+			{
 				std::vector<EntityID> subEntities(entities.begin() + start, entities.begin() + end);
 				return [=] { process(subEntities); };
 			};
@@ -264,7 +268,8 @@ namespace ecs {
 			const size_t threadCount = threadPool.size();
 			const size_t gap = entityCount / threadCount;
 			std::vector<std::future<void>> results(threadCount);
-			for (size_t i = 0; i < threadCount; i++) {
+			for (size_t i = 0; i < threadCount; i++)
+			{
 				int threadStart = i * gap;
 				int threadEnd = static_cast<int>(std::min(threadStart + gap, entityCount));
 				results[i] = threadPool.enqueue(processSplitter(entities, threadStart, threadEnd));
@@ -274,23 +279,25 @@ namespace ecs {
 			for (auto&& result : results) result.get();
 		}
 
-
-		static void instUpdateGravity(Scene* scene, sf::RenderWindow* window, const float dt) {
+		static void instUpdateGravity(Scene* scene, sf::RenderWindow* window, const float dt)
+		{
 			// Setup scope variables for process
 			const sf::Vector2u size = window->getSize();
 			const std::vector<EntityID> attractors = getSceneView<Transform, Attractor>(*scene);
 			const size_t attractorCount = attractors.size();
-			
-			// Create processing function
-			auto process = [=](std::vector<EntityID> entities) {
-				for (size_t i = 0; i < entities.size(); i++) {
 
+			// Create processing function
+			auto process = [=](std::vector<EntityID> entities)
+			{
+				for (size_t i = 0; i < entities.size(); i++)
+				{
 					// Get components
 					Transform* t = scene->get<Transform>(entities[i], false);
 					DynamicBody* db = scene->get<DynamicBody>(entities[i], false);
 
 					// Apply force towards all attractors
-					for (size_t o = 0; o < attractorCount; o++) {
+					for (size_t o = 0; o < attractorCount; o++)
+					{
 						Transform* at = scene->get<Transform>(attractors[o], false);
 						sf::Vector2f diff = at->pos - t->pos;
 						float mag = static_cast<float>(std::sqrt(diff.x * diff.x + diff.y * diff.y));
@@ -305,12 +312,13 @@ namespace ecs {
 			threadpoolProcess(process, entities);
 		}
 
-
-		static void instUpdateDynamics(Scene* scene, sf::RenderWindow* window, const float dt) {
+		static void instUpdateDynamics(Scene* scene, sf::RenderWindow* window, const float dt)
+		{
 			// Create processing function
-			auto process = [=](std::vector<EntityID> entities) {
-				for (size_t i = 0; i < entities.size(); i++) {
-
+			auto process = [=](std::vector<EntityID> entities)
+			{
+				for (size_t i = 0; i < entities.size(); i++)
+				{
 					// Get components
 					Transform* t = scene->get<Transform>(entities[i], false);
 					DynamicBody* db = scene->get<DynamicBody>(entities[i], false);
@@ -322,21 +330,21 @@ namespace ecs {
 					db->vel *= 0.995f;
 				}
 			};
-			
+
 			// Multithread the process function
 			const std::vector<EntityID> entities = getSceneView<Transform, DynamicBody>(*scene);
 			threadpoolProcess(process, entities);
 		}
 
-
-		static void instRenderAttractors(Scene* scene, sf::RenderWindow* window, const float dt) {
-			
+		static void instRenderAttractors(Scene* scene, sf::RenderWindow* window, const float dt)
+		{
 			// Create processing function
-			auto process = [=](std::vector<EntityID> entities) {
+			auto process = [=](std::vector<EntityID> entities)
+			{
 				sf::CircleShape shape(10);
 				shape.setOrigin(5, 5);
-				for (size_t i = 0; i < entities.size(); i++) {
-
+				for (size_t i = 0; i < entities.size(); i++)
+				{
 					// Get components
 					Transform* t = scene->get<Transform>(entities[i], false);
 
@@ -351,13 +359,14 @@ namespace ecs {
 			process(entities);
 		}
 
-
-		static void instRenderParticles(Scene* scene, sf::RenderWindow* window, const float dt) {
+		static void instRenderParticles(Scene* scene, sf::RenderWindow* window, const float dt)
+		{
 			// Create processing function
-			auto process = [=](std::vector<EntityID> entities) {			
+			auto process = [=](std::vector<EntityID> entities)
+			{
 				sf::VertexArray circles(sf::Points, entities.size());
-				for (size_t i = 0; i < entities.size(); i++) {
-
+				for (size_t i = 0; i < entities.size(); i++)
+				{
 					// Get components
 					Transform* t = scene->get<Transform>(entities[i], false);
 					Particle* s = scene->get<Particle>(entities[i], false);
