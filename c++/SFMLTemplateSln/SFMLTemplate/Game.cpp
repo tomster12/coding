@@ -8,7 +8,6 @@ Game::Game()
 
 void Game::initVariables()
 {
-	// Initialize variables
 	this->window = NULL;
 	this->dt = 0.0f;
 
@@ -25,7 +24,6 @@ void Game::initVariables()
 	this->window->setFramerateLimit(framerateLimit);
 	this->window->setVerticalSyncEnabled(verticalSyncEnabled);
 
-	// Init circle
 	this->testCircle = sf::CircleShape(100);
 	this->testCircle.setFillColor(sf::Color(100, 250, 50));
 }
@@ -64,7 +62,6 @@ void Game::render()
 {
 	window->clear();
 
-	// Render circle on mouse
 	sf::Vector2i pos = sf::Mouse::getPosition(*this->window);
 	this->testCircle.setPosition(pos.x - 100.0f, pos.y - 100.0f);
 	window->draw(this->testCircle);

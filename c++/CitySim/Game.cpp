@@ -8,7 +8,6 @@ Game::Game()
 
 void Game::init()
 {
-	// Initialize variables
 	window = NULL;
 	dt = 0.0f;
 
