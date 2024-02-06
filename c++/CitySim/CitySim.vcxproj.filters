@@ -25,6 +25,9 @@
     <ClCompile Include="RoadManager.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -40,6 +43,9 @@
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="RoadManager.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>

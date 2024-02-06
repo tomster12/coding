@@ -3,6 +3,7 @@
 #include <vector>
 #include "QuadArray.h"
 #include "Game.h"
+#include "RoadManager.h"
 
 class Game;
 
@@ -23,8 +24,8 @@ private:
 	float camZoom;
 	float camZoomVel;
 
-	QuadArray quads;
-	// sf::CircleShape referenceCircle;
+	//QuadArray quads;
+	RoadManager roadManager;
 
 	static const float CAM_POS_ACC;
 	static const float CAM_POS_DRAG;
@@ -32,4 +33,5 @@ private:
 	static const float CAM_SCROLL_DRAG;
 	static const float QUAD_GAP;
 	static const float QUAD_SIZE;
+	static const sf::Color GRASS_COL;
 };
