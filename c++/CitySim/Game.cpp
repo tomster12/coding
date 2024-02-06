@@ -3,18 +3,13 @@
 
 Game::Game()
 {
-	init();
-}
-
-void Game::init()
-{
 	window = NULL;
 	dt = 0.0f;
 
 	// Setup window using default settings
 	sf::VideoMode windowMode = sf::VideoMode::getDesktopMode();
-	windowMode.width = 800;
-	windowMode.height = 800;
+	windowMode.width = 1280;
+	windowMode.height = 720;
 	std::string title = "SFML Template";
 	bool fullscreen = false;
 	unsigned framerateLimit = 120;
@@ -24,11 +19,12 @@ void Game::init()
 	window->setFramerateLimit(framerateLimit);
 	window->setVerticalSyncEnabled(verticalSyncEnabled);
 
-	sim = Simulation(window);
+	sim = new Simulation(this);
 }
 
 Game::~Game()
 {
+	delete sim;
 	delete window;
 }
 
@@ -44,27 +40,34 @@ void Game::run()
 void Game::update()
 {
 	dt = dtClock.restart().asSeconds();
-	std::cout << (1 / dt) << std::endl;
 
+	mousePosPrev = mousePos;
+	mousePos = sf::Mouse::getPosition(*window);
+	mouseScrollDelta = 0;
+
+	sf::Event sfEvent;
 	while (window->pollEvent(sfEvent))
 	{
 		switch (sfEvent.type)
 		{
-			// Closed window
 		case sf::Event::Closed:
 			window->close();
+			break;
+
+		case sf::Event::MouseWheelScrolled:
+			mouseScrollDelta = sfEvent.mouseWheelScroll.delta;
 			break;
 		}
 	}
 
-	sim.update();
+	sim->update();
 }
 
 void Game::render()
 {
 	window->clear();
 
-	sim.render();
+	sim->render();
 
 	window->display();
 }

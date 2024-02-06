@@ -19,6 +19,12 @@
     <ClCompile Include="Simulation.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="QuadArray.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadManager.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -28,6 +34,12 @@
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="Simulation.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadArray.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadManager.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>

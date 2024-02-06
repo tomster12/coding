@@ -1,22 +1,35 @@
 #pragma once
 
-struct Float2
-{
-	float x, y;
-};
+#include <vector>
+#include "QuadArray.h"
+#include "Game.h"
+
+class Game;
 
 class Simulation
 {
 public:
-	Simulation() {};
-	Simulation(sf::RenderWindow* window);
+	Simulation(Game* game);
 	void update();
 	void render();
 
 private:
-	sf::RenderWindow* window;
+	Game* game;
+	sf::RenderWindow* window = nullptr;
+	sf::Vector2f baseViewSize;
+	sf::View camView;
+	sf::Vector2f camPos;
+	sf::Vector2f camVel;
+	float camZoom;
+	float camZoomVel;
 
-	size_t circlesCount;
-	std::vector<Float2> circlesPos;
-	sf::CircleShape circlesShape;
+	QuadArray quads;
+	// sf::CircleShape referenceCircle;
+
+	static const float CAM_POS_ACC;
+	static const float CAM_POS_DRAG;
+	static const float CAM_SCROLL_ACC;
+	static const float CAM_SCROLL_DRAG;
+	static const float QUAD_GAP;
+	static const float QUAD_SIZE;
 };
