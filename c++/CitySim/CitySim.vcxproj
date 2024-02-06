@@ -166,7 +166,8 @@
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="QuadArray.cpp" />
-    <ClCompile Include="RoadManager.cpp" />
+    <ClCompile Include="RoadNetwork.cpp" />
+    <ClCompile Include="RoadRenderer.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
@@ -179,7 +180,8 @@
   <ItemGroup>
     <ClInclude Include="Game.h" />
     <ClInclude Include="QuadArray.h" />
-    <ClInclude Include="RoadManager.h" />
+    <ClInclude Include="RoadNetwork.h" />
+    <ClInclude Include="RoadRenderer.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Utility.h" />

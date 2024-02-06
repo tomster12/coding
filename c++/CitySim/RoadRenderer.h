@@ -1,0 +1,80 @@
+#pragma once
+
+#include "RoadNetwork.h"
+
+// Temporary data about seg/seg intersections on nodes
+struct RoadNodeSegmentIntersectionInfo
+{
+	int segEndA;
+	int segEndB;
+	float angle;
+	sf::Vector2f vPathIst;
+	sf::Vector2f vRoadIst;
+	std::vector<sf::Vector2f> pathCurve;
+	std::vector<sf::Vector2f> roadCurve;
+};
+
+struct RoadNodeSegmentEnd
+{
+	int id;
+	int side;
+	float sideFlip;
+	float angle;
+	float offset;
+	int offsetIst = -1;
+	sf::Vector2f n;
+	sf::Vector2f perp;
+	sf::Vector2f vRoadEndLeft;
+	sf::Vector2f vRoadEndRight;
+	sf::Vector2f vWedgeRoadLeft;
+	sf::Vector2f vWedgePathLeft;
+	sf::Vector2f vWedgeRoadRight;
+	sf::Vector2f vWedgePathRight;
+};
+
+struct RoadNodeMeshInfo
+{
+	std::vector<RoadNodeSegmentIntersectionInfo> segmentIntersections;
+	std::vector<RoadNodeSegmentEnd> segmentEnds;
+	sf::VertexArray va;
+};
+
+struct RoadSegmentMeshInfo
+{
+	sf::Vector2f d;
+	float norm = 0;
+	sf::Vector2f n;
+	sf::Vector2f perp;
+	float nodeOffsetA = 0.0f;
+	float nodeOffsetB = 0.0f;
+	sf::VertexArray va;
+};
+
+class RoadRenderer : IRoadNetworkListener
+{
+public:
+	RoadRenderer(RoadNetwork* network);
+	void render(sf::RenderWindow* window);
+	void updateMesh();
+
+	// Node meshes only exist with segments
+	virtual void onAddSegment(int id) override;
+	virtual void onRemoveSegment(int id) override;
+
+private:
+	RoadNetwork* network;
+	std::map<int, RoadNodeMeshInfo> nodeMI;
+	std::map<int, RoadSegmentMeshInfo> segmentMI;
+	std::set<int> nodesToUpdate;
+	std::set<int> segmentsToUpdate;
+
+	void initSegmentMeshInfo(int id);
+	void createNodeMesh(int id);
+	void createSegmentMesh(int id);
+
+	static const float MESH_ROAD_HWIDTH;
+	static const float MESH_PATH_HWIDTH;
+	static const float MESH_NODE_CURVE;
+	static const sf::Color MESH_ROAD_COL;
+	static const sf::Color MESH_PATH_COL;
+};

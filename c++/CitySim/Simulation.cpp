@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Simulation.h"
+#include "RoadNetwork.h"
+#include "RoadRenderer.h"
 #include <random>
 
 const float Simulation::CAM_POS_ACC = 0.13f;
@@ -23,6 +25,7 @@ Simulation::Simulation(Game* game)
 	camZoom = 1.0f;
 	camZoomVel = 0.0f;
 
+	// Initialize quads
 	/*int countX = (int)(baseViewSize.x / (QUAD_SIZE + QUAD_GAP));
 	int countY = (int)(baseViewSize.y / (QUAD_SIZE + QUAD_GAP));
 	size_t count = countX * countY;
@@ -35,18 +38,26 @@ Simulation::Simulation(Game* game)
 		);
 	}*/
 
-	roadManager = RoadManager();
-	int nodeA = roadManager.addNode(500, 320);
-	int nodeB = roadManager.addNode(250, 250);
-	int nodeC = roadManager.addNode(400, 600);
-	int nodeD = roadManager.addNode(800, 220);
-	int nodeE = roadManager.addNode(830, 450);
-	int segment0 = roadManager.addSegment(nodeA, nodeB);
-	int segment1 = roadManager.addSegment(nodeA, nodeC);
-	int segment2 = roadManager.addSegment(nodeA, nodeD);
-	int segment3 = roadManager.addSegment(nodeA, nodeE);
-	int segment4 = roadManager.addSegment(nodeD, nodeE);
-	roadManager.createMeshes();
+	// Initialize road renderer and network
+	roadNetwork = new RoadNetwork();
+	roadRenderer = new RoadRenderer(roadNetwork);
+	int nodeA = roadNetwork->addNode(500, 320);
+	int nodeB = roadNetwork->addNode(250, 250);
+	int nodeC = roadNetwork->addNode(400, 600);
+	int nodeD = roadNetwork->addNode(800, 220);
+	int nodeE = roadNetwork->addNode(830, 450);
+	roadNetwork->addSegment(nodeA, nodeB);
+	roadNetwork->addSegment(nodeA, nodeC);
+	roadNetwork->addSegment(nodeA, nodeD);
+	roadNetwork->addSegment(nodeA, nodeE);
+	roadNetwork->addSegment(nodeD, nodeE);
+	roadRenderer->updateMesh();
+}
+
+Simulation::~Simulation()
+{
+	delete roadNetwork;
+	delete roadRenderer;
 }
 
 void Simulation::update()
@@ -83,7 +94,7 @@ void Simulation::render()
 
 	window->setView(camView);
 
-	roadManager.render(window);
+	roadRenderer->render(window);
 
 	//quads.render(window);
 }

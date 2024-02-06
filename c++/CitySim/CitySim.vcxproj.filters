@@ -22,10 +22,13 @@
     <ClCompile Include="QuadArray.cpp">
       <Filter>Main</Filter>
     </ClCompile>
-    <ClCompile Include="RoadManager.cpp">
+    <ClCompile Include="RoadNetwork.cpp">
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="Utility.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadRenderer.cpp">
       <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>
@@ -42,10 +45,13 @@
     <ClInclude Include="QuadArray.h">
       <Filter>Main</Filter>
     </ClInclude>
-    <ClInclude Include="RoadManager.h">
+    <ClInclude Include="RoadNetwork.h">
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="Utility.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadRenderer.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>

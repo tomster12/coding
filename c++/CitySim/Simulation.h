@@ -3,7 +3,8 @@
 #include <vector>
 #include "QuadArray.h"
 #include "Game.h"
-#include "RoadManager.h"
+#include "RoadNetwork.h"
+#include "RoadRenderer.h"
 
 class Game;
 
@@ -11,6 +12,7 @@ class Simulation
 {
 public:
 	Simulation(Game* game);
+	~Simulation();
 	void update();
 	void render();
 
@@ -25,7 +27,8 @@ private:
 	float camZoomVel;
 
 	//QuadArray quads;
-	RoadManager roadManager;
+	RoadNetwork* roadNetwork;
+	RoadRenderer* roadRenderer;
 
 	static const float CAM_POS_ACC;
 	static const float CAM_POS_DRAG;
