@@ -25,10 +25,14 @@ private:
 	sf::Vector2f camVel;
 	float camZoom;
 	float camZoomVel;
+	sf::Vector2f mousePos;
+	sf::Vector2f mousePosPrev;
 
-	//QuadArray quads;
+	QuadArray quads;
 	RoadNetwork* roadNetwork;
 	RoadRenderer* roadRenderer;
+	int nodePlacedLast = -1;
+	bool nodePlacedLock = false;
 
 	static const float CAM_POS_ACC;
 	static const float CAM_POS_DRAG;

@@ -6,8 +6,8 @@
 
 const float Simulation::CAM_POS_ACC = 0.13f;
 const float Simulation::CAM_POS_DRAG = 0.8f;
-const float Simulation::QUAD_GAP = 2.0f;
-const float Simulation::QUAD_SIZE = 5.0f;
+const float Simulation::QUAD_GAP = 5.0f;
+const float Simulation::QUAD_SIZE = 2.0f;
 const float Simulation::CAM_SCROLL_ACC = 0.04f;
 const float Simulation::CAM_SCROLL_DRAG = 0.8f;
 const sf::Color Simulation::GRASS_COL = sf::Color(110, 140, 110);
@@ -26,7 +26,8 @@ Simulation::Simulation(Game* game)
 	camZoomVel = 0.0f;
 
 	// Initialize quads
-	/*int countX = (int)(baseViewSize.x / (QUAD_SIZE + QUAD_GAP));
+	#if 0
+	int countX = (int)(baseViewSize.x / (QUAD_SIZE + QUAD_GAP));
 	int countY = (int)(baseViewSize.y / (QUAD_SIZE + QUAD_GAP));
 	size_t count = countX * countY;
 	quads = QuadArray(count, QUAD_SIZE);
@@ -36,9 +37,10 @@ Simulation::Simulation(Game* game)
 			QUAD_GAP / 2.0f + (int)(static_cast<float>(i) / countY) * (QUAD_SIZE + QUAD_GAP),
 			QUAD_GAP / 2.0f + (i % countY) * (QUAD_SIZE + QUAD_GAP)
 		);
-	}*/
+	}
+	#endif
 
-	// Initialize road renderer and network
+	// Create example network
 	roadNetwork = new RoadNetwork();
 	roadRenderer = new RoadRenderer(roadNetwork);
 	int nodeA = roadNetwork->addNode(500, 320);
@@ -51,7 +53,7 @@ Simulation::Simulation(Game* game)
 	roadNetwork->addSegment(nodeA, nodeD);
 	roadNetwork->addSegment(nodeA, nodeE);
 	roadNetwork->addSegment(nodeD, nodeE);
-	roadRenderer->updateMesh();
+	nodePlacedLast = nodeC;
 }
 
 Simulation::~Simulation()
@@ -62,11 +64,16 @@ Simulation::~Simulation()
 
 void Simulation::update()
 {
+	// Update mouse position
+	mousePosPrev = mousePos;
+	sf::Vector2i mousePosPixels = sf::Mouse::getPosition(*window);
+	mousePos = window->mapPixelToCoords(mousePosPixels);
+
 	// Handle camera movement and zoom
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 	{
-		camVel.x += (game->getMousePosPrev().x - game->getMousePos().x) * CAM_POS_ACC * camZoom;
-		camVel.y += (game->getMousePosPrev().y - game->getMousePos().y) * CAM_POS_ACC * camZoom;
+		camVel.x += (mousePosPrev.x - mousePos.x) * CAM_POS_ACC * camZoom;
+		camVel.y += (mousePosPrev.y - mousePos.y) * CAM_POS_ACC * camZoom;
 	}
 	camZoomVel = (game->getMouseScrollDelta() != 0 ? -game->getMouseScrollDelta() : camZoomVel);
 	camPos.x += camVel.x;
@@ -77,24 +84,39 @@ void Simulation::update()
 	camZoomVel *= CAM_SCROLL_DRAG;
 	camView.setCenter(camPos);
 	camView.setSize(baseViewSize * camZoom);
+	window->setView(camView);
 
-	/*for (size_t i = 0; i < quads.getCount(); ++i)
+	// Randomly move quads
+	#if 0
+	for (size_t i = 0; i < quads.getCount(); ++i)
 	{
 		const sf::Vector2f& pos = quads.getPosition(i);
 		quads.setPosition(i,
 			pos.x + ((float)rand() / RAND_MAX) * 2.0f - 1.0f,
 			pos.y + ((float)rand() / RAND_MAX) * 2.0f - 1.0f
 		);
-	}*/
+	}
+	#endif
+
+	// Place new network node / segment
+	if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
+	{
+		if (!nodePlacedLock)
+		{
+			int newNode = roadNetwork->addNode(mousePos.x, mousePos.y);
+			roadNetwork->addSegment(nodePlacedLast, newNode);
+			nodePlacedLast = newNode;
+			nodePlacedLock = true;
+		}
+	}
+	else nodePlacedLock = false;
 }
 
 void Simulation::render()
 {
 	window->clear(GRASS_COL);
 
-	window->setView(camView);
-
 	roadRenderer->render(window);
 
-	//quads.render(window);
+	// quads.render(window);
 }

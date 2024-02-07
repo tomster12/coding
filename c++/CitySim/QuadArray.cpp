@@ -4,6 +4,7 @@
 QuadArray::QuadArray(size_t count, float size)
 	: quadsCount(count), quadsSize(size), quadsVA(sf::Triangles, count * 6), quadsPos(count)
 {
+	/*
 	for (size_t i = 0; i < count; ++i)
 	{
 		float pct1 = (float)i / (count - 1);
@@ -17,7 +18,7 @@ QuadArray::QuadArray(size_t count, float size)
 		quadsVA[i * 6 + 3].color = col2;
 		quadsVA[i * 6 + 4].color = col2;
 		quadsVA[i * 6 + 5].color = col2;
-	}
+	}*/
 };
 
 void QuadArray::render(sf::RenderWindow* window)

@@ -41,8 +41,6 @@ void Game::update()
 {
 	dt = dtClock.restart().asSeconds();
 
-	mousePosPrev = mousePos;
-	mousePos = sf::Mouse::getPosition(*window);
 	mouseScrollDelta = 0;
 
 	sf::Event sfEvent;

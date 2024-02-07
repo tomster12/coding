@@ -15,7 +15,7 @@ public:
 
 	static float getAngleClockwise(const sf::Vector2f& a, const sf::Vector2f b);
 
-	static std::vector<sf::Vector2f> getSplinePoints(const sf::Vector2f& p1, const sf::Vector2f c, const sf::Vector2f& p2, int pointCount = 10);
+	static std::vector<sf::Vector2f> sampleBezier(const sf::Vector2f& p1, const sf::Vector2f p2, const sf::Vector2f& p3, float w1 = 1.0f, float w2 = 1.0f, float w3 = 1.0f, int pointCount = 10);
 
-	static std::vector<sf::Vector2f> getArcPoints(const sf::Vector2f& p1, const sf::Vector2f c, const sf::Vector2f& p2, int pointCount = 10);
+	static std::vector<sf::Vector2f> sampleArc(const sf::Vector2f& p1, const sf::Vector2f c, const sf::Vector2f& p2, int pointCount = 10);
 };

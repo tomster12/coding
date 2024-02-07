@@ -4,7 +4,7 @@
 
 const float RoadRenderer::MESH_ROAD_HWIDTH = 10.0f;
 const float RoadRenderer::MESH_PATH_HWIDTH = 10.0f;
-const float RoadRenderer::MESH_NODE_CURVE_SIZE = 50.0f;
+const float RoadRenderer::MESH_NODE_CURVE_SIZE = 25.0f;
 const int RoadRenderer::MESH_NODE_CURVE_COUNT = 10;
 const int RoadRenderer::MESH_NODE_END_COUNT = 10;
 const sf::Color RoadRenderer::MESH_ROAD_COL = sf::Color(100, 100, 100);
@@ -44,6 +44,8 @@ void RoadRenderer::onAddSegment(int id)
 	initSegmentMeshInfo(id);
 	nodesToUpdate.insert(segment.nodeA);
 	nodesToUpdate.insert(segment.nodeB);
+	for (int segId : network->getNode(segment.nodeA).segments) segmentsToUpdate.insert(segId);
+	for (int segId : network->getNode(segment.nodeB).segments) segmentsToUpdate.insert(segId);
 	segmentsToUpdate.insert(id);
 }
 
@@ -52,6 +54,8 @@ void RoadRenderer::onRemoveSegment(int id)
 	const RoadSegment& segment = network->getSegment(id);
 	nodesToUpdate.insert(segment.nodeA);
 	nodesToUpdate.insert(segment.nodeB);
+	for (int segId : network->getNode(segment.nodeA).segments) segmentsToUpdate.insert(segId);
+	for (int segId : network->getNode(segment.nodeB).segments) segmentsToUpdate.insert(segId);
 	segmentsToUpdate.insert(id);
 }
 
@@ -99,8 +103,8 @@ void RoadRenderer::createNodeMesh(int id)
 		sf::Vector2f roadEndRight = node.pos + perp * (MESH_ROAD_HWIDTH);
 
 		// Generate curves
-		std::vector<sf::Vector2f> roadCurve = Utility::getArcPoints(roadEndLeft, node.pos, roadEndRight, MESH_NODE_END_COUNT);
-		std::vector<sf::Vector2f> pathCurve = Utility::getArcPoints(pathEndLeft, node.pos, pathEndRight, MESH_NODE_END_COUNT);
+		std::vector<sf::Vector2f> roadCurve = Utility::sampleArc(roadEndRight, node.pos, roadEndLeft, MESH_NODE_END_COUNT);
+		std::vector<sf::Vector2f> pathCurve = Utility::sampleArc(pathEndRight, node.pos, pathEndLeft, MESH_NODE_END_COUNT);
 
 		for (int i = 0; i < MESH_NODE_END_COUNT; i++)
 		{
@@ -198,7 +202,7 @@ void RoadRenderer::createNodeMesh(int id)
 		}
 	}
 
-	// Loop over intersections to create wedges
+	// Loop over intersections to create wedges and curves
 	for (size_t i = 0; i < nmi.segmentIntersections.size(); ++i)
 	{
 		RoadNodeSegmentIntersectionInfo& nsii = nmi.segmentIntersections[i];
@@ -241,11 +245,15 @@ void RoadRenderer::createNodeMesh(int id)
 		}
 
 		// Generate curves
-		nsii.vRoadIstMid = nsii.angle > M_PI ? (segEndLeft.vWedgeRoadRight + segEndRight.vWedgeRoadLeft) / 2.0f : nsii.vRoadIst;
+		//sf::Vector2f pathMid = (segEndLeft.vWedgePathRight + segEndRight.vWedgePathLeft) / 2.0f;
+		//sf::Vector2f softRoadCorner = nsii.vRoadIst + (roadMid - nsii.vRoadIst) * 0.7f;
+		//sf::Vector2f softPathCorner = nsii.vPathIst + (pathMid - nsii.vPathIst) * 0.7f;
 
-		std::vector<sf::Vector2f> roadCurve = Utility::getSplinePoints(segEndLeft.vWedgeRoadRight, nsii.vRoadIst, segEndRight.vWedgeRoadLeft, MESH_NODE_CURVE_COUNT);
-		std::vector<sf::Vector2f> pathCurve = Utility::getSplinePoints(segEndLeft.vWedgePathRight, nsii.vPathIst, segEndRight.vWedgePathLeft, MESH_NODE_CURVE_COUNT);
+		std::vector<sf::Vector2f> roadCurve = Utility::sampleBezier(segEndLeft.vWedgeRoadRight, nsii.vRoadIst, segEndRight.vWedgeRoadLeft, 1.0f, 1.0f, 1.0f, MESH_NODE_CURVE_COUNT);
+		std::vector<sf::Vector2f> pathCurve = Utility::sampleBezier(segEndLeft.vWedgePathRight, nsii.vPathIst, segEndRight.vWedgePathLeft, 1.0f, 1.0f, 1.0f, MESH_NODE_CURVE_COUNT);
 
+		sf::Vector2f roadMid = (segEndLeft.vWedgeRoadRight + segEndRight.vWedgeRoadLeft) / 2.0f;
+		nsii.vRoadIstMid = nsii.angle > M_PI ? roadMid : nsii.vRoadIst;
 		for (int i = 0; i < MESH_NODE_CURVE_COUNT; i++)
 		{
 			nmi.va.append({ nsii.vRoadIstMid, MESH_ROAD_COL });
@@ -294,6 +302,10 @@ void RoadRenderer::createNodeMesh(int id)
 			nmi.va.append({ node.pos, MESH_ROAD_COL });
 		}
 	}
+
+	// Cleanup data
+	nmi.segmentIntersections.clear();
+	nmi.segmentEnds.clear();
 }
 
 void RoadRenderer::createSegmentMesh(int id)
