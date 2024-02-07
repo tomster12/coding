@@ -10,8 +10,7 @@ struct RoadNodeSegmentIntersectionInfo
 	float angle;
 	sf::Vector2f vPathIst;
 	sf::Vector2f vRoadIst;
-	std::vector<sf::Vector2f> pathCurve;
-	std::vector<sf::Vector2f> roadCurve;
+	sf::Vector2f vRoadIstMid;
 };
 
 struct RoadNodeSegmentEnd
@@ -74,7 +73,9 @@ private:
 
 	static const float MESH_ROAD_HWIDTH;
 	static const float MESH_PATH_HWIDTH;
-	static const float MESH_NODE_CURVE;
+	static const float MESH_NODE_CURVE_SIZE;
+	static const int MESH_NODE_CURVE_COUNT;
+	static const int MESH_NODE_END_COUNT;
 	static const sf::Color MESH_ROAD_COL;
 	static const sf::Color MESH_PATH_COL;
 };

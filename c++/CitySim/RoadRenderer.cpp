@@ -4,7 +4,9 @@
 
 const float RoadRenderer::MESH_ROAD_HWIDTH = 10.0f;
 const float RoadRenderer::MESH_PATH_HWIDTH = 10.0f;
-const float RoadRenderer::MESH_NODE_CURVE = 10.0f;
+const float RoadRenderer::MESH_NODE_CURVE_SIZE = 50.0f;
+const int RoadRenderer::MESH_NODE_CURVE_COUNT = 10;
+const int RoadRenderer::MESH_NODE_END_COUNT = 10;
 const sf::Color RoadRenderer::MESH_ROAD_COL = sf::Color(100, 100, 100);
 const sf::Color RoadRenderer::MESH_PATH_COL = sf::Color(180, 180, 180);
 
@@ -76,16 +78,6 @@ void RoadRenderer::createNodeMesh(int id)
 	RoadNodeMeshInfo& nmi = nodeMI[id];
 	nmi.va = sf::VertexArray{ sf::Triangles };
 
-	/*const auto addQuad = [&](const sf::Vertex& a, const sf::Vertex& b, const sf::Vertex& c, const sf::Vertex& d)
-	{
-		nmi.va.append(a);
-		nmi.va.append(b);
-		nmi.va.append(c);
-		nmi.va.append(a);
-		nmi.va.append(c);
-		nmi.va.append(d);
-	};*/
-
 	// -- 0 segments
 	if (node.segments.size() == 0) return;
 
@@ -99,9 +91,31 @@ void RoadRenderer::createNodeMesh(int id)
 		int side = segment.nodeA == id ? 0 : 1;
 		float sideFlip = side == 0 ? 1.0f : -1.0f;
 		const sf::Vector2f n = smi.n * sideFlip;
+		const sf::Vector2f perp = smi.perp * sideFlip;
 
-		//nmi.va.append({ node.pos, sf::Color::White });
-		//nmi.va.append({ node.pos - n * 40.0f, sf::Color::Yellow });
+		sf::Vector2f pathEndLeft = node.pos - perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
+		sf::Vector2f roadEndLeft = node.pos - perp * (MESH_ROAD_HWIDTH);
+		sf::Vector2f pathEndRight = node.pos + perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
+		sf::Vector2f roadEndRight = node.pos + perp * (MESH_ROAD_HWIDTH);
+
+		// Generate curves
+		std::vector<sf::Vector2f> roadCurve = Utility::getArcPoints(roadEndLeft, node.pos, roadEndRight, MESH_NODE_END_COUNT);
+		std::vector<sf::Vector2f> pathCurve = Utility::getArcPoints(pathEndLeft, node.pos, pathEndRight, MESH_NODE_END_COUNT);
+
+		for (int i = 0; i < MESH_NODE_END_COUNT; i++)
+		{
+			nmi.va.append({ node.pos, MESH_ROAD_COL });
+			nmi.va.append({ roadCurve[i], MESH_ROAD_COL });
+			nmi.va.append({ roadCurve[i + 1], MESH_ROAD_COL });
+
+			nmi.va.append({ roadCurve[i], MESH_PATH_COL });
+			nmi.va.append({ pathCurve[i], MESH_PATH_COL });
+			nmi.va.append({ roadCurve[i + 1], MESH_PATH_COL });
+
+			nmi.va.append({ roadCurve[i + 1], MESH_PATH_COL });
+			nmi.va.append({ pathCurve[i], MESH_PATH_COL });
+			nmi.va.append({ pathCurve[i + 1], MESH_PATH_COL });
+		}
 
 		return;
 	}
@@ -165,8 +179,8 @@ void RoadRenderer::createNodeMesh(int id)
 		if (nsii.angle < M_PI)
 		{
 			const sf::Vector2f istPathD = nsii.vPathIst - node.pos;
-			float offsetA = segEndA.n.x * istPathD.x + segEndA.n.y * istPathD.y + MESH_NODE_CURVE;
-			float offsetB = segEndB.n.x * istPathD.x + segEndB.n.y * istPathD.y + MESH_NODE_CURVE;
+			float offsetA = segEndA.n.x * istPathD.x + segEndA.n.y * istPathD.y + MESH_NODE_CURVE_SIZE;
+			float offsetB = segEndB.n.x * istPathD.x + segEndB.n.y * istPathD.y + MESH_NODE_CURVE_SIZE;
 			if (offsetA > segEndA.offset)
 			{
 				segEndA.offset = offsetA;
@@ -197,10 +211,10 @@ void RoadRenderer::createNodeMesh(int id)
 
 		segEndLeft.vRoadEndRight = node.pos + segEndLeft.n * segEndLeft.offset + segEndLeft.perp * MESH_ROAD_HWIDTH;
 		segEndRight.vRoadEndLeft = node.pos + segEndRight.n * segEndRight.offset - segEndRight.perp * MESH_ROAD_HWIDTH;
-		segEndLeft.vWedgeRoadRight = nsii.vRoadIst + segEndLeft.n * MESH_NODE_CURVE;
-		segEndLeft.vWedgePathRight = nsii.vPathIst + segEndLeft.n * MESH_NODE_CURVE;
-		segEndRight.vWedgeRoadLeft = nsii.vRoadIst + segEndRight.n * MESH_NODE_CURVE;
-		segEndRight.vWedgePathLeft = nsii.vPathIst + segEndRight.n * MESH_NODE_CURVE;
+		segEndLeft.vWedgeRoadRight = nsii.vRoadIst + segEndLeft.n * MESH_NODE_CURVE_SIZE;
+		segEndLeft.vWedgePathRight = nsii.vPathIst + segEndLeft.n * MESH_NODE_CURVE_SIZE;
+		segEndRight.vWedgeRoadLeft = nsii.vRoadIst + segEndRight.n * MESH_NODE_CURVE_SIZE;
+		segEndRight.vWedgePathLeft = nsii.vPathIst + segEndRight.n * MESH_NODE_CURVE_SIZE;
 
 		// Left segment end right edge
 		nmi.va.append({ segEndLeft.vWedgeRoadRight, MESH_PATH_COL });
@@ -225,6 +239,27 @@ void RoadRenderer::createNodeMesh(int id)
 			nmi.va.append({ vPathEndLeft, MESH_PATH_COL });
 			nmi.va.append({ segEndRight.vRoadEndLeft, MESH_PATH_COL });
 		}
+
+		// Generate curves
+		nsii.vRoadIstMid = nsii.angle > M_PI ? (segEndLeft.vWedgeRoadRight + segEndRight.vWedgeRoadLeft) / 2.0f : nsii.vRoadIst;
+
+		std::vector<sf::Vector2f> roadCurve = Utility::getSplinePoints(segEndLeft.vWedgeRoadRight, nsii.vRoadIst, segEndRight.vWedgeRoadLeft, MESH_NODE_CURVE_COUNT);
+		std::vector<sf::Vector2f> pathCurve = Utility::getSplinePoints(segEndLeft.vWedgePathRight, nsii.vPathIst, segEndRight.vWedgePathLeft, MESH_NODE_CURVE_COUNT);
+
+		for (int i = 0; i < MESH_NODE_CURVE_COUNT; i++)
+		{
+			nmi.va.append({ nsii.vRoadIstMid, MESH_ROAD_COL });
+			nmi.va.append({ roadCurve[i], MESH_ROAD_COL });
+			nmi.va.append({ roadCurve[i + 1], MESH_ROAD_COL });
+
+			nmi.va.append({ roadCurve[i], MESH_PATH_COL });
+			nmi.va.append({ pathCurve[i], MESH_PATH_COL });
+			nmi.va.append({ roadCurve[i + 1], MESH_PATH_COL });
+
+			nmi.va.append({ roadCurve[i + 1], MESH_PATH_COL });
+			nmi.va.append({ pathCurve[i], MESH_PATH_COL });
+			nmi.va.append({ pathCurve[i + 1], MESH_PATH_COL });
+		}
 	}
 
 	// Loop over segment ends to fill in road between wedges
@@ -246,33 +281,18 @@ void RoadRenderer::createNodeMesh(int id)
 		// Quad of edge of curve <-> road intersection
 		nmi.va.append({ segEnd.vWedgeRoadLeft, MESH_ROAD_COL });
 		nmi.va.append({ segEnd.vWedgeRoadRight, MESH_ROAD_COL });
-		nmi.va.append({ rightNsii.vRoadIst, MESH_ROAD_COL });
-		nmi.va.append({ rightNsii.vRoadIst, MESH_ROAD_COL });
-		nmi.va.append({ leftNsii.vRoadIst, MESH_ROAD_COL });
+		nmi.va.append({ rightNsii.vRoadIstMid, MESH_ROAD_COL });
+		nmi.va.append({ rightNsii.vRoadIstMid, MESH_ROAD_COL });
+		nmi.va.append({ leftNsii.vRoadIstMid, MESH_ROAD_COL });
 		nmi.va.append({ segEnd.vWedgeRoadLeft, MESH_ROAD_COL });
 
 		// Triangle into middle of node
 		if (nmi.segmentEnds.size() > 2)
 		{
-			nmi.va.append({ leftNsii.vRoadIst, MESH_ROAD_COL });
-			nmi.va.append({ rightNsii.vRoadIst, MESH_ROAD_COL });
+			nmi.va.append({ leftNsii.vRoadIstMid, MESH_ROAD_COL });
+			nmi.va.append({ rightNsii.vRoadIstMid, MESH_ROAD_COL });
 			nmi.va.append({ node.pos, MESH_ROAD_COL });
 		}
-
-		// Debug mesh for curves
-		nmi.va.append({ leftNsii.vPathIst, sf::Color::Magenta });
-		nmi.va.append({ segEnd.vWedgePathLeft, sf::Color::Magenta });
-		nmi.va.append({ segEnd.vWedgeRoadLeft, sf::Color::Magenta });
-		nmi.va.append({ segEnd.vWedgeRoadLeft, sf::Color::Magenta });
-		nmi.va.append({ leftNsii.vRoadIst, sf::Color::Magenta });
-		nmi.va.append({ leftNsii.vPathIst, sf::Color::Magenta });
-
-		nmi.va.append({ rightNsii.vPathIst, sf::Color::Magenta });
-		nmi.va.append({ segEnd.vWedgePathRight, sf::Color::Magenta });
-		nmi.va.append({ segEnd.vWedgeRoadRight, sf::Color::Magenta });
-		nmi.va.append({ segEnd.vWedgeRoadRight, sf::Color::Magenta });
-		nmi.va.append({ rightNsii.vRoadIst, sf::Color::Magenta });
-		nmi.va.append({ rightNsii.vPathIst, sf::Color::Magenta });
 	}
 }
 
