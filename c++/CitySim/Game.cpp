@@ -6,11 +6,13 @@ Game::Game()
 	window = NULL;
 	dt = 0.0f;
 
+	srand((size_t)time(NULL));
+
 	// Setup window using default settings
 	sf::VideoMode windowMode = sf::VideoMode::getDesktopMode();
-	windowMode.width = 1280;
-	windowMode.height = 720;
-	std::string title = "SFML Template";
+	windowMode.width = 1920;
+	windowMode.height = 1080;
+	std::string title = "City Simulation";
 	bool fullscreen = false;
 	unsigned framerateLimit = 120;
 	bool verticalSyncEnabled = false;
@@ -19,7 +21,7 @@ Game::Game()
 	window->setFramerateLimit(framerateLimit);
 	window->setVerticalSyncEnabled(verticalSyncEnabled);
 
-	sim = new Simulation(this);
+	sim = new Simulation(this, window);
 }
 
 Game::~Game()
@@ -41,6 +43,8 @@ void Game::update()
 {
 	dt = dtClock.restart().asSeconds();
 
+	mousePosPrev = mousePos;
+	mousePos = sf::Mouse::getPosition(*window);
 	mouseScrollDelta = 0;
 
 	sf::Event sfEvent;

@@ -1,10 +1,8 @@
 #include "stdafx.h"
 #include "RoadRenderer.h"
+#include "World.h"
 #include "Utility.h"
 
-const float RoadRenderer::MESH_ROAD_HWIDTH = 10.0f;
-const float RoadRenderer::MESH_PATH_HWIDTH = 10.0f;
-const float RoadRenderer::MESH_NODE_CURVE_SIZE = 25.0f;
 const int RoadRenderer::MESH_NODE_CURVE_COUNT = 10;
 const int RoadRenderer::MESH_NODE_END_COUNT = 10;
 const sf::Color RoadRenderer::MESH_ROAD_COL = sf::Color(100, 100, 100);
@@ -40,7 +38,7 @@ void RoadRenderer::updateMesh()
 
 void RoadRenderer::onAddSegment(int id)
 {
-	const RoadSegment& segment = network->getSegment(id);
+	const RoadNetworkSegment& segment = network->getSegment(id);
 	initSegmentMeshInfo(id);
 	nodesToUpdate.insert(segment.nodeA);
 	nodesToUpdate.insert(segment.nodeB);
@@ -51,7 +49,7 @@ void RoadRenderer::onAddSegment(int id)
 
 void RoadRenderer::onRemoveSegment(int id)
 {
-	const RoadSegment& segment = network->getSegment(id);
+	const RoadNetworkSegment& segment = network->getSegment(id);
 	nodesToUpdate.insert(segment.nodeA);
 	nodesToUpdate.insert(segment.nodeB);
 	for (int segId : network->getNode(segment.nodeA).segments) segmentsToUpdate.insert(segId);
@@ -61,9 +59,9 @@ void RoadRenderer::onRemoveSegment(int id)
 
 void RoadRenderer::initSegmentMeshInfo(int id)
 {
-	const RoadSegment& segment = network->getSegment(id);
-	const RoadNode& nodeA = network->getNode(segment.nodeA);
-	const RoadNode& nodeB = network->getNode(segment.nodeB);
+	const RoadNetworkSegment& segment = network->getSegment(id);
+	const RoadNetworkNode& nodeA = network->getNode(segment.nodeA);
+	const RoadNetworkNode& nodeB = network->getNode(segment.nodeB);
 
 	segmentMI[id] = {};
 	RoadSegmentMeshInfo& smi = segmentMI[id];
@@ -76,20 +74,22 @@ void RoadRenderer::initSegmentMeshInfo(int id)
 
 void RoadRenderer::createNodeMesh(int id)
 {
-	const RoadNode& node = network->getNode(id);
+	const RoadNetworkNode& node = network->getNode(id);
 
 	nodeMI[id] = {};
 	RoadNodeMeshInfo& nmi = nodeMI[id];
 	nmi.va = sf::VertexArray{ sf::Triangles };
 
 	// -- 0 segments
+
 	if (node.segments.size() == 0) return;
 
 	// -- 1 segments
+
 	if (node.segments.size() == 1)
 	{
 		int segId = *node.segments.begin();
-		const RoadSegment& segment = network->getSegment(segId);
+		const RoadNetworkSegment& segment = network->getSegment(segId);
 		RoadSegmentMeshInfo& smi = segmentMI[segId];
 
 		int side = segment.nodeA == id ? 0 : 1;
@@ -97,10 +97,10 @@ void RoadRenderer::createNodeMesh(int id)
 		const sf::Vector2f n = smi.n * sideFlip;
 		const sf::Vector2f perp = smi.perp * sideFlip;
 
-		sf::Vector2f pathEndLeft = node.pos - perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
-		sf::Vector2f roadEndLeft = node.pos - perp * (MESH_ROAD_HWIDTH);
-		sf::Vector2f pathEndRight = node.pos + perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
-		sf::Vector2f roadEndRight = node.pos + perp * (MESH_ROAD_HWIDTH);
+		sf::Vector2f pathEndLeft = node.pos - perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH);
+		sf::Vector2f roadEndLeft = node.pos - perp * (World::ROAD_HWIDTH);
+		sf::Vector2f pathEndRight = node.pos + perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH);
+		sf::Vector2f roadEndRight = node.pos + perp * (World::ROAD_HWIDTH);
 
 		// Generate curves
 		std::vector<sf::Vector2f> roadCurve = Utility::sampleArc(roadEndRight, node.pos, roadEndLeft, MESH_NODE_END_COUNT);
@@ -129,7 +129,7 @@ void RoadRenderer::createNodeMesh(int id)
 	// For each segment of the node pull out info
 	for (int segId : node.segments)
 	{
-		const RoadSegment& segment = network->getSegment(segId);
+		const RoadNetworkSegment& segment = network->getSegment(segId);
 		const RoadSegmentMeshInfo& smi = segmentMI[segId];
 
 		int side = segment.nodeA == id ? 0 : 1;
@@ -172,10 +172,10 @@ void RoadRenderer::createNodeMesh(int id)
 		// Calculate key intersection info
 		nsii.angle = Utility::getAngleClockwise(segEndA.n, segEndB.n);
 		float istFlip = nsii.angle < M_PI ? -1.0f : 1.0f;
-		const sf::Vector2f pathIstA = node.pos + segEndA.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
-		const sf::Vector2f pathIstB = node.pos - segEndB.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
-		const sf::Vector2f roadIstA = node.pos + segEndA.perp * (MESH_ROAD_HWIDTH);
-		const sf::Vector2f roadIstB = node.pos - segEndB.perp * (MESH_ROAD_HWIDTH);
+		const sf::Vector2f pathIstA = node.pos + segEndA.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH);
+		const sf::Vector2f pathIstB = node.pos - segEndB.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH);
+		const sf::Vector2f roadIstA = node.pos + segEndA.perp * (World::ROAD_HWIDTH);
+		const sf::Vector2f roadIstB = node.pos - segEndB.perp * (World::ROAD_HWIDTH);
 		nsii.vPathIst = Utility::getIntersection(pathIstA, segEndA.n * istFlip, pathIstB, segEndB.n * istFlip);
 		nsii.vRoadIst = Utility::getIntersection(roadIstA, segEndA.n * istFlip, roadIstB, segEndB.n * istFlip);
 
@@ -183,8 +183,8 @@ void RoadRenderer::createNodeMesh(int id)
 		if (nsii.angle < M_PI)
 		{
 			const sf::Vector2f istPathD = nsii.vPathIst - node.pos;
-			float offsetA = segEndA.n.x * istPathD.x + segEndA.n.y * istPathD.y + MESH_NODE_CURVE_SIZE;
-			float offsetB = segEndB.n.x * istPathD.x + segEndB.n.y * istPathD.y + MESH_NODE_CURVE_SIZE;
+			float offsetA = segEndA.n.x * istPathD.x + segEndA.n.y * istPathD.y + World::World::NODE_CURVE_SIZE;
+			float offsetB = segEndB.n.x * istPathD.x + segEndB.n.y * istPathD.y + World::World::NODE_CURVE_SIZE;
 			if (offsetA > segEndA.offset)
 			{
 				segEndA.offset = offsetA;
@@ -213,12 +213,12 @@ void RoadRenderer::createNodeMesh(int id)
 		const RoadSegmentMeshInfo& smiLeft = segmentMI[segEndLeft.id];
 		const RoadSegmentMeshInfo& smiRight = segmentMI[segEndRight.id];
 
-		segEndLeft.vRoadEndRight = node.pos + segEndLeft.n * segEndLeft.offset + segEndLeft.perp * MESH_ROAD_HWIDTH;
-		segEndRight.vRoadEndLeft = node.pos + segEndRight.n * segEndRight.offset - segEndRight.perp * MESH_ROAD_HWIDTH;
-		segEndLeft.vWedgeRoadRight = nsii.vRoadIst + segEndLeft.n * MESH_NODE_CURVE_SIZE;
-		segEndLeft.vWedgePathRight = nsii.vPathIst + segEndLeft.n * MESH_NODE_CURVE_SIZE;
-		segEndRight.vWedgeRoadLeft = nsii.vRoadIst + segEndRight.n * MESH_NODE_CURVE_SIZE;
-		segEndRight.vWedgePathLeft = nsii.vPathIst + segEndRight.n * MESH_NODE_CURVE_SIZE;
+		segEndLeft.vRoadEndRight = node.pos + segEndLeft.n * segEndLeft.offset + segEndLeft.perp * World::ROAD_HWIDTH;
+		segEndRight.vRoadEndLeft = node.pos + segEndRight.n * segEndRight.offset - segEndRight.perp * World::ROAD_HWIDTH;
+		segEndLeft.vWedgeRoadRight = nsii.vRoadIst + segEndLeft.n * World::NODE_CURVE_SIZE;
+		segEndLeft.vWedgePathRight = nsii.vPathIst + segEndLeft.n * World::NODE_CURVE_SIZE;
+		segEndRight.vWedgeRoadLeft = nsii.vRoadIst + segEndRight.n * World::NODE_CURVE_SIZE;
+		segEndRight.vWedgePathLeft = nsii.vPathIst + segEndRight.n * World::NODE_CURVE_SIZE;
 
 		// Left segment end right edge
 		nmi.va.append({ segEndLeft.vWedgeRoadRight, MESH_PATH_COL });
@@ -226,7 +226,7 @@ void RoadRenderer::createNodeMesh(int id)
 		nmi.va.append({ segEndLeft.vRoadEndRight, MESH_PATH_COL });
 		if (segEndLeft.offsetIst != i)
 		{
-			sf::Vector2f vPathEndRight = node.pos + segEndLeft.n * segEndLeft.offset + segEndLeft.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
+			sf::Vector2f vPathEndRight = node.pos + segEndLeft.n * segEndLeft.offset + segEndLeft.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH);
 			nmi.va.append({ segEndLeft.vWedgePathRight, MESH_PATH_COL });
 			nmi.va.append({ vPathEndRight, MESH_PATH_COL });
 			nmi.va.append({ segEndLeft.vRoadEndRight, MESH_PATH_COL });
@@ -238,17 +238,13 @@ void RoadRenderer::createNodeMesh(int id)
 		nmi.va.append({ segEndRight.vRoadEndLeft, MESH_PATH_COL });
 		if (segEndRight.offsetIst != i)
 		{
-			sf::Vector2f vPathEndLeft = node.pos + segEndRight.n * segEndRight.offset - segEndRight.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH);
+			sf::Vector2f vPathEndLeft = node.pos + segEndRight.n * segEndRight.offset - segEndRight.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH);
 			nmi.va.append({ segEndRight.vWedgePathLeft, MESH_PATH_COL });
 			nmi.va.append({ vPathEndLeft, MESH_PATH_COL });
 			nmi.va.append({ segEndRight.vRoadEndLeft, MESH_PATH_COL });
 		}
 
 		// Generate curves
-		//sf::Vector2f pathMid = (segEndLeft.vWedgePathRight + segEndRight.vWedgePathLeft) / 2.0f;
-		//sf::Vector2f softRoadCorner = nsii.vRoadIst + (roadMid - nsii.vRoadIst) * 0.7f;
-		//sf::Vector2f softPathCorner = nsii.vPathIst + (pathMid - nsii.vPathIst) * 0.7f;
-
 		std::vector<sf::Vector2f> roadCurve = Utility::sampleBezier(segEndLeft.vWedgeRoadRight, nsii.vRoadIst, segEndRight.vWedgeRoadLeft, 1.0f, 1.0f, 1.0f, MESH_NODE_CURVE_COUNT);
 		std::vector<sf::Vector2f> pathCurve = Utility::sampleBezier(segEndLeft.vWedgePathRight, nsii.vPathIst, segEndRight.vWedgePathLeft, 1.0f, 1.0f, 1.0f, MESH_NODE_CURVE_COUNT);
 
@@ -310,9 +306,9 @@ void RoadRenderer::createNodeMesh(int id)
 
 void RoadRenderer::createSegmentMesh(int id)
 {
-	const RoadSegment& segment = network->getSegment(id);
-	const RoadNode& nodeA = network->getNode(segment.nodeA);
-	const RoadNode& nodeB = network->getNode(segment.nodeB);
+	const RoadNetworkSegment& segment = network->getSegment(id);
+	const RoadNetworkNode& nodeA = network->getNode(segment.nodeA);
+	const RoadNetworkNode& nodeB = network->getNode(segment.nodeB);
 	RoadSegmentMeshInfo& smi = segmentMI[id];
 
 	sf::Vector2f segEndA = nodeA.pos + smi.n * smi.nodeOffsetA;
@@ -331,24 +327,24 @@ void RoadRenderer::createSegmentMesh(int id)
 	};
 
 	addQuad(
-		{ segEndA - smi.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH), MESH_PATH_COL },
-		{ segEndB - smi.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH), MESH_PATH_COL },
-		{ segEndB - smi.perp * MESH_ROAD_HWIDTH, MESH_PATH_COL },
-		{ segEndA - smi.perp * MESH_ROAD_HWIDTH, MESH_PATH_COL }
+		{ segEndA - smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
+		{ segEndB - smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
+		{ segEndB - smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL },
+		{ segEndA - smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL }
 	);
 
 	addQuad(
-		{ segEndA - smi.perp * MESH_ROAD_HWIDTH, MESH_ROAD_COL },
-		{ segEndB - smi.perp * MESH_ROAD_HWIDTH, MESH_ROAD_COL },
-		{ segEndB + smi.perp * MESH_ROAD_HWIDTH, MESH_ROAD_COL },
-		{ segEndA + smi.perp * MESH_ROAD_HWIDTH, MESH_ROAD_COL }
+		{ segEndA - smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
+		{ segEndB - smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
+		{ segEndB + smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
+		{ segEndA + smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL }
 	);
 
 	addQuad(
-		{ segEndA + smi.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH), MESH_PATH_COL },
-		{ segEndB + smi.perp * (MESH_ROAD_HWIDTH + MESH_PATH_HWIDTH), MESH_PATH_COL },
-		{ segEndB + smi.perp * MESH_ROAD_HWIDTH, MESH_PATH_COL },
-		{ segEndA + smi.perp * MESH_ROAD_HWIDTH, MESH_PATH_COL }
+		{ segEndA + smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
+		{ segEndB + smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
+		{ segEndB + smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL },
+		{ segEndA + smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL }
 	);
 
 	segmentMI[id] = std::move(smi);

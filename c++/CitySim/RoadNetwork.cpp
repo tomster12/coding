@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "RoadNetwork.h"
-#include "math.h"
 #include "Utility.h"
 
 int RoadNetwork::addNode(float x, float y)
@@ -17,7 +16,7 @@ void RoadNetwork::removeNode(int id)
 {
 	for (IRoadNetworkListener* l : listeners) l->onRemoveNode(id);
 
-	const RoadNode& node = getNode(id);
+	const RoadNetworkNode& node = getNode(id);
 
 	for (int id : node.segments) removeSegment(id);
 
@@ -66,13 +65,38 @@ void RoadNetwork::removeSegment(int id)
 {
 	for (IRoadNetworkListener* l : listeners) l->onRemoveSegment(id);
 
-	const RoadSegment& segment = getSegment(id);
+	const RoadNetworkSegment& segment = getSegment(id);
 
 	nodes[segment.nodeA].segments.erase(id);
 	nodes[segment.nodeB].segments.erase(id);
 
 	segments.erase(id);
 	freedSegmentIds.insert(id);
+}
+
+int RoadNetwork::getClosestSegment(float x, float y)
+{
+	int closestId = -1;
+	float closestDistSq = 0;
+
+	for (const auto& pair : segments)
+	{
+		sf::Vector2f p = Utility::getClosestPointOnLine({ x, y },
+			nodes[pair.second.nodeA].pos,
+			nodes[pair.second.nodeB].pos);
+
+		float dx = p.x - x;
+		float dy = p.y - y;
+		float distSq = dx * dx + dy * dy;
+
+		if (closestId == -1 || distSq < closestDistSq)
+		{
+			closestId = pair.first;
+			closestDistSq = distSq;
+		}
+	}
+
+	return closestId;
 }
 
 int RoadNetwork::getNodeId()

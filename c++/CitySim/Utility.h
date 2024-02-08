@@ -11,6 +11,8 @@ public:
 
 	static float getAngle(const sf::Vector2f& a);
 
+	static sf::Vector2f getClosestPointOnLine(const sf::Vector2f& p, const sf::Vector2f& a, const sf::Vector2f& b);
+
 	static sf::Vector2f getIntersection(const sf::Vector2f& p1, const sf::Vector2f& r1, const sf::Vector2f& p2, const sf::Vector2f& r2);
 
 	static float getAngleClockwise(const sf::Vector2f& a, const sf::Vector2f b);

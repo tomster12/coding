@@ -1,6 +1,6 @@
 #include "stdafx.h"
-#include "Utility.h"
 #include "math.h"
+#include "Utility.h"
 
 std::vector<sf::Vector2f> Utility::getCurvePoints(const sf::Vector2f& a, const sf::Vector2f& b, const sf::Vector2f& p, float segmentSize)
 {
@@ -16,6 +16,16 @@ float Utility::getAngle(const sf::Vector2f& a)
 {
 	float angle = atan2(a.y, a.x);
 	return angle < 0 ? (angle + (float)M_PI * 2.0f) : angle;
+}
+
+sf::Vector2f Utility::getClosestPointOnLine(const sf::Vector2f& p, const sf::Vector2f& a, const sf::Vector2f& b)
+{
+	float l2 = (b.x - a.x) * (b.x - a.x) + (b.y - a.y) * (b.y - a.y);
+	if (l2 == 0) return b;
+
+	float t = ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / l2;
+	t = std::max(0.0f, std::min(1.0f, t));
+	return a + t * (b - a);
 }
 
 sf::Vector2f Utility::getIntersection(const sf::Vector2f& p1, const sf::Vector2f& r1, const sf::Vector2f& p2, const sf::Vector2f& r2)

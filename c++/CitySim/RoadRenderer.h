@@ -2,7 +2,6 @@
 
 #include "RoadNetwork.h"
 
-// Temporary data about seg/seg intersections on nodes
 struct RoadNodeSegmentIntersectionInfo
 {
 	int segEndA;
@@ -60,9 +59,6 @@ public:
 	virtual void onAddSegment(int id) override;
 	virtual void onRemoveSegment(int id) override;
 
-	static const float MESH_ROAD_HWIDTH;
-	static const float MESH_PATH_HWIDTH;
-	static const float MESH_NODE_CURVE_SIZE;
 	static const int MESH_NODE_CURVE_COUNT;
 	static const int MESH_NODE_END_COUNT;
 	static const sf::Color MESH_ROAD_COL;

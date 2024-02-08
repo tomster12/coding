@@ -31,6 +31,15 @@
     <ClCompile Include="RoadRenderer.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="RoadPathfinding.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerController.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -52,6 +61,15 @@
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="RoadRenderer.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadPathfinding.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerController.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="World.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>

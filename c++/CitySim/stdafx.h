@@ -8,6 +8,9 @@
 #include <vector>
 #include <stack>
 #include <map>
+#include <random>
+#include <functional>
+#include <math.h>
 
 #include <SFML/Graphics.hpp>
 #include <SFML/Window.hpp>

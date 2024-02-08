@@ -165,8 +165,10 @@
   <ItemGroup>
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="PlayerController.cpp" />
     <ClCompile Include="QuadArray.cpp" />
     <ClCompile Include="RoadNetwork.cpp" />
+    <ClCompile Include="RoadPathfinding.cpp" />
     <ClCompile Include="RoadRenderer.cpp" />
     <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -176,15 +178,19 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Utility.cpp" />
+    <ClCompile Include="World.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h" />
+    <ClInclude Include="PlayerController.h" />
     <ClInclude Include="QuadArray.h" />
     <ClInclude Include="RoadNetwork.h" />
+    <ClInclude Include="RoadPathfinding.h" />
     <ClInclude Include="RoadRenderer.h" />
     <ClInclude Include="Simulation.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Utility.h" />
+    <ClInclude Include="World.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
