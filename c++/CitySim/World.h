@@ -2,6 +2,7 @@
 
 #include "RoadNetwork.h"
 #include "RoadRenderer.h"
+#include "BuildingManager.h"
 #include "QuadArray.h"
 
 class Game;
@@ -11,6 +12,7 @@ class World
 {
 public:
 	World(Game* game, sf::RenderWindow* window, Simulation* simulation);
+	~World();
 	void update();
 	void render();
 
@@ -31,5 +33,6 @@ private:
 
 	RoadNetwork* roadNetwork;
 	RoadRenderer* roadRenderer;
+	BuildingManager* buildingManager;
 	QuadArray quads;
 };

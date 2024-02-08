@@ -1,5 +1,8 @@
 #pragma once
 
+#include "RoadNetwork.h"
+#include "RoadRenderer.h"
+
 class Game;
 class Simulation;
 class World;
@@ -8,6 +11,7 @@ class PlayerController
 {
 public:
 	PlayerController(Game* game, sf::RenderWindow* window, Simulation* simulation, World* world);
+	~PlayerController();
 	void update();
 	void render();
 
@@ -23,9 +27,12 @@ private:
 	float camZoom;
 	float camZoomVel;
 
-	sf::CircleShape indicator;
-	int lastPlacedNode = 0;
 	bool nodePlacementLock = false;
+	RoadNetwork* buildingRoadNetwork;
+	RoadRenderer* buildingRoadRenderer;
+	int buildingNodeFrom, buildingBNodeFrom, buildingBNodeTo;
+
+	sf::CircleShape indicator;
 
 	static const float CAM_POS_VEL;
 	static const float CAM_SCROLL_ACC;

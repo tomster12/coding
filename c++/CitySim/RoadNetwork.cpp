@@ -12,6 +12,15 @@ int RoadNetwork::addNode(float x, float y)
 	return id;
 }
 
+void RoadNetwork::moveNode(int id, float x, float y)
+{
+	const sf::Vector2f oldPos = { nodes[id].pos.x, nodes[id].pos.y };
+	nodes[id].pos = { x, y };
+	const sf::Vector2f newPos = nodes[id].pos;
+
+	for (IRoadNetworkListener* l : listeners) l->onMoveNode(id, oldPos, newPos);
+}
+
 void RoadNetwork::removeNode(int id)
 {
 	for (IRoadNetworkListener* l : listeners) l->onRemoveNode(id);
@@ -21,7 +30,7 @@ void RoadNetwork::removeNode(int id)
 	for (int id : node.segments) removeSegment(id);
 
 	nodes.erase(id);
-	freedNodesIds.insert(id);
+	freedNodeIds.insert(id);
 }
 
 int RoadNetwork::getClosestNode(float x, float y)
@@ -99,13 +108,23 @@ int RoadNetwork::getClosestSegment(float x, float y)
 	return closestId;
 }
 
+void RoadNetwork::clear()
+{
+	nodes.clear();
+	segments.clear();
+	freedNodeIds.clear();
+	freedSegmentIds.clear();
+	nextNodeId = 0;
+	nextSegmentId = 0;
+}
+
 int RoadNetwork::getNodeId()
 {
-	if (freedNodesIds.size() > 0)
+	if (freedNodeIds.size() > 0)
 	{
-		auto removed = freedNodesIds.begin();
+		auto removed = freedNodeIds.begin();
 		int id = *removed;
-		freedNodesIds.erase(removed);
+		freedNodeIds.erase(removed);
 		return id;
 	}
 

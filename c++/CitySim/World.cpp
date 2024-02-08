@@ -13,7 +13,7 @@ World::World(Game* game, sf::RenderWindow* window, Simulation* simulation)
 {
 	// Intialize road network
 	roadNetwork = new RoadNetwork();
-	roadRenderer = new RoadRenderer(roadNetwork);
+	roadRenderer = new RoadRenderer(window, roadNetwork);
 	int nodeA = roadNetwork->addNode(500, 320);
 	int nodeB = roadNetwork->addNode(250, 250);
 	int nodeC = roadNetwork->addNode(400, 600);
@@ -24,6 +24,9 @@ World::World(Game* game, sf::RenderWindow* window, Simulation* simulation)
 	roadNetwork->addSegment(nodeA, nodeD);
 	roadNetwork->addSegment(nodeA, nodeE);
 	roadNetwork->addSegment(nodeD, nodeE);
+
+	// Initialize building manager
+	buildingManager = new BuildingManager(this, roadRenderer);
 
 	// Initialize quads
 	#if 0
@@ -39,6 +42,12 @@ World::World(Game* game, sf::RenderWindow* window, Simulation* simulation)
 		);
 	}
 	#endif
+}
+
+World::~World()
+{
+	delete roadNetwork;
+	delete roadRenderer;
 }
 
 void World::update()
@@ -59,8 +68,6 @@ void World::update()
 void World::render()
 {
 	window->clear(GRASS_COL);
-
-	roadRenderer->render(window);
-
+	roadRenderer->render();
 	// quads.render(window);
 }

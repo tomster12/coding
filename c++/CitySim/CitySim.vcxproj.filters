@@ -40,6 +40,9 @@
     <ClCompile Include="World.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="BuildingManager.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -70,6 +73,9 @@
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="World.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildingManager.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>

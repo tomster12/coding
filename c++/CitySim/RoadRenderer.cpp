@@ -7,13 +7,15 @@ const int RoadRenderer::MESH_NODE_CURVE_COUNT = 10;
 const int RoadRenderer::MESH_NODE_END_COUNT = 10;
 const sf::Color RoadRenderer::MESH_ROAD_COL = sf::Color(100, 100, 100);
 const sf::Color RoadRenderer::MESH_PATH_COL = sf::Color(180, 180, 180);
+const sf::Color RoadRenderer::MESH_TEMP_COL = sf::Color(220, 160, 160, 100);
 
-RoadRenderer::RoadRenderer(RoadNetwork* network) : network(network)
+RoadRenderer::RoadRenderer(sf::RenderWindow* window, RoadNetwork* network, bool isTemporary)
+	: window(window), network(network), isTemporary(isTemporary)
 {
 	network->subscribeListener(this);
 }
 
-void RoadRenderer::render(sf::RenderWindow* window)
+void RoadRenderer::render()
 {
 	updateMesh();
 	for (const auto& mesh : segmentMI) window->draw(mesh.second.va);
@@ -22,49 +24,91 @@ void RoadRenderer::render(sf::RenderWindow* window)
 
 void RoadRenderer::updateMesh()
 {
-	while (nodesToUpdate.size() > 0)
+	while (nodesToCreate.size() > 0)
 	{
-		auto itr = nodesToUpdate.begin();
-		createNodeMesh(*itr);
-		nodesToUpdate.erase(itr);
+		auto itr = nodesToCreate.begin();
+		if (!network->hasNode(*itr))
+		{
+			nodeMI.erase(*itr);
+			for (IRoadRendererListener* l : listeners) l->onRemoveNodeMesh(*itr);
+		}
+		else
+		{
+			createNodeMesh(*itr);
+
+			for (IRoadRendererListener* l : listeners) l->onUpdateNodeMesh(*itr);
+		}
+		nodesToCreate.erase(itr);
 	}
-	while (segmentsToUpdate.size() > 0)
+	while (segmentsToCreate.size() > 0)
 	{
-		auto itr = segmentsToUpdate.begin();
-		createSegmentMesh(*itr);
-		segmentsToUpdate.erase(itr);
+		auto itr = segmentsToCreate.begin();
+
+		if (!network->hasSegment(*itr))
+		{
+			segmentMI.erase(*itr);
+			for (IRoadRendererListener* l : listeners) l->onRemoveSegmentMesh(*itr);
+		}
+		else
+		{
+			createSegmentMesh(*itr);
+			for (IRoadRendererListener* l : listeners) l->onUpdateSegmentMesh(*itr);
+		}
+		segmentsToCreate.erase(itr);
+	}
+}
+
+void RoadRenderer::clear()
+{
+	nodeMI.clear();
+	segmentMI.clear();
+	nodesToCreate.clear();
+	segmentsToCreate.clear();
+}
+
+void RoadRenderer::onMoveNode(int id, const sf::Vector2f& oldPos, const sf::Vector2f& newPos)
+{
+	for (int segId : network->getNode(id).segments)
+	{
+		const RoadNetworkSegment& segment = network->getSegment(segId);
+
+		initSegmentMesh(segId);
+		nodesToCreate.insert(segment.nodeA);
+		nodesToCreate.insert(segment.nodeB);
+		for (int segId : network->getNode(segment.nodeA).segments) segmentsToCreate.insert(segId);
+		for (int segId : network->getNode(segment.nodeB).segments) segmentsToCreate.insert(segId);
 	}
 }
 
 void RoadRenderer::onAddSegment(int id)
 {
 	const RoadNetworkSegment& segment = network->getSegment(id);
-	initSegmentMeshInfo(id);
-	nodesToUpdate.insert(segment.nodeA);
-	nodesToUpdate.insert(segment.nodeB);
-	for (int segId : network->getNode(segment.nodeA).segments) segmentsToUpdate.insert(segId);
-	for (int segId : network->getNode(segment.nodeB).segments) segmentsToUpdate.insert(segId);
-	segmentsToUpdate.insert(id);
+
+	initSegmentMesh(id);
+	nodesToCreate.insert(segment.nodeA);
+	nodesToCreate.insert(segment.nodeB);
+	for (int segId : network->getNode(segment.nodeA).segments) segmentsToCreate.insert(segId);
+	for (int segId : network->getNode(segment.nodeB).segments) segmentsToCreate.insert(segId);
 }
 
 void RoadRenderer::onRemoveSegment(int id)
 {
 	const RoadNetworkSegment& segment = network->getSegment(id);
-	nodesToUpdate.insert(segment.nodeA);
-	nodesToUpdate.insert(segment.nodeB);
-	for (int segId : network->getNode(segment.nodeA).segments) segmentsToUpdate.insert(segId);
-	for (int segId : network->getNode(segment.nodeB).segments) segmentsToUpdate.insert(segId);
-	segmentsToUpdate.insert(id);
+
+	nodesToCreate.insert(segment.nodeA);
+	nodesToCreate.insert(segment.nodeB);
+	for (int segId : network->getNode(segment.nodeA).segments) segmentsToCreate.insert(segId);
+	for (int segId : network->getNode(segment.nodeB).segments) segmentsToCreate.insert(segId);
 }
 
-void RoadRenderer::initSegmentMeshInfo(int id)
+void RoadRenderer::initSegmentMesh(int id)
 {
+	segmentMI[id] = {};
+	RoadSegmentMeshInfo& smi = segmentMI[id];
+
 	const RoadNetworkSegment& segment = network->getSegment(id);
 	const RoadNetworkNode& nodeA = network->getNode(segment.nodeA);
 	const RoadNetworkNode& nodeB = network->getNode(segment.nodeB);
-
-	segmentMI[id] = {};
-	RoadSegmentMeshInfo& smi = segmentMI[id];
 
 	smi.d = nodeB.pos - nodeA.pos;
 	smi.norm = sqrt(smi.d.x * smi.d.x + smi.d.y * smi.d.y);
@@ -74,11 +118,11 @@ void RoadRenderer::initSegmentMeshInfo(int id)
 
 void RoadRenderer::createNodeMesh(int id)
 {
-	const RoadNetworkNode& node = network->getNode(id);
-
 	nodeMI[id] = {};
 	RoadNodeMeshInfo& nmi = nodeMI[id];
 	nmi.va = sf::VertexArray{ sf::Triangles };
+
+	const RoadNetworkNode& node = network->getNode(id);
 
 	// -- 0 segments
 
@@ -121,6 +165,10 @@ void RoadRenderer::createNodeMesh(int id)
 			nmi.va.append({ pathCurve[i + 1], MESH_PATH_COL });
 		}
 
+		if (isTemporary)
+		{
+			for (size_t i = 0; i < nmi.va.getVertexCount(); i++) nmi.va[i].color = MESH_TEMP_COL;
+		}
 		return;
 	}
 
@@ -137,31 +185,31 @@ void RoadRenderer::createNodeMesh(int id)
 		float angle = Utility::getAngle(smi.n * sideFlip);
 
 		// Place segment end into node info sorted by angle
-		for (auto itr = nmi.segmentEnds.begin();; ++itr)
+		for (auto itr = nmi._segmentEnds.begin();; ++itr)
 		{
-			if (itr == nmi.segmentEnds.end())
+			if (itr == nmi._segmentEnds.end())
 			{
-				nmi.segmentEnds.push_back({ segId, side, sideFlip, angle });
+				nmi._segmentEnds.push_back({ segId, side, sideFlip, angle });
 				break;
 			}
 			if (itr->angle > angle)
 			{
-				nmi.segmentEnds.insert(itr, { segId, side, sideFlip, angle });
+				nmi._segmentEnds.insert(itr, { segId, side, sideFlip, angle });
 				break;
 			}
 		}
 	}
 
 	// Loop over segment ends to create intersections
-	for (size_t i = 0; i < nmi.segmentEnds.size(); ++i)
+	for (size_t i = 0; i < nmi._segmentEnds.size(); ++i)
 	{
-		int ni = (i + 1) % nmi.segmentEnds.size();
-		nmi.segmentIntersections.push_back({ (int)i, ni });
-		RoadNodeSegmentEnd& segEndA = nmi.segmentEnds[i];
-		RoadNodeSegmentEnd& segEndB = nmi.segmentEnds[ni];
+		int ni = (i + 1) % nmi._segmentEnds.size();
+		nmi._segmentIntersections.push_back({ (int)i, ni });
+		RoadNodeSegmentEnd& segEndA = nmi._segmentEnds[i];
+		RoadNodeSegmentEnd& segEndB = nmi._segmentEnds[ni];
 		RoadSegmentMeshInfo& smiA = segmentMI[segEndA.id];
 		RoadSegmentMeshInfo& smiB = segmentMI[segEndB.id];
-		RoadNodeSegmentIntersectionInfo& nsii = nmi.segmentIntersections[nmi.segmentIntersections.size() - 1];
+		RoadNodeSegmentIntersectionInfo& nsii = nmi._segmentIntersections[nmi._segmentIntersections.size() - 1];
 
 		// Calculate specific intersection info
 		segEndA.n = smiA.n * segEndA.sideFlip;
@@ -203,13 +251,13 @@ void RoadRenderer::createNodeMesh(int id)
 	}
 
 	// Loop over intersections to create wedges and curves
-	for (size_t i = 0; i < nmi.segmentIntersections.size(); ++i)
+	for (size_t i = 0; i < nmi._segmentIntersections.size(); ++i)
 	{
-		RoadNodeSegmentIntersectionInfo& nsii = nmi.segmentIntersections[i];
+		RoadNodeSegmentIntersectionInfo& nsii = nmi._segmentIntersections[i];
 
-		int ni = (i + 1) % nmi.segmentEnds.size();
-		RoadNodeSegmentEnd& segEndLeft = nmi.segmentEnds[i];
-		RoadNodeSegmentEnd& segEndRight = nmi.segmentEnds[ni];
+		int ni = (i + 1) % nmi._segmentEnds.size();
+		RoadNodeSegmentEnd& segEndLeft = nmi._segmentEnds[i];
+		RoadNodeSegmentEnd& segEndRight = nmi._segmentEnds[ni];
 		const RoadSegmentMeshInfo& smiLeft = segmentMI[segEndLeft.id];
 		const RoadSegmentMeshInfo& smiRight = segmentMI[segEndRight.id];
 
@@ -267,12 +315,12 @@ void RoadRenderer::createNodeMesh(int id)
 	}
 
 	// Loop over segment ends to fill in road between wedges
-	for (size_t i = 0; i < nmi.segmentEnds.size(); ++i)
+	for (size_t i = 0; i < nmi._segmentEnds.size(); ++i)
 	{
-		RoadNodeSegmentEnd& segEnd = nmi.segmentEnds[i];
-		int pi = (i + nmi.segmentEnds.size() - 1) % nmi.segmentEnds.size();
-		RoadNodeSegmentIntersectionInfo& leftNsii = nmi.segmentIntersections[pi];
-		RoadNodeSegmentIntersectionInfo& rightNsii = nmi.segmentIntersections[i];
+		RoadNodeSegmentEnd& segEnd = nmi._segmentEnds[i];
+		int pi = (i + nmi._segmentEnds.size() - 1) % nmi._segmentEnds.size();
+		RoadNodeSegmentIntersectionInfo& leftNsii = nmi._segmentIntersections[pi];
+		RoadNodeSegmentIntersectionInfo& rightNsii = nmi._segmentIntersections[i];
 
 		// Quad of road <-> edge of curve
 		nmi.va.append({ segEnd.vWedgeRoadLeft, MESH_ROAD_COL });
@@ -291,7 +339,7 @@ void RoadRenderer::createNodeMesh(int id)
 		nmi.va.append({ segEnd.vWedgeRoadLeft, MESH_ROAD_COL });
 
 		// Triangle into middle of node
-		if (nmi.segmentEnds.size() > 2)
+		if (nmi._segmentEnds.size() > 2)
 		{
 			nmi.va.append({ leftNsii.vRoadIstMid, MESH_ROAD_COL });
 			nmi.va.append({ rightNsii.vRoadIstMid, MESH_ROAD_COL });
@@ -299,22 +347,26 @@ void RoadRenderer::createNodeMesh(int id)
 		}
 	}
 
-	// Cleanup data
-	nmi.segmentIntersections.clear();
-	nmi.segmentEnds.clear();
+	nmi._segmentIntersections.clear();
+	nmi._segmentEnds.clear();
+
+	if (isTemporary)
+	{
+		for (size_t i = 0; i < nmi.va.getVertexCount(); i++) nmi.va[i].color = MESH_TEMP_COL;
+	}
 }
 
 void RoadRenderer::createSegmentMesh(int id)
 {
+	RoadSegmentMeshInfo& smi = segmentMI[id];
+	smi.va = sf::VertexArray(sf::Triangles);
+
 	const RoadNetworkSegment& segment = network->getSegment(id);
 	const RoadNetworkNode& nodeA = network->getNode(segment.nodeA);
 	const RoadNetworkNode& nodeB = network->getNode(segment.nodeB);
-	RoadSegmentMeshInfo& smi = segmentMI[id];
 
 	sf::Vector2f segEndA = nodeA.pos + smi.n * smi.nodeOffsetA;
 	sf::Vector2f segEndB = nodeB.pos - smi.n * smi.nodeOffsetB;
-
-	smi.va = sf::VertexArray(sf::Triangles);
 
 	const auto addQuad = [&](const sf::Vertex& a, const sf::Vertex& b, const sf::Vertex& c, const sf::Vertex& d)
 	{
@@ -326,26 +378,41 @@ void RoadRenderer::createSegmentMesh(int id)
 		smi.va.append(d);
 	};
 
-	addQuad(
-		{ segEndA - smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
-		{ segEndB - smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
-		{ segEndB - smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL },
-		{ segEndA - smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL }
-	);
+	smi.edgeLeft = {
+		0,
+		segEndA + smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH),
+		segEndB + smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH)
+	};
+
+	smi.edgeRight = {
+		1,
+		segEndA - smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH),
+		segEndB - smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH)
+	};
 
 	addQuad(
-		{ segEndA - smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
-		{ segEndB - smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
-		{ segEndB + smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
-		{ segEndA + smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL }
-	);
-
-	addQuad(
-		{ segEndA + smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
-		{ segEndB + smi.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH), MESH_PATH_COL },
+		{ smi.edgeLeft.a, MESH_PATH_COL },
+		{ smi.edgeLeft.b, MESH_PATH_COL },
 		{ segEndB + smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL },
 		{ segEndA + smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL }
 	);
 
-	segmentMI[id] = std::move(smi);
+	addQuad(
+		{ segEndA + smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
+		{ segEndB + smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
+		{ segEndB - smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL },
+		{ segEndA - smi.perp * World::ROAD_HWIDTH, MESH_ROAD_COL }
+	);
+
+	addQuad(
+		{ smi.edgeRight.a, MESH_PATH_COL },
+		{ smi.edgeRight.b, MESH_PATH_COL },
+		{ segEndB - smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL },
+		{ segEndA - smi.perp * World::ROAD_HWIDTH, MESH_PATH_COL }
+	);
+
+	if (isTemporary)
+	{
+		for (size_t i = 0; i < smi.va.getVertexCount(); i++) smi.va[i].color = MESH_TEMP_COL;
+	}
 }
