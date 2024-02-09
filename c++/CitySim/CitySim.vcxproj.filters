@@ -1,0 +1,82 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Main">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadArray.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadNetwork.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="Utility.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadRenderer.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadPathfinding.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerController.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="World.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildingManager.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Game.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Simulation.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadArray.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadNetwork.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="Utility.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadRenderer.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadPathfinding.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerController.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="World.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildingManager.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
