@@ -5,7 +5,7 @@ Simulation::Simulation(Game* game, sf::RenderWindow* window)
 	: game(game), window(window)
 {
 	world = new World(game, window, this);
-	playerController = new PlayerController(game, window, this, world);
+	playerController = new PlayerController(game, this, world);
 }
 
 Simulation::~Simulation()
@@ -20,8 +20,8 @@ void Simulation::update()
 	playerController->update();
 }
 
-void Simulation::render()
+void Simulation::queueRenders(DrawQueue& drawQueue)
 {
-	world->render();
-	playerController->render();
+	world->queueRenders(drawQueue);
+	playerController->queueRenders(drawQueue);
 }

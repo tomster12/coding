@@ -1,5 +1,6 @@
 #pragma once
 
+#include "DrawQueue.h"
 #include "World.h"
 #include "PlayerController.h"
 
@@ -11,7 +12,7 @@ public:
 	Simulation(Game* game, sf::RenderWindow* window);
 	~Simulation();
 	void update();
-	void render();
+	void queueRenders(DrawQueue& drawQueue);
 
 private:
 	Game* game;

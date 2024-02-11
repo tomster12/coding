@@ -11,9 +11,11 @@ const float World::NODE_CURVE_SIZE = 17.0f;
 World::World(Game* game, sf::RenderWindow* window, Simulation* simulation)
 	: game(game), window(window), simulation(simulation)
 {
+	game->setClearColor(GRASS_COL);
+
 	// Intialize road network
 	roadNetwork = new RoadNetwork();
-	roadRenderer = new RoadRenderer(window, roadNetwork);
+	roadRenderer = new RoadRenderer(roadNetwork);
 	int nodeA = roadNetwork->addNode(500, 320);
 	int nodeB = roadNetwork->addNode(250, 250);
 	int nodeC = roadNetwork->addNode(400, 600);
@@ -65,9 +67,9 @@ void World::update()
 	#endif
 }
 
-void World::render()
+void World::queueRenders(DrawQueue& drawQueue)
 {
-	window->clear(GRASS_COL);
-	roadRenderer->render();
+	roadRenderer->queueRenders(drawQueue);
+	buildingManager->queueRenders(drawQueue);
 	// quads.render(window);
 }

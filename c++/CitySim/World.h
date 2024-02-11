@@ -1,5 +1,7 @@
 #pragma once
 
+#include "DrawQueue.h"
+#include "Game.h"
 #include "RoadNetwork.h"
 #include "RoadRenderer.h"
 #include "BuildingManager.h"
@@ -14,7 +16,7 @@ public:
 	World(Game* game, sf::RenderWindow* window, Simulation* simulation);
 	~World();
 	void update();
-	void render();
+	void queueRenders(DrawQueue& drawQueue);
 
 	RoadNetwork* getRoadNetwork() { return roadNetwork; }
 	RoadRenderer* getRoadRenderer() { return roadRenderer; }
