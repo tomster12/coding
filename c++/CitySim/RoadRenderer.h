@@ -19,10 +19,11 @@ struct RoadNodeSegmentEnd
 	int side;
 	float sideFlip;
 	float angle;
-	float offset;
-	int offsetIst = -1;
 	sf::Vector2f n;
 	sf::Vector2f perp;
+
+	float offset;
+	int offsetIst = -1;
 	sf::Vector2f vRoadEndLeft;
 	sf::Vector2f vRoadEndRight;
 	sf::Vector2f vPathEndLeft;

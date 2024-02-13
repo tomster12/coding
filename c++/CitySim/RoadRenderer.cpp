@@ -197,42 +197,39 @@ void RoadRenderer::createNodeMesh(int id)
 
 		int side = segment.nodeA == id ? 0 : 1;
 		float sideFlip = side == 0 ? 1.0f : -1.0f;
-		float angle = Utility::getAngle(smi.n * sideFlip);
+		sf::Vector2f n = smi.n * sideFlip;
+		float angle = Utility::getAngle(n);
+		sf::Vector2f perp = smi.perp * sideFlip;
+		RoadNodeSegmentEnd segEnd{ seg, side, sideFlip, angle, n, perp };
 
 		// Place segment end into node info sorted by angle
 		for (auto itr = nmi._segmentEnds.begin();; ++itr)
 		{
 			if (itr == nmi._segmentEnds.end())
 			{
-				nmi._segmentEnds.push_back({ seg, side, sideFlip, angle });
+				nmi._segmentEnds.push_back(segEnd);
 				break;
 			}
 			if (itr->angle > angle)
 			{
-				nmi._segmentEnds.insert(itr, { seg, side, sideFlip, angle });
+				nmi._segmentEnds.insert(itr, segEnd);
 				break;
 			}
 		}
 	}
 
-	// Loop over segment ends to create intersections
+	// Intersection points and segment end offsets
 	for (size_t i = 0; i < nmi._segmentEnds.size(); ++i)
 	{
 		int ni = (i + 1) % nmi._segmentEnds.size();
 		nmi._segmentIntersections.push_back({ (int)i, ni });
+		RoadNodeSegmentIntersectionInfo& nsii = nmi._segmentIntersections[i];
 		RoadNodeSegmentEnd& segEndA = nmi._segmentEnds[i];
 		RoadNodeSegmentEnd& segEndB = nmi._segmentEnds[ni];
 		RoadSegmentMeshInfo& smiA = segmentMI[segEndA.id];
 		RoadSegmentMeshInfo& smiB = segmentMI[segEndB.id];
-		RoadNodeSegmentIntersectionInfo& nsii = nmi._segmentIntersections[nmi._segmentIntersections.size() - 1];
 
-		// Calculate specific intersection info
-		segEndA.n = smiA.n * segEndA.sideFlip;
-		segEndB.n = smiB.n * segEndB.sideFlip;
-		segEndA.perp = smiA.perp * segEndA.sideFlip;
-		segEndB.perp = smiB.perp * segEndB.sideFlip;
-
-		// Calculate key intersection info
+		// Calculate intersection info
 		nsii.angle = Utility::getAngleClockwise(segEndA.n, segEndB.n);
 		float istFlip = nsii.angle < M_PI ? -1.0f : 1.0f;
 		const sf::Vector2f pathIstA = node.pos + segEndA.perp * (World::ROAD_HWIDTH + World::PATH_HWIDTH);
@@ -242,7 +239,7 @@ void RoadRenderer::createNodeMesh(int id)
 		nsii.vPathIst = Utility::getIntersection(pathIstA, segEndA.n * istFlip, pathIstB, segEndB.n * istFlip);
 		nsii.vRoadIst = Utility::getIntersection(roadIstA, segEndA.n * istFlip, roadIstB, segEndB.n * istFlip);
 
-		// Update segment mesh information with node offsets
+		// Update segment ends with node offsets
 		if (nsii.angle < M_PI)
 		{
 			const sf::Vector2f istPathD = nsii.vPathIst - node.pos;
