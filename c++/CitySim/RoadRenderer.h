@@ -1,6 +1,8 @@
 #pragma once
 
+#include "DrawQueue.h"
 #include "RoadNetwork.h"
+
 struct RoadNodeSegmentIntersectionInfo
 {
 	int segEndA;
@@ -17,12 +19,15 @@ struct RoadNodeSegmentEnd
 	int side;
 	float sideFlip;
 	float angle;
-	float offset;
-	int offsetIst = -1;
 	sf::Vector2f n;
 	sf::Vector2f perp;
+
+	float offset;
+	int offsetIst = -1;
 	sf::Vector2f vRoadEndLeft;
 	sf::Vector2f vRoadEndRight;
+	sf::Vector2f vPathEndLeft;
+	sf::Vector2f vPathEndRight;
 	sf::Vector2f vWedgeRoadLeft;
 	sf::Vector2f vWedgePathLeft;
 	sf::Vector2f vWedgeRoadRight;
@@ -33,12 +38,15 @@ struct RoadNodeMeshInfo
 {
 	std::vector<RoadNodeSegmentIntersectionInfo> _segmentIntersections;
 	std::vector<RoadNodeSegmentEnd> _segmentEnds;
+
+	std::vector<sf::Vector2f> collider;
+	sf::VertexArray colliderVa;
 	sf::VertexArray va;
 };
 
 struct RoadSegmentEdge
 {
-	int side;
+	int side = 0;
 	sf::Vector2f a;
 	sf::Vector2f b;
 };
@@ -52,6 +60,7 @@ struct RoadSegmentMeshInfo
 	float nodeOffsetA = 0.0f;
 	float nodeOffsetB = 0.0f;
 	RoadSegmentEdge edgeLeft, edgeRight;
+	sf::VertexArray colliderVa;
 	sf::VertexArray va;
 };
 
@@ -67,8 +76,8 @@ public:
 class RoadRenderer : IRoadNetworkListener
 {
 public:
-	RoadRenderer(sf::RenderWindow* window, RoadNetwork* network, bool isTemporary = false);
-	void render();
+	RoadRenderer(RoadNetwork* network, bool isTemporary = false);
+	void queueRenders(DrawQueue& drawQueue, float zIndex = 3.0f);
 	void updateMesh();
 	const RoadNodeMeshInfo& getNodeMI(int id) { return nodeMI[id]; }
 	const RoadSegmentMeshInfo& getSegmentMI(int id) { return segmentMI[id]; }
@@ -88,7 +97,6 @@ public:
 	static const sf::Color MESH_TEMP_COL;
 
 private:
-	sf::RenderWindow* window;
 	RoadNetwork* network;
 	bool isTemporary = false;
 

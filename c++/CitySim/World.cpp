@@ -11,9 +11,11 @@ const float World::NODE_CURVE_SIZE = 17.0f;
 World::World(Game* game, sf::RenderWindow* window, Simulation* simulation)
 	: game(game), window(window), simulation(simulation)
 {
+	game->setClearColor(GRASS_COL);
+
 	// Intialize road network
 	roadNetwork = new RoadNetwork();
-	roadRenderer = new RoadRenderer(window, roadNetwork);
+	roadRenderer = new RoadRenderer(roadNetwork);
 	int nodeA = roadNetwork->addNode(500, 320);
 	int nodeB = roadNetwork->addNode(250, 250);
 	int nodeC = roadNetwork->addNode(400, 600);
@@ -29,9 +31,8 @@ World::World(Game* game, sf::RenderWindow* window, Simulation* simulation)
 	buildingManager = new BuildingManager(this, roadRenderer);
 
 	// Initialize quads
-	#if 0
-	int countX = (int)(baseViewSize.x / (QUAD_SIZE + QUAD_GAP));
-	int countY = (int)(baseViewSize.y / (QUAD_SIZE + QUAD_GAP));
+	int countX = 2000;
+	int countY = 100;
 	size_t count = countX * countY;
 	quads = QuadArray(count, QUAD_SIZE);
 	for (size_t i = 0; i < count; ++i)
@@ -41,7 +42,6 @@ World::World(Game* game, sf::RenderWindow* window, Simulation* simulation)
 			QUAD_GAP / 2.0f + (i % countY) * (QUAD_SIZE + QUAD_GAP)
 		);
 	}
-	#endif
 }
 
 World::~World()
@@ -53,7 +53,6 @@ World::~World()
 void World::update()
 {
 	// Randomly move quads
-	#if 0
 	for (size_t i = 0; i < quads.getCount(); ++i)
 	{
 		const sf::Vector2f& pos = quads.getPosition(i);
@@ -62,12 +61,11 @@ void World::update()
 			pos.y + ((float)rand() / RAND_MAX) * 2.0f - 1.0f
 		);
 	}
-	#endif
 }
 
-void World::render()
+void World::queueRenders(DrawQueue& drawQueue)
 {
-	window->clear(GRASS_COL);
-	roadRenderer->render();
-	// quads.render(window);
+	roadRenderer->queueRenders(drawQueue);
+	buildingManager->queueRenders(drawQueue);
+	quads.render(window);
 }

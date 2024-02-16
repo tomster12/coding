@@ -67,9 +67,11 @@ void Game::update()
 
 void Game::render()
 {
-	window->clear();
+	window->clear(clearColor);
 
-	sim->render();
+	DrawQueue drawQueue;
+	sim->queueRenders(drawQueue);
+	drawQueue.render(window);
 
 	window->display();
 }

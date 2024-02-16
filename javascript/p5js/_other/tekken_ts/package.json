@@ -5,11 +5,13 @@
     "author": "",
     "license": "ISC",
     "scripts": {
-        "serve": "parcel serve src/index.html --open",
+        "copy": "copyfiles -f src/assets/**/* dist/assets/",
+        "serve": "npm run copy & parcel serve src/index.html -p 3000 --open",
         "build": "parcel build src/index.html"
     },
     "devDependencies": {
         "parcel": "^2.11.0",
+        "copyfiles": "^2.4.1",
         "typescript": "^5.3.3"
     },
     "dependencies": {

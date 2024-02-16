@@ -43,6 +43,12 @@
     <ClCompile Include="BuildingManager.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="UIDSource.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawQueue.cpp">
+      <Filter>Main</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
@@ -76,6 +82,12 @@
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="BuildingManager.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="UIDSource.h">
+      <Filter>Main</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawQueue.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>
