@@ -4,3 +4,6 @@
 [submodule "general/machine_learning/6_c++/MachineLearningSln"]
 	path = general/machine_learning/6_c++/MachineLearningSln
 	url = https://github.com/tomster12/MachineLearningSln
+[submodule "c++/FactorioBlueprints"]
+	path = c++/FactorioBlueprints
+	url = https://github.com/tomster12/FactorioBlueprints
