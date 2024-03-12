@@ -13,7 +13,7 @@ var __extends = (this && this.__extends) || (function () {
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     };
 })();
-var main = document.getElementById("main");
+var main = document.querySelector(".main");
 function createHTMLElement(elementString) {
     var div = document.createElement("div");
     div.innerHTML = elementString;
@@ -59,6 +59,16 @@ var EventBus = /** @class */ (function () {
         this.events[event].forEach(function (callback) { return callback.apply(void 0, args); });
     };
     return EventBus;
+}());
+var LogManager = /** @class */ (function () {
+    function LogManager() {
+        LogManager.instance = this;
+        this.element = main.querySelector(".log");
+    }
+    LogManager.prototype.log = function (message) {
+        this.element.innerHTML += "<div class=\"log\">".concat(message, "</div>");
+    };
+    return LogManager;
 }());
 // ----------------------------------------------
 var Entity = /** @class */ (function () {
@@ -222,6 +232,10 @@ var PanelConnection = /** @class */ (function (_super) {
             this.targetPanel.events.remove("move", this.targetMoveListener);
         }
         document.removeEventListener("mousemove", this.mouseMoveListener);
+        if (this.isConnected) {
+            this.sourcePanel.events.remove("outputUpdate", this.sourceOutputUpdateListener);
+        }
+        PanelConnectionManager.instance.removeConnection(this);
         this.element.remove();
     };
     PanelConnection.prototype.onMouseMoved = function (e) {
@@ -329,10 +343,15 @@ var PanelConnection = /** @class */ (function (_super) {
         };
     };
     PanelConnection.prototype.updateElement = function () {
+        var dx = this.targetPos.x - this.sourcePos.x;
+        var dy = this.targetPos.y - this.sourcePos.y;
+        var dst = Math.sqrt(dx * dx + dy * dy);
+        var angle = Math.atan2(this.targetPos.y - this.sourcePos.y, this.targetPos.x - this.sourcePos.x);
+        // Make the element a line between the source and target
         this.element.style.left = this.sourcePos.x + "px";
-        this.element.style.top = this.sourcePos.y + "px";
-        this.element.style.width = this.targetPos.x - this.sourcePos.x + "px";
-        this.element.style.height = this.targetPos.y - this.sourcePos.y + "px";
+        this.element.style.top = "calc(".concat(this.sourcePos.y, "px - 0.1rem)");
+        this.element.style.width = dst + "px";
+        this.element.style.transform = "rotate(".concat(angle, "rad)");
     };
     return PanelConnection;
 }(Entity));
@@ -344,6 +363,9 @@ var PanelConnectionManager = /** @class */ (function () {
         this.connections = [];
         main.addEventListener("mousedown", function (e) { return _this.onMainMouseDown(e); });
     }
+    PanelConnectionManager.prototype.removeConnection = function (connection) {
+        this.connections = this.connections.filter(function (c) { return c !== connection; });
+    };
     PanelConnectionManager.prototype.onInputNodeMouseDown = function (e, panel, nodeIndex) {
         e.stopPropagation();
         if (this.currentConnection) {
@@ -463,6 +485,7 @@ var SplitTextEntity = /** @class */ (function (_super) {
 }(Entity));
 // ----------------------------------------------
 new PanelConnectionManager();
+new LogManager();
 var p1 = new PanelEntity(new TextEntity([new TextContent("Hello World")]));
 var p2 = new PanelEntity(new TextEntity([
     new TextContent("01232324334252323"),

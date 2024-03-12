@@ -1,4 +1,4 @@
-const main = document.getElementById("main") as HTMLElement;
+const main = document.querySelector(".main") as HTMLElement;
 
 function createHTMLElement(elementString: string): HTMLElement {
     const div = document.createElement("div");
@@ -43,6 +43,20 @@ class EventBus {
     emit(event: string, ...args: any[]) {
         if (!this.events[event]) return;
         this.events[event].forEach((callback) => callback(...args));
+    }
+}
+
+class LogManager {
+    static instance: LogManager;
+    element: HTMLElement;
+
+    constructor() {
+        LogManager.instance = this;
+        this.element = main.querySelector(".log") as HTMLElement;
+    }
+
+    log(message: string) {
+        this.element.innerHTML += `<div class="log">${message}</div>`;
     }
 }
 
@@ -296,6 +310,16 @@ class PanelConnection extends Entity {
             this.targetPanel.events.remove("move", this.targetMoveListener);
         }
         document.removeEventListener("mousemove", this.mouseMoveListener);
+
+        if (this.isConnected) {
+            this.sourcePanel.events.remove(
+                "outputUpdate",
+                this.sourceOutputUpdateListener
+            );
+        }
+
+        PanelConnectionManager.instance.removeConnection(this);
+
         this.element.remove();
     }
 
@@ -330,6 +354,7 @@ class PanelConnection extends Entity {
             this.calculateSourcePos();
             this.updateElement();
         };
+
         this.sourcePanel.events.on("move", this.sourceMoveListener);
         this.sourcePanel.events.on("remove", this.removeListener);
 
@@ -355,6 +380,7 @@ class PanelConnection extends Entity {
             this.calculateTargetPos();
             this.updateElement();
         };
+
         this.targetPanel.events.on("move", this.targetMoveListener);
         this.targetPanel.events.on("remove", this.removeListener);
 
@@ -374,6 +400,7 @@ class PanelConnection extends Entity {
         this.sourceOutputUpdateListener = (index: number) => {
             if (index === this.sourceNodeIndex) this.propogate();
         };
+
         this.sourcePanel.events.on(
             "outputUpdate",
             this.sourceOutputUpdateListener
@@ -417,10 +444,19 @@ class PanelConnection extends Entity {
     }
 
     updateElement() {
+        const dx = this.targetPos.x - this.sourcePos.x;
+        const dy = this.targetPos.y - this.sourcePos.y;
+        const dst = Math.sqrt(dx * dx + dy * dy);
+        const angle = Math.atan2(
+            this.targetPos.y - this.sourcePos.y,
+            this.targetPos.x - this.sourcePos.x
+        );
+
+        // Make the element a line between the source and target
         this.element.style.left = this.sourcePos.x + "px";
-        this.element.style.top = this.sourcePos.y + "px";
-        this.element.style.width = this.targetPos.x - this.sourcePos.x + "px";
-        this.element.style.height = this.targetPos.y - this.sourcePos.y + "px";
+        this.element.style.top = `calc(${this.sourcePos.y}px - 0.1rem)`;
+        this.element.style.width = dst + "px";
+        this.element.style.transform = `rotate(${angle}rad)`;
     }
 }
 
@@ -435,6 +471,10 @@ class PanelConnectionManager {
         this.connections = [];
 
         main.addEventListener("mousedown", (e) => this.onMainMouseDown(e));
+    }
+
+    removeConnection(connection: PanelConnection) {
+        this.connections = this.connections.filter((c) => c !== connection);
     }
 
     onInputNodeMouseDown(e: MouseEvent, panel: PanelEntity, nodeIndex: number) {
@@ -586,6 +626,7 @@ class SplitTextEntity extends Entity implements IPanelContent {
 // ----------------------------------------------
 
 new PanelConnectionManager();
+new LogManager();
 
 const p1 = new PanelEntity(new TextEntity([new TextContent("Hello World")]));
 
