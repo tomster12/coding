@@ -36,29 +36,29 @@ layout: default
   <div class="gifs">
     <a href="{{ 'https://github.com/tomster12/Coding/tree/master/c++/LiquidSln' }}">
       <img src="{{ '/assets/gifs/c++/Liquid.gif' | relative_url }}" /></a>
-    <a href="{{ 'https://github.com/tomster12/Coding/tree/master/c++/MachineLearningSln' }}">
+    <a href="{{ 'https://github.com/tomster12/MachineLearning' }}">
       <img src="{{ '/assets/gifs/c++/MachineLearning.gif' | relative_url }}" /></a>
     <a href="{{ 'https://github.com/tomster12/Coding/tree/master/c++/ECSSln' }}">
       <img src="{{ '/assets/gifs/c++/ECS.gif' | relative_url }}" /></a>
   </div><br />
 
-  <h2>Javascript</h2>
+  <h2>javascript</h2>
   <div class="gifs">
-    <a href="{{ '/Javascript/p5js/_physics/collision_1D/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_physics/collision_1D/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/1DCollision.gif' | relative_url }}" /></a>
-    <a href="{{ '/Javascript/p5js/_algorithms/Boids2D/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_algorithms/Boids2D/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/Boids.gif' | relative_url }}" /></a>
-    <a href="{{ '/Javascript/p5js/_algorithms/Cave Generation/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_algorithms/Cave Generation/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/CaveGeneration.gif' | relative_url }}" /></a>
-    <a href="{{ '/Javascript/p5js/_algorithms/Dungeon Generation/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_algorithms/Dungeon Generation/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/DungeonGeneration.gif' | relative_url }}" /></a>
-    <a href="{{ '/Javascript/p5js/_maths/Fourier/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_maths/Fourier/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/Fourier.gif' | relative_url }}" /></a>
-    <a href="{{ '/Javascript/p5js/_games/Gates Attempt 3/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_games/Gates Attempt 3/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/Gates.gif' | relative_url }}" /></a>
-    <a href="{{ '/Javascript/p5js/_algorithms/Pathfinding Visualization/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_algorithms/Pathfinding Visualization/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/Pathfinding.gif' | relative_url }}" /></a>
-    <a href="{{ '/Javascript/p5js/_games/Slide/index.html' | relative_url }}">
+    <a href="{{ '/javascript/p5js/_games/Slide/index.html' | relative_url }}">
       <img src="{{ '/assets/gifs/javascript/Slide.gif' | relative_url }}" /></a>
   </div><br />
 
@@ -157,7 +157,7 @@ layout: default
       {% endif %}
     {% endfor %}
     <br />
-    <h2>Javascript</h2>
+    <h2>javascript</h2>
     {% for url in site.static_files %}
       {% if url.path contains '/javascript/' and url.path contains '.html' %}
         <li><a href="https://github.com/tomster12/Coding/tree/master/{{ url.path }}">{{ url.path }}</a></li>
