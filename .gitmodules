@@ -1,6 +1,6 @@
-[submodule "C++/MachineLearningSln"]
-	path = C++/MachineLearningSln
-	url = https://github.com/tomster12/MachineLearningSln
+[submodule "C++/MachineLearning"]
+	path = c++/MachineLearning
+	url = https://github.com/tomster12/MachineLearning
 [submodule "c++/FactorioBlueprints"]
 	path = c++/FactorioBlueprints
 	url = https://github.com/tomster12/FactorioBlueprints
