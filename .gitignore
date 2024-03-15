@@ -23,3 +23,4 @@ _site/
 **/.parcel-cache/
 **/dist/
 /processing/**/build/
+/c++/FactorioBlueprints/
