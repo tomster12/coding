@@ -18,7 +18,7 @@ pt_msgs_raw = [
 ]
 
 # Parse PT alphabet
-pt_msgs = [ msg.lower() for msg in pt_msgs_raw ]
+pt_msgs = [msg.lower() for msg in pt_msgs_raw]
 pt_a = set()
 for msg in pt_msgs:
     pt_a.update(list(msg))
@@ -28,7 +28,7 @@ pt_a = sorted(list(pt_a))
 cipher = crypto.RotatingHomophonicCipher(pt_a)
 
 # Encode all messages
-ct_msgs = [ cipher.encode(pt) for pt in pt_msgs ]
+ct_msgs = [cipher.encode(pt) for pt in pt_msgs]
 
 # Full overview
 # analysis.full_overview(ct_msgs)
@@ -38,11 +38,12 @@ ct_msgs = [ cipher.encode(pt) for pt in pt_msgs ]
 # plt.show()
 
 # Straight messages
+ct_im = analysis.conv_msgs_to_im(ct_msgs),
 analysis.plot_im(
-    im=analysis.conv_msgs_to_im(ct_msgs),
-    to_label=True,
+    im=ct_im,
+    labels=ct_im,
     title="Messages",
-    figsize=(50,2.4))
+    figsize=(50, 2.4))
 
 # Shared sections
 shared_im = analysis.calc_shared(
@@ -50,12 +51,11 @@ shared_im = analysis.calc_shared(
     to_zero=True)
 analysis.plot_im(
     im=shared_im,
-    to_label=True,
     labels=ct_msgs,
     title="Shared Sections",
     to_dull=True,
     under_value=1,
-    figsize=(50,2.4))
+    figsize=(50, 2.4))
 
 # Gaps
 gap_im = analysis.calc_gaps(
@@ -66,17 +66,16 @@ gap_im = analysis.calc_gaps(
     to_zero=True)
 analysis.plot_im(
     im=gap_im,
-    to_label=True,
     labels=ct_msgs,
     title="Gaps",
     to_dull=True,
-    figsize=((50,2.4)))
+    figsize=((50, 2.4)))
 analysis.plot_im(
     im=gap_im,
-    to_label=True,
+    labels=gap_im,
     title="Gaps (Sizes)",
     to_dull=True,
-    figsize=((50,2.4)))
+    figsize=((50, 2.4)))
 
 # Isomorphs
 # msgs = ct_msgs[0:9]
@@ -87,10 +86,9 @@ isos = analysis.calc_isomorphs(msgs)
 isos_im = analysis.conv_isomorphs_to_img(msgs, isos, 0)
 analysis.plot_im(
     im=isos_im,
-    to_label=True,
     to_dull=True,
     labels=msgs,
     title="Isomorphs",
-    figsize=((28,1.6)))
+    figsize=((28, 1.6)))
 
 plt.show()

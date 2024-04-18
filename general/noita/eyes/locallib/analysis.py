@@ -9,6 +9,7 @@ import math
 import itertools
 import time
 
+
 # -------- Calculation --------
 
 
@@ -152,14 +153,14 @@ def calc_chains(t1, t2):
     return chains
 
 
-def calc_shared(msgs, to_zero=False, zero_value=-1):
+def calc_shared(msgs, zero_value=np.nan):
     im = generate_blank_im(msgs)
     for y in range(len(msgs)):
         for x in range(len(msgs[y])):
-            matching = sum([(other[x] == msgs[y][x]) if len(
-                other) > x else 0 for other in msgs])
-            im[y, x] = msgs[y][x] if matching > 1 else (
-                zero_value if to_zero else np.nan)
+            matching = sum([
+                1 if ((len(other) > x) and (other[x] == msgs[y][x]))
+                else 0 for other in msgs])
+            im[y, x] = msgs[y][x] if matching > 1 else zero_value
     return im
 
 
@@ -183,22 +184,26 @@ def calc_shared_unique(msgs):
     return im
 
 
-def calc_gaps(msgs, limit=-1, include_end=False, use_msg_value=True, to_zero=False, zero_value=0):
-    im = generate_blank_im(msgs, blank=zero_value)
+def calc_gaps(msgs, limit=None, include_end=False, use_msg_value=False, zero_value=np.nan):
+    im = generate_blank_im(msgs, blank=np.nan)
+
     for y in range(len(msgs)):
         msg_len = len(msgs[y])
+
         for x1 in range(msg_len):
-            if to_zero:
-                im[y][x1] = zero_value if np.isnan(im[y][x1]) else im[y][x1]
-            upper_bounds = msg_len if (
-                limit == -1) else min(x1 + limit + 2, msg_len)
+            if np.isnan(im[y][x1]) and not np.isnan(zero_value):
+                im[y][x1] = zero_value
+
+            upper_bounds = msg_len if (limit is None) else min(
+                (x1 + 1) + limit + 1, msg_len)
+
             for x2 in range(x1 + 1, upper_bounds):
                 if msgs[y][x1] == msgs[y][x2]:
-                    val = (x2 - x1) if (not use_msg_value) else msgs[y][x1]
-                    im[y][x1] = val
+                    im[y][x1] = msgs[y][x1] if use_msg_value else (x2 - x1)
                     if include_end:
-                        im[y][x2] = val
+                        im[y][x2] = im[y][x1]
                     break
+
     return im
 
 
@@ -237,6 +242,7 @@ def calc_if_prime(num):
             return False
     return True
 
+
 # -------- Visual --------
 
 
@@ -246,21 +252,20 @@ def conv_msgs_to_im(msgs):
 
 
 def generate_blank_im(msgs, blank=np.nan):
-    _, h = calc_length_range(msgs)
-    im = np.full((len(msgs), h), blank)
+    _, ml = calc_length_range(msgs)
+    im = np.full((len(msgs), ml), blank)
     return im
 
 
-def plot_im(im, to_label=True, ascii=False, title=None, labels=None, to_dull=False, cmap_name="distinct", under_color="#d9d9d9", dull_amount=0.1, under_value=0.1, cast_labels=True, figsize=(40, 5)):
+def plot_im(im, ascii=False, title=None, labels=None, to_dull=False, cmap_name="distinct", under_color="#d9d9d9", dull_amount=0.1, under_value=0, cast_labels=True, figsize=(40, 5)):
     plt.figure(figsize=figsize)
 
     if cmap_name == "distinct":
         np.random.seed(0)
-        # vals = set.union(*[ set(r) for r in im ])
-        col_count = int(max([max(r) for r in im]))
-        cols = np.random.rand(col_count, 3) * 0.6 + 0.4
+        max_val = int(
+            max([max([x for x in r if not np.isnan(x)]) for r in im]))
+        cols = np.random.rand(max_val, 3) * 0.5 + 0.5
         cmap = mpl.colors.ListedColormap(cols)
-
     else:
         cmap = mpl.cm.get_cmap(cmap_name).copy()
     cmap.set_under(color=under_color)
@@ -274,7 +279,7 @@ def plot_im(im, to_label=True, ascii=False, title=None, labels=None, to_dull=Fal
 
     labels = labels if (labels is not None) else im
 
-    if to_label:
+    if labels is not None:
         for y in range(len(labels)):
             for x in range(len(labels[y])):
                 if not cast_labels or not math.isnan(labels[y][x]):
@@ -283,12 +288,10 @@ def plot_im(im, to_label=True, ascii=False, title=None, labels=None, to_dull=Fal
                     plt.text(x, y, label, ha="center", va="center", fontsize="7", alpha=(
                         dull_amount if im[y][x] < under_value and to_dull else 0.9))
 
-    # plt.show()
-
 
 def plot_msgs(msgs, to_label=False, ascii=False, title=None):
     im = conv_msgs_to_im(msgs)
-    plot_im(im, True, False, title)
+    plot_im(im, ascii=True, title=title)
 
 
 def plot_msgs_freq_overall(msgs):

@@ -24,3 +24,4 @@ _site/
 **/dist/
 /processing/**/build/
 /c++/FactorioBlueprints/
+/general/noita/web-analysis/
