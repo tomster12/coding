@@ -1,10 +1,14 @@
 #pragma once
 
 #include "DrawQueue.h"
-#include "World.h"
-#include "PlayerController.h"
+#include "Game.h"
+#include "RoadNetwork.h"
+#include "RoadRenderer.h"
+#include "BuildingManager.h"
+#include "QuadArray.h"
 
 class Game;
+class Simulation;
 
 class Simulation
 {
@@ -14,10 +18,22 @@ public:
 	void update();
 	void queueRenders(DrawQueue& drawQueue);
 
+	RoadNetwork* getRoadNetwork() { return roadNetwork; }
+	RoadRenderer* getRoadRenderer() { return roadRenderer; }
+
+	static const float ROAD_HWIDTH;
+	static const float PATH_HWIDTH;
+	static const float NODE_CURVE_SIZE;
+	static const float QUAD_GAP;
+	static const float QUAD_SIZE;
+	static const sf::Color GRASS_COL;
+
 private:
 	Game* game;
 	sf::RenderWindow* window;
 
-	World* world;
-	PlayerController* playerController;
+	RoadNetwork* roadNetwork;
+	RoadRenderer* roadRenderer;
+	BuildingManager* buildingManager;
+	QuadArray quads;
 };

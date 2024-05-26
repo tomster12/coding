@@ -17,6 +17,6 @@ public:
 private:
 	size_t quadsCount = 0;
 	float quadsSize = 0;
-	sf::VertexArray quadsVA;
+	sf::VertexArray quadsVtx;
 	std::vector<sf::Vector2f> quadsPos;
 };

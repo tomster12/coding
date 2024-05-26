@@ -2,6 +2,7 @@
 
 #include "DrawQueue.h"
 #include "Simulation.h"
+#include "PlayerController.h"
 
 class Simulation;
 
@@ -27,7 +28,9 @@ private:
 	sf::Vector2i mousePos;
 	sf::Vector2i mousePosPrev;
 	float mouseScrollDelta = 0.0f;
+
 	Simulation* sim;
+	PlayerController* playerController;
 
 	void update();
 	void render();

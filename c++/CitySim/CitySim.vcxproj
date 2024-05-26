@@ -172,7 +172,6 @@
     <ClCompile Include="RoadNetwork.cpp" />
     <ClCompile Include="RoadPathfinding.cpp" />
     <ClCompile Include="RoadRenderer.cpp" />
-    <ClCompile Include="Simulation.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -180,8 +179,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="UIDSource.cpp" />
-    <ClCompile Include="Utility.cpp" />
-    <ClCompile Include="World.cpp" />
+    <ClCompile Include="GeomUtility.cpp" />
+    <ClCompile Include="Simulation.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BuildingManager.h" />
@@ -192,11 +191,10 @@
     <ClInclude Include="RoadNetwork.h" />
     <ClInclude Include="RoadPathfinding.h" />
     <ClInclude Include="RoadRenderer.h" />
-    <ClInclude Include="Simulation.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="UIDSource.h" />
-    <ClInclude Include="Utility.h" />
-    <ClInclude Include="World.h" />
+    <ClInclude Include="GeomUtility.h" />
+    <ClInclude Include="Simulation.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

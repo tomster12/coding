@@ -3,29 +3,29 @@
 
 int UIDSource::get()
 {
-	if (releasedUids.size() > 0)
+	if (releasedUIDs.size() > 0)
 	{
-		auto uidItr = releasedUids.begin();
-		int uid = *uidItr;
-		releasedUids.erase(uidItr);
+		auto itr = releasedUIDs.begin();
+		int uid = *itr;
+		releasedUIDs.erase(itr);
 		return uid;
 	}
 
-	return nextUid++;
+	return nextUID++;
 }
 
 void UIDSource::release(int uid)
 {
-	releasedUids.insert(uid);
+	releasedUIDs.insert(uid);
 }
 
 bool UIDSource::exists(int uid)
 {
-	return uid < nextUid && releasedUids.find(uid) == releasedUids.end();
+	return uid < nextUID && releasedUIDs.find(uid) == releasedUIDs.end();
 }
 
 void UIDSource::reset()
 {
-	releasedUids.clear();
-	nextUid = 0;
+	releasedUIDs.clear();
+	nextUID = 0;
 }

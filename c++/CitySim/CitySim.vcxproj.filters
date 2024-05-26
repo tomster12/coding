@@ -1,93 +1,96 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
+    <Filter Include="Driver">
+      <UniqueIdentifier>{e5ecfff3-fb78-43ac-abfd-c1f7e75c3dd4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Utility">
+      <UniqueIdentifier>{49c7e734-14c8-453a-aaab-a2afb791506f}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Main">
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Main\Simulation">
+      <UniqueIdentifier>{a6e1c732-8803-4b76-a31c-f7eae76e8f47}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
     <ClCompile Include="Game.cpp">
-      <Filter>Main</Filter>
+      <Filter>Driver</Filter>
     </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Main</Filter>
+    <ClCompile Include="main.cpp">
+      <Filter>Driver</Filter>
     </ClCompile>
-    <ClCompile Include="Simulation.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="QuadArray.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="RoadNetwork.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="Utility.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="RoadRenderer.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="RoadPathfinding.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="PlayerController.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="World.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="BuildingManager.cpp">
-      <Filter>Main</Filter>
+    <ClCompile Include="GeomUtility.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="UIDSource.cpp">
-      <Filter>Main</Filter>
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="QuadArray.cpp">
+      <Filter>Utility</Filter>
     </ClCompile>
     <ClCompile Include="DrawQueue.cpp">
+      <Filter>Utility</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadNetwork.cpp">
+      <Filter>Main\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadRenderer.cpp">
+      <Filter>Main\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="RoadPathfinding.cpp">
+      <Filter>Main\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildingManager.cpp">
+      <Filter>Main\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation.cpp">
+      <Filter>Main\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="PlayerController.cpp">
       <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Game.h">
-      <Filter>Main</Filter>
+      <Filter>Driver</Filter>
     </ClInclude>
-    <ClInclude Include="stdafx.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="Simulation.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="QuadArray.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="RoadNetwork.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="Utility.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="RoadRenderer.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="RoadPathfinding.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="PlayerController.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="World.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="BuildingManager.h">
-      <Filter>Main</Filter>
+    <ClInclude Include="GeomUtility.h">
+      <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="UIDSource.h">
-      <Filter>Main</Filter>
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="QuadArray.h">
+      <Filter>Utility</Filter>
     </ClInclude>
     <ClInclude Include="DrawQueue.h">
+      <Filter>Utility</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Driver</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadNetwork.h">
+      <Filter>Main\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadPathfinding.h">
+      <Filter>Main\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildingManager.h">
+      <Filter>Main\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="RoadRenderer.h">
+      <Filter>Main\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="Simulation.h">
+      <Filter>Main\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="PlayerController.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>

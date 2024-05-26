@@ -6,22 +6,23 @@
 
 class Game;
 class Simulation;
-class World;
+class Simulation;
 
 class PlayerController
 {
 public:
-	PlayerController(Game* game, Simulation* simulation, World* world);
+	PlayerController(Game* game, Simulation* sim);
 	~PlayerController();
 	void update();
 	void queueRenders(DrawQueue& drawQueue);
 
 private:
 	Game* game;
-	Simulation* simulation;
-	World* world;
+	Simulation* sim;
 
-	sf::RenderWindow const* window;
+	RoadNetwork* roadNetwork;
+	RoadRenderer* roadRenderer;
+	const sf::RenderWindow* window;
 	sf::View camView;
 	sf::Vector2f baseViewSize;
 	sf::Vector2f camPos;

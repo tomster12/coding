@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "PlayerController.h"
-#include "Utility.h"
+#include "GeomUtility.h"
 #include "Game.h"
 #include "RoadRenderer.h"
 
@@ -8,10 +8,14 @@ const float PlayerController::CAM_POS_VEL = 1.0f;
 const float PlayerController::CAM_SCROLL_ACC = 0.04f;
 const float PlayerController::CAM_SCROLL_DRAG = 0.8f;
 
-PlayerController::PlayerController(Game* game, Simulation* simulation, World* world)
-	: game(game), simulation(simulation), world(world)
+PlayerController::PlayerController(Game* game, Simulation* sim)
+	: game(game), sim(sim)
 {
-	// Initialize view of the world
+	// Get references to sim components
+	roadNetwork = sim->getRoadNetwork();
+	roadRenderer = sim->getRoadRenderer();
+
+	// Initialize view of the sim
 	window = game->getWindow();
 	baseViewSize = (sf::Vector2f)window->getSize();
 	camView = sf::View(sf::FloatRect(0.0f, 0.0f, baseViewSize.x, baseViewSize.y));
@@ -23,7 +27,7 @@ PlayerController::PlayerController(Game* game, Simulation* simulation, World* wo
 	buildingRoadNetwork = new RoadNetwork();
 	buildingRoadRenderer = new RoadRenderer(buildingRoadNetwork, true);
 	buildingNodeFrom = 3;
-	buildingBNodeFrom = buildingRoadNetwork->addNode(world->getRoadNetwork()->getNode(buildingNodeFrom).pos);
+	buildingBNodeFrom = buildingRoadNetwork->addNode(sim->getRoadNetwork()->getNode(buildingNodeFrom).pos);
 	buildingBNodeTo = buildingRoadNetwork->addNode(0.0f, 0.0f);
 	buildingRoadNetwork->addSegment(buildingBNodeFrom, buildingBNodeTo);
 
@@ -43,9 +47,7 @@ void PlayerController::update()
 	const sf::Vector2i& mousePos = game->getMousePos();
 	const sf::Vector2i& mousePosPrev = game->getMousePosPrev();
 	float mouseScrollDelta = game->getMouseScrollDelta();
-	RoadNetwork* roadNetwork = world->getRoadNetwork();
-	RoadRenderer* roadRenderer = world->getRoadRenderer();
-	sf::Vector2f worldMousePos = window->mapPixelToCoords(mousePos);
+	sf::Vector2f simMousePos = window->mapPixelToCoords(mousePos);
 
 	// Handle camera movement and zoom
 	sf::Vector2f mouseDiff = (sf::Vector2f)(mousePos - mousePosPrev);
@@ -58,14 +60,14 @@ void PlayerController::update()
 	game->setView(camView);
 
 	// Building new nodes
-	buildingRoadNetwork->moveNode(buildingBNodeTo, worldMousePos);
+	buildingRoadNetwork->moveNode(buildingBNodeTo, simMousePos);
 	if (sf::Mouse::isButtonPressed(sf::Mouse::Right))
 	{
 		if (!nodePlacementLock)
 		{
-			int newNode = roadNetwork->addNode(worldMousePos);
+			int newNode = roadNetwork->addNode(simMousePos);
 			roadNetwork->addSegment(buildingNodeFrom, newNode);
-			buildingRoadNetwork->moveNode(buildingBNodeFrom, worldMousePos);
+			buildingRoadNetwork->moveNode(buildingBNodeFrom, simMousePos);
 			buildingNodeFrom = newNode;
 			nodePlacementLock = true;
 		}
@@ -73,10 +75,10 @@ void PlayerController::update()
 	else nodePlacementLock = false;
 
 	// Find closest segment and draw indicator on it
-	int closestSegmentUid = roadNetwork->getClosestSegment(worldMousePos);
+	int closestSegmentUid = roadNetwork->getClosestSegment(simMousePos);
 	const auto& closestSegment = roadNetwork->getSegment(closestSegmentUid);
-	sf::Vector2f p = Utility::getClosestPointOnLine(
-		worldMousePos,
+	sf::Vector2f p = GeomUtility::getClosestPointOnLine(
+		simMousePos,
 		roadNetwork->getNode(closestSegment.nodeA).pos,
 		roadNetwork->getNode(closestSegment.nodeB).pos);
 	indicator.setPosition(p);

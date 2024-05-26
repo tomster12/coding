@@ -5,44 +5,56 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Driver">
+      <UniqueIdentifier>{1095073c-072a-44d0-abe8-9f0b34eaeaeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Impl">
+      <UniqueIdentifier>{a78e333e-6710-49aa-b663-af9b18052975}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="main.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="stdafx.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
-    <ClCompile Include="Game.cpp">
-      <Filter>Main</Filter>
-    </ClCompile>
     <ClCompile Include="ecs.cpp">
       <Filter>Main</Filter>
     </ClCompile>
     <ClCompile Include="ThreadPool.cpp">
       <Filter>Main</Filter>
     </ClCompile>
+    <ClCompile Include="Game.cpp">
+      <Filter>Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="ecsImpl.cpp">
+      <Filter>Impl</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stdafx.h">
-      <Filter>Main</Filter>
-    </ClInclude>
     <ClInclude Include="ecs.h">
-      <Filter>Main</Filter>
-    </ClInclude>
-    <ClInclude Include="Game.h">
       <Filter>Main</Filter>
     </ClInclude>
     <ClInclude Include="ThreadPool.h">
       <Filter>Main</Filter>
     </ClInclude>
+    <ClInclude Include="Game.h">
+      <Filter>Driver</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>Driver</Filter>
+    </ClInclude>
+    <ClInclude Include="ecsImpl.h">
+      <Filter>Impl</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="postprocess.frag">
-      <Filter>Main</Filter>
-    </None>
     <None Include="postprocess.vert">
-      <Filter>Main</Filter>
+      <Filter>Impl</Filter>
+    </None>
+    <None Include="postprocess.frag">
+      <Filter>Impl</Filter>
     </None>
   </ItemGroup>
 </Project>

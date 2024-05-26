@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "RoadNetwork.h"
-#include "Utility.h"
+#include "GeomUtility.h"
 
 int RoadNetwork::addNode(float x, float y)
 {
@@ -15,8 +15,8 @@ int RoadNetwork::addNode(float x, float y)
 void RoadNetwork::moveNode(int uid, float x, float y)
 {
 	const sf::Vector2f oldPos = { nodes[uid].pos.x, nodes[uid].pos.y };
-	nodes[uid].pos = { x, y };
-	const sf::Vector2f newPos = nodes[uid].pos;
+	const sf::Vector2f newPos = { x, y };
+	nodes[uid].pos = newPos;
 
 	for (IRoadNetworkListener* l : listeners) l->onMoveNode(uid, oldPos, newPos);
 }
@@ -90,7 +90,7 @@ int RoadNetwork::getClosestSegment(float x, float y)
 
 	for (const auto& pair : segments)
 	{
-		sf::Vector2f p = Utility::getClosestPointOnLine({ x, y },
+		sf::Vector2f p = GeomUtility::getClosestPointOnLine({ x, y },
 			nodes[pair.second.nodeA].pos,
 			nodes[pair.second.nodeB].pos);
 

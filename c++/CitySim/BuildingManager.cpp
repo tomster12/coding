@@ -1,9 +1,9 @@
 #include "stdafx.h"
 #include "BuildingManager.h"
-#include "World.h"
+#include "Simulation.h"
 
-BuildingManager::BuildingManager(World* world, RoadRenderer* roadRenderer)
-	: world(world), roadRenderer(roadRenderer)
+BuildingManager::BuildingManager(Simulation* sim, RoadRenderer* roadRenderer)
+	: sim(sim), roadRenderer(roadRenderer)
 {
 	roadRenderer->subscribeListener(this);
 }
@@ -12,7 +12,7 @@ void BuildingManager::queueRenders(DrawQueue& drawQueue)
 {
 	for (auto& edgePair : buildableEdges)
 	{
-		drawQueue.queue({ 3.0f, &edgePair.second.va });
+		drawQueue.queue({ 3.0f, &edgePair.second.mainVtx });
 	}
 }
 
@@ -30,16 +30,16 @@ void BuildingManager::onRemoveSegmentMesh(int uid)
 
 void BuildingManager::updateBuildableEdge(int segUid, int side)
 {
-	const RoadSegmentMeshInfo& segment = world->getRoadRenderer()->getSegmentMI(segUid);
-	const RoadSegmentEdge& edge = side == 0 ? segment.edgeLeft : segment.edgeRight;
-	int bedgeUid = segUid * 10 + side;
+	const RoadSegmentMesh& segment = sim->getRoadRenderer()->getSegmentMesh(segUid);
+	const RoadSegmentEdgeInfo& edge = side == 0 ? segment.edgeLeft : segment.edgeRight;
+	int bEdgeUID = segUid * 2 + side;
 
 	sf::Vector2f perp = segment.perp * (side == 0 ? 1.0f : -1.0f);
 
-	sf::VertexArray va{ sf::Lines, 2 };
-	va[0] = { edge.a + perp * 4.0f, sf::Color::Blue };
-	va[1] = { edge.b + perp * 4.0f, sf::Color::Blue };
-	buildableEdges[bedgeUid] = { va };
+	sf::VertexArray mainVtx{ sf::Lines, 2 };
+	mainVtx[0] = { edge.a + perp * 4.0f, sf::Color::Blue };
+	mainVtx[1] = { edge.b + perp * 4.0f, sf::Color::Blue };
+	buildableEdges[bEdgeUID] = { mainVtx };
 }
 
 void BuildingManager::removeBuildableEdge(int segUid, int side)

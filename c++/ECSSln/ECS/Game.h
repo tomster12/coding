@@ -1,5 +1,6 @@
 #pragma once
 #include "ecs.h"
+#include "ecsImpl.h"
 
 class Game
 {
@@ -21,7 +22,7 @@ private:
 	sf::Texture windowTex;
 	sf::Sprite windowSprite;
 	sf::Shader postprocess;
-	ecs::Scene* scn;
+	ecs::Scene* scene;
 
 	// Private functions
 	void initWindow();

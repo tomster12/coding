@@ -8,6 +8,6 @@ public:
 	void reset();
 
 private:
-	std::set<int> releasedUids;
-	int nextUid = 0;
+	std::set<int> releasedUIDs;
+	int nextUID = 0;
 };
