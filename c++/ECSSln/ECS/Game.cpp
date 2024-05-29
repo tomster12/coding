@@ -15,10 +15,6 @@ Game::~Game()
 
 void Game::initWindow()
 {
-	// Initialize variables
-	this->window = NULL;
-	this->dt = 0.0f;
-
 	// Setup default options
 	sf::VideoMode windowMode = sf::VideoMode::getDesktopMode();
 	windowMode.width = 1280;
@@ -49,6 +45,7 @@ void Game::init()
 	this->scene = new ecs::Scene();
 
 	// Fill up entities, leave space for attractors
+	sf::Vector2u size = this->window->getSize();
 	for (size_t i = 0; i < 300'000; i++)
 	{
 		ecs::EntityID entity = this->scene->createEntity();
@@ -57,7 +54,6 @@ void Game::init()
 		ecs::component::DynamicBody* db = this->scene->assign<ecs::component::DynamicBody>(entity);
 
 		// Randomize position
-		sf::Vector2u size = this->window->getSize();
 		t->pos.x = 0.0f + rand() % size.x;
 		t->pos.y = 0.0f + rand() % size.y;
 
