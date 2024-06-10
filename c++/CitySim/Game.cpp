@@ -1,5 +1,7 @@
 #include "stdafx.h"
 #include "Game.h"
+#include "Simulation.h"
+#include "PlayerController.h"
 
 Game::Game()
 {
@@ -21,12 +23,15 @@ Game::Game()
 	window->setFramerateLimit(framerateLimit);
 	window->setVerticalSyncEnabled(verticalSyncEnabled);
 
+	// Setup simulation
 	sim = new Simulation(this, window);
+	playerController = new PlayerController(this, sim);
 }
 
 Game::~Game()
 {
 	delete sim;
+	delete playerController;
 	delete window;
 }
 
@@ -63,6 +68,7 @@ void Game::update()
 	}
 
 	sim->update();
+	playerController->update();
 }
 
 void Game::render()
@@ -71,6 +77,7 @@ void Game::render()
 
 	DrawQueue drawQueue;
 	sim->queueRenders(drawQueue);
+	playerController->queueRenders(drawQueue);
 	drawQueue.render(window);
 
 	window->display();

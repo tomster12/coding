@@ -5,15 +5,15 @@
 
 struct BuildableEdge
 {
-	sf::VertexArray va;
+	sf::VertexArray mainVtx;
 };
 
-class World;
+class Simulation;
 
 class BuildingManager : IRoadRendererListener
 {
 public:
-	BuildingManager(World* world, RoadRenderer* roadRenderer);
+	BuildingManager(Simulation* sim, RoadRenderer* roadRenderer);
 	void queueRenders(DrawQueue& drawQueue);
 	//const BuildableEdge& getClosestBuildableEdge(sf::Vector2f p) { return getClosestBuildableEdge(p.x, p.y); }
 	//const BuildableEdge& getClosestBuildableEdge(float x, float y);
@@ -22,7 +22,7 @@ public:
 	virtual void onRemoveSegmentMesh(int uid) override;
 
 private:
-	World* world;
+	Simulation* sim;
 	RoadRenderer* roadRenderer;
 
 	std::map<int, BuildableEdge> buildableEdges;

@@ -1,8 +1,6 @@
 #include "stdafx.h"
 #include "Game.h"
 
-#pragma region Setup
-
 Game::Game()
 {
 	this->initWindow();
@@ -12,15 +10,11 @@ Game::Game()
 Game::~Game()
 {
 	delete this->window;
-	delete this->scn;
+	delete this->scene;
 }
 
 void Game::initWindow()
 {
-	// Initialize variables
-	this->window = NULL;
-	this->dt = 0.0f;
-
 	// Setup default options
 	sf::VideoMode windowMode = sf::VideoMode::getDesktopMode();
 	windowMode.width = 1280;
@@ -48,32 +42,28 @@ void Game::initWindow()
 void Game::init()
 {
 	// Init scene
-	this->scn = new ecs::Scene();
+	this->scene = new ecs::Scene();
 
 	// Fill up entities, leave space for attractors
+	sf::Vector2u size = this->window->getSize();
 	for (size_t i = 0; i < 300'000; i++)
 	{
-		ecs::EntityID e = this->scn->createEntity();
-		ecs::Transform* t = this->scn->assign<ecs::Transform>(e);
-		ecs::Particle* s = this->scn->assign<ecs::Particle>(e);
-		ecs::DynamicBody* db = this->scn->assign<ecs::DynamicBody>(e);
+		ecs::EntityID entity = this->scene->createEntity();
+		ecs::component::Transform* t = this->scene->assign<ecs::component::Transform>(entity);
+		ecs::component::Particle* p = this->scene->assign<ecs::component::Particle>(entity);
+		ecs::component::DynamicBody* db = this->scene->assign<ecs::component::DynamicBody>(entity);
 
 		// Randomize position
-		sf::Vector2u size = this->window->getSize();
 		t->pos.x = 0.0f + rand() % size.x;
 		t->pos.y = 0.0f + rand() % size.y;
 
 		// Randomize color
-		s->vtx.color = sf::Color(static_cast<int>(t->pos.x), static_cast<int>(t->pos.y), 150);
+		p->vtx.color = sf::Color(static_cast<int>(t->pos.x), static_cast<int>(t->pos.y), 150);
 	}
 
 	// Log info
-	this->scn->log();
+	this->scene->log();
 }
-
-#pragma endregion
-
-#pragma region Main
 
 void Game::run()
 {
@@ -111,9 +101,9 @@ void Game::update()
 		case sf::Event::MouseButtonPressed:
 			if (this->sfEvent.mouseButton.button == sf::Mouse::Left)
 			{
-				ecs::EntityID e = this->scn->createEntity();
-				ecs::Transform* t = this->scn->assign<ecs::Transform>(e);
-				ecs::Attractor* a = this->scn->assign<ecs::Attractor>(e);
+				ecs::EntityID e = this->scene->createEntity();
+				ecs::component::Transform* t = this->scene->assign<ecs::component::Transform>(e);
+				ecs::component::Attractor* a = this->scene->assign<ecs::component::Attractor>(e);
 				t->pos.x = 0.0f + this->sfEvent.mouseButton.x;
 				t->pos.y = 0.0f + this->sfEvent.mouseButton.y;
 			}
@@ -127,8 +117,8 @@ void Game::update()
 	}
 
 	// Run update systems
-	ecs::system::instUpdateGravity(this->scn, this->window, this->dt);
-	ecs::system::instUpdateDynamics(this->scn, this->window, this->dt);
+	ecs::system::instUpdateGravity(this->scene, this->window, this->dt);
+	ecs::system::instUpdateDynamics(this->scene, this->window, this->dt);
 }
 
 void Game::render()
@@ -137,8 +127,8 @@ void Game::render()
 	this->window->clear();
 
 	// Run render functions
-	ecs::system::instRenderAttractors(this->scn, this->window, this->dt);
-	ecs::system::instRenderParticles(this->scn, this->window, this->dt);
+	ecs::system::instRenderAttractors(this->scene, this->window, this->dt);
+	ecs::system::instRenderParticles(this->scene, this->window, this->dt);
 
 	//// Apply post processing to window
 	//this->windowTex.update(*this->window);
@@ -148,5 +138,3 @@ void Game::render()
 	// Display window
 	this->window->display();
 }
-
-#pragma endregion

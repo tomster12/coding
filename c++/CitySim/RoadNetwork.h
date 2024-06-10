@@ -36,6 +36,7 @@ public:
 	int getClosestNode(const sf::Vector2f& p) { return getClosestNode(p.x, p.y); }
 	const RoadNetworkNode& getNode(int uid) const { return nodes.at(uid); }
 	const std::map<int, RoadNetworkNode>& getNodes(int uid) const { return nodes; }
+	void clear();
 
 	bool hasSegment(int uid) { return segments.find(uid) != segments.end(); }
 	int addSegment(int nodeA, int nodeB);
@@ -44,8 +45,6 @@ public:
 	int getClosestSegment(const sf::Vector2f& p) { return getClosestSegment(p.x, p.y); }
 	const RoadNetworkSegment& getSegment(int uid) const { return segments.at(uid); }
 	const std::map<int, RoadNetworkSegment>& getSegments(int uid) const { return segments; }
-
-	void clear();
 
 	void subscribeListener(IRoadNetworkListener* listener) { listeners.push_back(listener); }
 	void unsubscribeListener(IRoadNetworkListener* listener) { listeners.erase(std::find(listeners.begin(), listeners.end(), listener)); }

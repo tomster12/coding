@@ -6,7 +6,7 @@ import random
 # -------- General --------
 
 
-def simulate_annealing(init_temp, k_max, it_max, bestRetention, f_init, f_nudge, f_fitness):
+def simulate_annealing(init_temp, k_max, it_max, best_retention, f_init, f_nudge, f_fitness):
     best_state = f_init()
     best_state_fitness = f_fitness(best_state)
     best_states = [(best_state_fitness, best_state)]
@@ -23,7 +23,7 @@ def simulate_annealing(init_temp, k_max, it_max, bestRetention, f_init, f_nudge,
                 best_state = candidate
                 best_state_fitness = candidate_fitness
                 best_states.append((best_state_fitness, best_state))
-                if len(best_states) > bestRetention:
+                if len(best_states) > best_retention:
                     best_states.pop(0)
 
     for state in best_states:
@@ -51,6 +51,7 @@ class EnglishChecker:
         probs = [math.log10(self.quadgram_data.get(
             q, 1) / self.quadgram_data_total) for q in quadgrams]
         return sum(probs)
+
 
 # -------- Ciphers --------
 
