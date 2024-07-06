@@ -16,12 +16,13 @@ _site/
 /c++/**/.vs/
 /c++/**/dependencies/
 /c++/SFML-2.5.1/
-/general/**/build/
-/general/docker/docker_network/mongodb/
-/rust/**/target/
+/c++/**/x64/
 **/node_modules/
 **/.parcel-cache/
 **/dist/
+/general/**/build/
+/general/docker/docker_network/mongodb/
+/rust/**/target/
 /processing/**/build/
 /c++/FactorioBlueprints/
 /general/noita/web-analysis/
