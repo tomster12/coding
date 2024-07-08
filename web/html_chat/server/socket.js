@@ -1,6 +1,6 @@
 import { Server } from "socket.io";
 
-export default function createIO(server) {
+function createIO(server) {
     const io = new Server(server);
 
     io.on("connection", (socket) => {
@@ -18,3 +18,5 @@ export default function createIO(server) {
 
     return io;
 }
+
+export { createIO };

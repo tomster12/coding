@@ -8,7 +8,6 @@ token
 
 # Private submodules
 /c++/FactorioBlueprints/
-/web/exercise-app/
 
 # Local gh-pages byproducts
 _site/

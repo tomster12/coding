@@ -1,6 +1,6 @@
 import express from "express";
 
-export default function createApp() {
+function createApp() {
     const app = express();
 
     app.use(express.static("../client"));
@@ -11,3 +11,5 @@ export default function createApp() {
 
     return app;
 }
+
+export { createApp };
