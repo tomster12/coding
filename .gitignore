@@ -22,7 +22,8 @@ _site/
 **/dist/
 /general/**/build/
 /general/docker/docker_network/mongodb/
+/general/noita/web-analysis/
 /rust/**/target/
 /processing/**/build/
 /c++/FactorioBlueprints/
-/general/noita/web-analysis/
+/web/exercise-app/
