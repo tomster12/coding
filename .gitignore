@@ -1,4 +1,3 @@
-
 # Definetly do not include
 /other/
 /software/
@@ -6,6 +5,10 @@
 /c/vinn/
 /unity/
 token
+
+# Private submodules
+/c++/FactorioBlueprints/
+/web/exercise-app/
 
 # Local gh-pages byproducts
 _site/
@@ -25,5 +28,3 @@ _site/
 /general/noita/web-analysis/
 /rust/**/target/
 /processing/**/build/
-/c++/FactorioBlueprints/
-/web/exercise-app/
