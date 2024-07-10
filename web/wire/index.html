@@ -1,0 +1,35 @@
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>Wire</title>
+    </head>
+    <body>
+        <script src="./wire.js"></script>
+
+        <script>
+            counter = new Base("counter", 5);
+            double = new Computed("double", [counter], (c) => c * 2);
+            list = new Base("list", [1, 2, 3, 4, 5]);
+            props = new Base("props", { a: 1, b: 2, c: 3 });
+
+            function onClick() {
+                counter.set(counter.get() + 1);
+                list.set([...list.get(), { number: counter.get(), text: "Hello" }]);
+            }
+        </script>
+
+        <div>
+            <button onclick="onClick()">Counter: <wire to="counter" /></button>
+
+            <p>Double: <wire to="double" /></p>
+
+            <wire with="props">
+                <p>Props: {{props.get().a}}, {{props.get().b}}, {{props.get().c}}</p>
+            </wire>
+
+            <wire over="list" with="item">
+                <p>{{item.number}}: {{item.text}}</p>
+            </wire>
+        </div>
+    </body>
+</html>
