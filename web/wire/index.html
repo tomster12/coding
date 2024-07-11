@@ -18,7 +18,7 @@
 
             props = new Base("props", { a: 1, b: 2, c: 3 });
 
-            function onClick() {
+            function onClick1() {
                 counter.set(counter.get() + 1);
                 const tmpProps = props.get();
                 tmpProps.a += 1;
@@ -30,7 +30,7 @@
         </script>
 
         <div>
-            <button onclick="onClick()">Counter: <wire to="counter" /></button>
+            <button onclick="onClick1()">Counter: <wire to="counter" /></button>
 
             <p>Double: <wire to="double" /></p>
 
