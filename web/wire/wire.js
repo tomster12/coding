@@ -84,30 +84,18 @@ class WireElementOver {
 
     render() {
         const list = this.state.get();
-        let html = "";
-
-        list.forEach((item) => {
-            if (this.with) {
-                html += wire.hydrateTemplate(this.template, { item });
-            } else {
-                html += wire.hydrateTemplate(this.template);
-            }
-        });
-
-        this.el.innerHTML = html;
+        this.el.innerHTML = list.reduce((acc, item) => {
+            let values = this.with ? { item } : {};
+            return acc + wire.hydrateTemplate(this.template, values);
+        }, "");
     }
 }
-function evalWithVariables(func, vars) {
-    // TODO: Fix strictness situation
+
+function evalWithVariables(code, vars) {
     var varString = "";
-    for (var i in vars) varString += "var " + i + " = " + vars[i] + ";";
-    const evalString = varString + " var result = " + func + ";";
-    eval?.(evalString);
-
-    console.log(evalString);
-    console.log(result);
-
-    return result;
+    for (var i in vars) varString += "var " + i + " = " + JSON.stringify(vars[i]) + ";";
+    eval?.(varString);
+    return eval(code);
 }
 
 class Wire {
@@ -121,7 +109,6 @@ class Wire {
     }
 
     onDocumentLoad() {
-        // Parse all wire tags in document
         const documentElements = document.getElementsByTagName("wire");
         for (const el of documentElements) {
             const attributes = el.getAttributeNames();
@@ -151,7 +138,6 @@ class Wire {
 
     hydrateTemplate(template, values = {}) {
         let hydrated = template;
-
         for (let i = 0; i < hydrated.length; i++) {
             if (hydrated[i] === "{") {
                 let end = hydrated.indexOf("}", i);
