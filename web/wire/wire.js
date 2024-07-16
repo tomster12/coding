@@ -3,7 +3,7 @@ class Signal {
         this.name = name;
         this.value = null;
         this.listeners = [];
-        Wire.instance.registerSignals(name, this);
+        Wire.instance.registerSignal(name, this);
     }
 
     get() {
@@ -15,7 +15,7 @@ class Signal {
     }
 }
 
-class Base extends Signal {
+class State extends Signal {
     constructor(name, value) {
         super(name);
         this.set(value);
@@ -42,52 +42,60 @@ class Computed extends Signal {
     }
 }
 
-class WireElementTo {
+class WireElement {
+    static ALLOWED_ATTRIBUTES = ["to", "with", "over"];
+
     constructor(el) {
         this.el = el;
-        this.to = el.getAttribute("to");
-        this.state = wire.resolveSignal(this.to);
-        this.state.listen(this.render.bind(this));
+        this.attributes = {};
+
+        for (const attr of this.el.getAttributeNames()) {
+            this.attributes[attr] = this.el.getAttribute(attr);
+            if (!WireElement.ALLOWED_ATTRIBUTES.includes(attr)) {
+                console.error("Invalid wire attributes: ", this.el.getAttributeNames());
+                return;
+            }
+        }
+
+        if (this.attributes.to && (this.attributes.with || this.attributes.over)) {
+            console.error("Invalid wire attribute layout: ", this.attributes);
+            return;
+        }
+
+        this.listenedSignal = null;
+        if (this.attributes.to) this.listenedSignal = wire.resolveSignal(this.attributes.to);
+        else if (this.attributes.over) this.listenedSignal = wire.resolveSignal(this.attributes.over);
+        else if (this.attributes.with) this.listenedSignal = wire.resolveSignal(this.attributes.with);
+        if (!this.listenedSignal) {
+            console.error("No wire attribute signal: ", this.attributes);
+            return;
+        }
+
+        if (this.attributes.over || this.attributes.with) this.template = this.el.innerHTML;
+
+        this.listenedSignal.listen(this.render.bind(this));
         this.render();
     }
 
     render() {
-        this.el.innerHTML = this.state.get();
-    }
-}
+        // Directly render signal value
+        if (this.attributes.to) {
+            this.el.innerHTML = this.listenedSignal.get();
+        }
 
-class WireElementWith {
-    constructor(el) {
-        this.el = el;
-        this.template = el.innerHTML;
-        this.with = el.getAttribute("with");
-        this.state = wire.resolveSignal(this.with);
-        this.state.listen(this.render.bind(this));
-        this.render();
-    }
+        // Hydrate and render template for each item in list
+        else if (this.attributes.over) {
+            const list = this.listenedSignal.get();
+            this.el.innerHTML = list.reduce((acc, item) => {
+                let values = this.attributes.with ? { item } : {};
+                return acc + wire.hydrateTemplate(this.template, values);
+            }, "");
+        }
 
-    render() {
-        this.el.innerHTML = wire.hydrateTemplate(this.template);
-    }
-}
-
-class WireElementOver {
-    constructor(el) {
-        this.el = el;
-        this.template = el.innerHTML;
-        this.over = el.getAttribute("over");
-        this.with = el.getAttribute("with");
-        this.state = wire.resolveSignal(this.over);
-        this.state.listen(this.render.bind(this));
-        this.render();
-    }
-
-    render() {
-        const list = this.state.get();
-        this.el.innerHTML = list.reduce((acc, item) => {
-            let values = this.with ? { item } : {};
-            return acc + wire.hydrateTemplate(this.template, values);
-        }, "");
+        // Hydrate and render template
+        else if (this.attributes.with) {
+            this.el.innerHTML = wire.hydrateTemplate(this.template);
+        }
     }
 }
 
@@ -110,25 +118,10 @@ class Wire {
 
     onDocumentLoad() {
         const documentElements = document.getElementsByTagName("wire");
-        for (const el of documentElements) {
-            const attributes = el.getAttributeNames();
-            const hasTo = attributes.includes("to");
-            const hasWith = attributes.includes("with");
-            const hasOver = attributes.includes("over");
-
-            if (hasTo && !(hasWith || hasOver)) {
-                this.wireElements.push(new WireElementTo(el));
-            } else if (hasWith && !hasTo && !hasOver) {
-                this.wireElements.push(new WireElementWith(el));
-            } else if (hasOver && !hasTo) {
-                this.wireElements.push(new WireElementOver(el));
-            } else {
-                console.error("Invalid wire tag attributes: ", attributes);
-            }
-        }
+        for (const el of documentElements) this.wireElements.push(new WireElement(el));
     }
 
-    registerSignals(name, signal) {
+    registerSignal(name, signal) {
         this.signalDict[name] = signal;
     }
 
@@ -136,18 +129,23 @@ class Wire {
         return this.signalDict[name];
     }
 
-    hydrateTemplate(template, values = {}) {
+    hydrateTemplate(template, variables = {}) {
         let hydrated = template;
         for (let i = 0; i < hydrated.length; i++) {
             if (hydrated[i] === "{") {
+                if (i == hydrated.length - 1) throw new Error("Unmatched { in template");
+                if (hydrated[i + 1] !== "{") throw new Error("Unmatched { in template");
                 let end = hydrated.indexOf("}", i);
                 if (end === -1) throw new Error("Unmatched { in template");
+                if (end == i + 2) throw new Error("Empty code block in template");
+                if (end == hydrated.length - 1) throw new Error("Unmatched } in template");
+                if (hydrated[end + 1] !== "}") throw new Error("Unmatched } in template");
+
                 const code = hydrated.slice(i + 2, end);
-                const result = evalWithVariables(code, values);
+                const result = evalWithVariables(code, variables);
                 hydrated = hydrated.slice(0, i) + result + hydrated.slice(end + 2);
             }
         }
-
         return hydrated;
     }
 }

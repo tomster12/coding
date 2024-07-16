@@ -7,24 +7,26 @@
         <script src="./wire.js"></script>
 
         <script>
-            counter = new Base("counter", 2);
+            counter = new State("counter", 2);
 
             double = new Computed("double", [counter], (c) => c * 2);
 
-            list = new Base("list", [
+            list = new State("list", [
                 { number: 1, text: "Hello" },
                 { number: 2, text: "World" },
             ]);
 
-            props = new Base("props", { a: 1, b: 2, c: 3 });
+            listStr = new Computed("listStr", [list], (l) => JSON.stringify(l));
+
+            props = new State("props", { a: 1, b: 2, c: 3 });
 
             function onClick1() {
                 counter.set(counter.get() + 1);
-                const tmpProps = props.get();
-                tmpProps.a += 1;
-                tmpProps.b *= 2;
-                tmpProps.c -= 1;
-                props.set(tmpProps);
+                const tmp = props.get();
+                tmp.a += 1;
+                tmp.b *= 2;
+                tmp.c -= 1;
+                props.set(tmp);
                 list.set([...list.get(), { number: counter.get(), text: "Click" }]);
             }
         </script>
@@ -41,6 +43,8 @@
             <wire over="list" with="item">
                 <p>{{item.number}}: {{item.text}}</p>
             </wire>
+
+            <p>List Str: <wire to="listStr" /></p>
         </div>
     </body>
 </html>
