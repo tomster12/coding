@@ -1,3 +1,14 @@
+// --------------------------------------------------------------------------------------
+
+function evalWithVariables(code, vars) {
+    var varString = "";
+    for (var i in vars) varString += "var " + i + " = " + JSON.stringify(vars[i]) + ";";
+    eval?.(varString);
+    return eval(code);
+}
+
+// --------------------------------------------------------------------------------------
+
 class Signal {
     constructor(name) {
         this.name = name;
@@ -42,6 +53,8 @@ class Computed extends Signal {
     }
 }
 
+// --------------------------------------------------------------------------------------
+
 class WireElement {
     static ALLOWED_ATTRIBUTES = ["to", "with", "over"];
 
@@ -49,6 +62,7 @@ class WireElement {
         this.el = el;
         this.attributes = {};
 
+        // Extract and check attributes
         for (const attr of this.el.getAttributeNames()) {
             this.attributes[attr] = this.el.getAttribute(attr);
             if (!WireElement.ALLOWED_ATTRIBUTES.includes(attr)) {
@@ -57,11 +71,13 @@ class WireElement {
             }
         }
 
+        // Ensure correct attribute layout
         if (this.attributes.to && (this.attributes.with || this.attributes.over)) {
             console.error("Invalid wire attribute layout: ", this.attributes);
             return;
         }
 
+        // Resolve signal to listen to
         this.listenedSignal = null;
         if (this.attributes.to) this.listenedSignal = wire.resolveSignal(this.attributes.to);
         else if (this.attributes.over) this.listenedSignal = wire.resolveSignal(this.attributes.over);
@@ -71,8 +87,10 @@ class WireElement {
             return;
         }
 
+        // Store template if needed
         if (this.attributes.over || this.attributes.with) this.template = this.el.innerHTML;
 
+        // Listen to signal and render
         this.listenedSignal.listen(this.render.bind(this));
         this.render();
     }
@@ -97,13 +115,6 @@ class WireElement {
             this.el.innerHTML = wire.hydrateTemplate(this.template);
         }
     }
-}
-
-function evalWithVariables(code, vars) {
-    var varString = "";
-    for (var i in vars) varString += "var " + i + " = " + JSON.stringify(vars[i]) + ";";
-    eval?.(varString);
-    return eval(code);
 }
 
 class Wire {
@@ -133,14 +144,13 @@ class Wire {
         let hydrated = template;
         for (let i = 0; i < hydrated.length; i++) {
             if (hydrated[i] === "{") {
-                if (i == hydrated.length - 1) throw new Error("Unmatched { in template");
-                if (hydrated[i + 1] !== "{") throw new Error("Unmatched { in template");
+                if (i == hydrated.length - 1) throw new Error("Unmatched '{' in template (found single '{' at EOF)");
+                if (hydrated[i + 1] !== "{") throw new Error("Unmatched '{' in template (found single '{')");
                 let end = hydrated.indexOf("}", i);
-                if (end === -1) throw new Error("Unmatched { in template");
+                if (end === -1) throw new Error("Unmatched '{' in template (could not find closing '}')");
                 if (end == i + 2) throw new Error("Empty code block in template");
-                if (end == hydrated.length - 1) throw new Error("Unmatched } in template");
-                if (hydrated[end + 1] !== "}") throw new Error("Unmatched } in template");
-
+                if (end == hydrated.length - 1) throw new Error("Unmatched '}' in template (found single '}' at EOF)");
+                if (hydrated[end + 1] !== "}") throw new Error("Unmatched '}' in template (found single '}')");
                 const code = hydrated.slice(i + 2, end);
                 const result = evalWithVariables(code, variables);
                 hydrated = hydrated.slice(0, i) + result + hydrated.slice(end + 2);
@@ -149,6 +159,8 @@ class Wire {
         return hydrated;
     }
 }
+
+// --------------------------------------------------------------------------------------
 
 let wire = new Wire();
 addEventListener("load", (e) => wire.onDocumentLoad());

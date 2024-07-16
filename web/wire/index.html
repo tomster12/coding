@@ -40,11 +40,21 @@
                 <p>Props: {{props.get().a}}, {{props.get().b}}, {{props.get().c}}</p>
             </wire>
 
+            <br /><br />
+
             <wire over="list" with="item">
                 <p>{{item.number}}: {{item.text}}</p>
             </wire>
 
             <p>List Str: <wire to="listStr" /></p>
         </div>
+
+        <style>
+            wire {
+                display: inline-block;
+                padding: 5px;
+                background-color: #adadff;
+            }
+        </style>
     </body>
 </html>
