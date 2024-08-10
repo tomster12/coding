@@ -1,14 +1,13 @@
-
 theme: jekyll-theme-tactile
 
 exclude:
-  - ./**/node_modules/
-  - AoC/
-  - Autohotkey/
-  - Github/
-  - Other/
-  - Software/
-  - Unity/
-  - Web/
-  - Gemfile
-  - Gemfile.lock
+    - ./**/node_modules/
+    - aoc/
+    - Autohotkey/
+    - github/
+    - other/
+    - software/
+    - unity/
+    - web/
+    - Gemfile
+    - Gemfile.lock
