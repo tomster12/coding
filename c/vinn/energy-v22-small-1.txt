@@ -1,0 +1,6 @@
+York	Hull	60
+Doncaster	Hull	76
+Leeds	Doncaster	-47
+York	Whitby	100
+Whitby	Hull	-200
+York	Grimsby	43

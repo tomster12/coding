@@ -1,0 +1,10 @@
+
+- Trigger.isTrigger prevents it causing collisions
+
+- RB.isKinematic prevents collisions being caused
+
+- Atleast 1 needs RB for any reaction
+
+- If atleast 1 has trigger, trigger functions called
+
+- If neither have trigger, collision functions called and they collide

@@ -1,0 +1,13 @@
+
+Birmingham	Bristol	139
+Birmingham	Manchester	129
+Manchester	Carlisle	20
+Carlisle	Liverpool	-30
+Liverpool	Blackpool	79
+
+Blackpool	Leeds	116
+Leeds	Sheffield	53
+Nottingham	Sheffield	61
+Nottingham	Birmingham	-77
+Birmingham	Cardiff	172
+Cardiff	Bristol	-71

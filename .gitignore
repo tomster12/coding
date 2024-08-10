@@ -1,29 +1,68 @@
 # Definetly do not include
-/other/
+/exclude/
 /software/
 /github/
-/c/vinn/
-/unity/
-token
 
-# Private submodules
-/c++/FactorioBlueprints/
+# Submodules
+/**/[Gg]it*/
 
-# Local gh-pages byproducts
+# Build byproducts
 _site/
 .jekyll-cache/
-
-# Project byproducts
 /c++/**/bin/
 /c++/**/.vs/
 /c++/**/dependencies/
-/c++/SFML-2.5.1/
 /c++/**/x64/
-**/node_modules/
-**/.parcel-cache/
-**/dist/
+/**/node_modules/
+/**/.parcel-cache/
+/**/dist/
 /general/**/build/
 /general/docker/docker_network/mongodb/
-/general/noita/web-analysis/
 /rust/**/target/
 /processing/**/build/
+/unity/!Builds/
+
+# Hidden local files
+token
+
+# Unity Projects
+/unity/**/[Ll]ibrary/
+/unity/**/[Tt]emp/
+/unity/**/[Oo]bj/
+/unity/**/[Bb]uild/
+/unity/**/[Bb]uilds/
+/unity/**/[Ll]ogs/
+/unity/**/[Uu]ser[Ss]ettings/
+/unity/**/[Mm]emoryCaptures/
+/unity/**/[Rr]ecordings/
+/unity/**/[Aa]ssets/Plugins/Editor/JetBrains*
+/unity/**/.vs/
+/unity/**/.gradle/
+/unity/**/ExportedObj/
+/unity/**/.consulo/
+/unity/**/*.csproj
+/unity/**/*.unityproj
+/unity/**/*.sln
+/unity/**/*.suo
+/unity/**/*.tmp
+/unity/**/*.user
+/unity/**/*.userprefs
+/unity/**/*.pidb
+/unity/**/*.booproj
+/unity/**/*.svd
+/unity/**/*.pdb
+/unity/**/*.mdb
+/unity/**/*.opendb
+/unity/**/*.VC.db
+/unity/**/*.pidb.meta
+/unity/**/*.pdb.meta
+/unity/**/*.mdb.meta
+/unity/**/sysinfo.txt
+/unity/**/*.apk
+/unity/**/*.aab
+/unity/**/*.unitypackage
+/unity/**/*.app
+/unity/**/crashlytics-build.properties
+/unity/**/[Aa]ssets/[Aa]ddressable[Aa]ssets[Dd]ata/*/*.bin*
+/unity/**/[Aa]ssets/[Ss]treamingAssets/aa.meta
+/unity/**/[Aa]ssets/[Ss]treamingAssets/aa/*

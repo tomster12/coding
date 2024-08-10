@@ -1,3 +1,0 @@
-﻿  WadsworthAnnealing.cpp
-D:\Files\Coding\C++\WadsworthAnnealingSln\WadsworthAnnealing\WadsworthAnnealing.cpp(80,15): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  WadsworthAnnealing.vcxproj -> D:\Files\Coding\C++\WadsworthAnnealingSln\x64\Debug\WadsworthAnnealing.exe

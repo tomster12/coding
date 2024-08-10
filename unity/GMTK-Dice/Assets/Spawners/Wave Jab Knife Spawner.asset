@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 360065b906eba59418b88dbbd7f3c3b5, type: 3}
+  m_Name: Wave Jab Knife Spawner
+  m_EditorClassIdentifier: 
+  startTime: 15
+  attackIntervalInitial: 5
+  attackIntervalChange: -0.06
+  attackIntervalMinimum: 2
+  pcr: {fileID: 0}
+  knifePfb: {fileID: 7564663994791019870, guid: 41d56632191635748b404dae9edf801b, type: 3}
+  spawnDistance: 4
+  spawnSpread: 25
+  knifeSettings:
+    canAim: 0
+    pauseDuration: 0.6
+    windupDuration: 0.6
+    windupDistance: 4
+    attackDuration: 0.8
+    attackDistance: 20

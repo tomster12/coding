@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7f5b2978cc97c944698de81d77ecd4c1, type: 3}
+  m_Name: Aim Jab Knife Spawner
+  m_EditorClassIdentifier: 
+  startTime: 0
+  attackIntervalInitial: 3
+  attackIntervalChange: 0.06
+  attackIntervalMinimum: 1
+  pcr: {fileID: 0}
+  knifePfb: {fileID: 7564663994791019870, guid: 41d56632191635748b404dae9edf801b, type: 3}
+  spawnDistance: 8
+  knifeSettings:
+    canAim: 1
+    pauseDuration: 1.2
+    windupDuration: 0.6
+    windupDistance: 4
+    attackDuration: 1.2
+    attackDistance: 30
