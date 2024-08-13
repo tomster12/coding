@@ -282,6 +282,10 @@ namespace Entities {
                     return;
                 }
 
+                // Overwrite any existing connections
+                const existingConnection = this.connections.find((c) => c.targetPanel === panel && c.targetNodeIndex === nodeIndex);
+                if (existingConnection) existingConnection.remove();
+
                 // Connect the target node and finish if needed
                 this.currentConnection.setTarget(panel, nodeIndex);
                 if (this.currentConnection.isConnected) {
@@ -294,13 +298,12 @@ namespace Entities {
                 if (existingConnection) {
                     this.currentConnection = existingConnection;
                     this.currentConnection.unsetTarget();
+                    return;
                 }
 
                 // Otherwise start a new connection if not holding one
-                else {
-                    this.currentConnection = new PanelEntityConnection();
-                    this.currentConnection.setTarget(panel, nodeIndex);
-                }
+                this.currentConnection = new PanelEntityConnection();
+                this.currentConnection.setTarget(panel, nodeIndex);
             }
         }
 
@@ -312,6 +315,10 @@ namespace Entities {
                     this.currentConnection = null;
                     return;
                 }
+
+                // Overwrite any existing connections
+                const existingConnection = this.connections.find((c) => c.sourcePanel === panel && c.sourceNodeIndex === nodeIndex);
+                if (existingConnection) existingConnection.remove();
 
                 // Connect the source node and finish if needed
                 this.currentConnection.setSource(panel, nodeIndex);
@@ -327,11 +334,9 @@ namespace Entities {
                     this.currentConnection.unsetSource();
                 }
 
-                // Start a new connection if not holding one
-                else {
-                    this.currentConnection = new PanelEntityConnection();
-                    this.currentConnection.setSource(panel, nodeIndex);
-                }
+                // Otherwise start a new connection if not holding one
+                this.currentConnection = new PanelEntityConnection();
+                this.currentConnection.setSource(panel, nodeIndex);
             }
         }
 
@@ -586,14 +591,14 @@ namespace Entities {
     Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
     Globals.PanelEntityManager = new Entities.PanelEntityManager();
 
-    const p1 = new Entities.PanelEntity(new Entities.MessagesEntity([new Cipher.Message("Hello World")]), "Text Panel");
+    const p1 = new Entities.PanelEntity(new Entities.MessagesEntity([new Cipher.Message("Hello World")]), "Text");
 
     const p2 = new Entities.PanelEntity(
         new Entities.MessagesEntity([new Cipher.Message("01232324334252323"), new Cipher.Message("45645632234456454"), new Cipher.Message("13231212323232")]),
-        "Text Panel 2"
+        "Text"
     );
 
-    const p3 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split Panel");
+    const p3 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split");
 
     p1.setPosition(50, 50);
     p2.setPosition(70, 300);

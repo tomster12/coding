@@ -40,7 +40,7 @@
     bottom: 0px;
     left: 0px;
     width: 100%;
-    height: 5rem;
+    height: 3rem;
     background-color: #909090;
     transition: height 0.15s;
 }
@@ -50,10 +50,10 @@
 }
 
 .logs-title {
-    height: 1.5rem;
-    line-height: 1.5rem;
+    height: 1.3rem;
+    line-height: 1.3rem;
     text-align: center;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     font-weight: 600;
     background-color: #d1d1d1;
     color: #282828;
@@ -187,7 +187,7 @@
 }
 
 .panel-entity-nodes div:hover {
-    background-color: #f0f0f0;
+    background-color: #f7f7f7;
 }
 
 .panel-entity-connection {
@@ -212,7 +212,7 @@
     background-color: #e7e7e7;
 }
 
-.message span:hover {
+.message:hover {
     background-color: #a6a6a6;
 }
 
