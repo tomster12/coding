@@ -45,14 +45,14 @@ namespace Util {
 namespace Cipher {
     /** Generic message class used by cryptography. */
     export class Message {
-        text: string;
+        letters: string[];
 
-        constructor(text: string) {
-            this.text = text;
+        constructor(letters: string[]) {
+            this.letters = letters;
         }
 
-        toHTML(): string {
-            return `<span>${this.text}</span>`;
+        static parseFromString(text: string, delimeter = ""): Message {
+            return new Message(text.split(delimeter));
         }
     }
 }
@@ -517,6 +517,15 @@ namespace Entities {
         }
     }
 
+    export function createMessageElement(message: Cipher.Message): HTMLElement {
+        const parent = Util.createHTMLElement(`<div class="message"></div>`);
+        for (const letter of message.letters) {
+            const el = Util.createHTMLElement(`<span>${letter}</span>`);
+            parent.appendChild(el);
+        }
+        return parent;
+    }
+
     /** PanelEntity content, displays messages. */
     export class MessagesEntity extends BaseEntity implements IPanelEntityContent {
         panel: PanelEntity;
@@ -535,8 +544,8 @@ namespace Entities {
         setMessages(messages: Cipher.Message[]) {
             this.messages = messages;
             this.element.innerHTML = "";
-            this.messages.forEach((content: Cipher.Message) => {
-                this.element.appendChild(Util.createHTMLElement(`<div class="message">${content.toHTML()}</div>`));
+            this.messages.forEach((message: Cipher.Message) => {
+                this.element.appendChild(createMessageElement(message));
             });
         }
 
@@ -568,7 +577,7 @@ namespace Entities {
             this.messages = messages;
             this.element.innerHTML = "";
             this.messages.forEach((content: Cipher.Message) => {
-                this.element.appendChild(Util.createHTMLElement(`<div class="message">${content.toHTML()}</div>`));
+                this.element.appendChild(createMessageElement(content));
             });
         }
 
@@ -591,16 +600,20 @@ namespace Entities {
     Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
     Globals.PanelEntityManager = new Entities.PanelEntityManager();
 
-    const p1 = new Entities.PanelEntity(new Entities.MessagesEntity([new Cipher.Message("Hello World")]), "Text");
+    const p1 = new Entities.PanelEntity(new Entities.MessagesEntity([Cipher.Message.parseFromString("Hello World")]), "Text");
 
     const p2 = new Entities.PanelEntity(
-        new Entities.MessagesEntity([new Cipher.Message("01232324334252323"), new Cipher.Message("45645632234456454"), new Cipher.Message("13231212323232")]),
+        new Entities.MessagesEntity([
+            Cipher.Message.parseFromString("0123232433422323"),
+            Cipher.Message.parseFromString("45645632234456454"),
+            Cipher.Message.parseFromString("13231212323232"),
+        ]),
         "Text"
     );
 
     const p3 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split");
 
-    p1.setPosition(50, 50);
-    p2.setPosition(70, 300);
+    p1.setPosition(70, 50);
+    p2.setPosition(40, 450);
     p3.setPosition(350, 300);
 })();
