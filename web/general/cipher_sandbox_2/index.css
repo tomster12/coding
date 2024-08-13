@@ -5,24 +5,32 @@
     overflow: hidden;
 }
 
-html {
-    font-family: Courier, monospace;
-    font-size: 20px;
-    font-weight: 600;
-    color: rgb(33, 33, 33);
+@font-face {
+    font-family: "Oxygen";
+    src: url("oxygen-regular.ttf");
 }
+
+@font-face {
+    font-family: "Cousine";
+    src: url("cousine-regular.ttf");
+}
+
+:root {
+    font-family: "Oxygen";
+    font-size: 20px;
+    color: rgb(16, 16, 16);
+}
+
+/* --------------------------------------------------- */
 
 .main {
     z-index: 0;
-}
-
-/* ---------------------------------------- */
-
-.main {
     position: relative;
     width: 100%;
     height: 100%;
-    background-color: rgb(32, 33, 38);
+    background-color: rgb(58, 58, 65);
+    background-image: url("grid.png");
+    background-size: 5rem;
 }
 
 /* ----------------------- */
@@ -34,11 +42,11 @@ html {
     width: 100%;
     height: 5rem;
     background-color: #909090;
-    transition: height 0.2s;
+    transition: height 0.15s;
 }
 
 .logs:hover {
-    height: 25rem;
+    height: 20rem;
 }
 
 .logs-title {
@@ -48,7 +56,7 @@ html {
     font-size: 0.9rem;
     font-weight: 600;
     background-color: #d1d1d1;
-    color: #4d4d4d;
+    color: #282828;
 }
 
 .logs-container {
@@ -68,59 +76,70 @@ html {
 /* ----------------------- */
 
 .panel-entity {
+    --panel-border-radius: 0.2rem;
+    --panel-close-border-radius: 0.17rem;
+    --panel-content-padding: 0.4rem;
+    --panel-content-border-radius: 0.15rem;
     display: inline-block;
     position: absolute;
     background-color: rgb(130, 130, 130);
-    box-shadow: 1px 1px 6px -1px #000000;
-    border-radius: 0.1rem;
+    box-shadow: 0 0.2rem 0.7rem -0.2rem #151515;
+    transition: box-shadow 0.15s;
+    border-radius: var(--panel-border-radius);
     user-select: none;
     overflow: visible;
 }
 
-.panel-bar {
+.panel-entity:hover {
+    box-shadow: 0 0.2rem 1.1rem -0.2rem #151515;
+}
+
+.panel-entity-bar {
     width: 100%;
     min-width: 10em;
     height: 1.2rem;
     overflow: hidden;
-    border-radius: 0.1rem 0.1rem 0px 0px;
-    background-color: #d0d0d0;
+    border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
+    background-color: #e5e5e5;
     box-sizing: border-box;
     cursor: pointer;
 }
 
-.panel-bar-title {
+.panel-entity-bar-title {
     position: absolute;
     width: 100%;
     line-height: 1.2rem;
-    font-size: 0.9rem;
+    border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
+    transition: background-color 0.1s;
+    font-size: 0.8rem;
+    font-weight: 600;
     text-align: center;
+    color: #282828;
 }
 
-.panel-bar-title:hover {
-    background-color: #b6b6b6;
+.panel-entity-bar-title:hover {
+    background-color: #efefef;
 }
 
-.panel-bar-close {
+.panel-entity-bar-close {
     position: absolute;
     top: 0px;
     right: 0px;
     width: 1.2rem;
     height: 1.2rem;
-    border-radius: 0px 0.09rem 0px 0px;
-    background-color: #cf7474;
-    color: white;
-    font-size: 0.8em;
-    line-height: 1.2rem;
-    text-align: center;
+    border-radius: 0px var(--panel-close-border-radius) 0px 0px;
+    background-color: #d55e5e;
     cursor: pointer;
+    content: url("close.png");
+    padding: 0.28rem;
 }
 
-.panel-bar-close:hover {
-    background-color: #dc5050;
+.panel-entity-bar-close:hover {
+    background-color: #a44545;
 }
 
-.panel-body {
-    padding: 0.3rem 0px;
+.panel-entity-body {
+    padding: var(--panel-content-padding) 0;
     display: flex;
     flex-direction: row;
     justify-self: center;
@@ -128,13 +147,14 @@ html {
     align-items: stretch;
 }
 
-.panel-content {
+.panel-entity-content {
     flex-grow: 1;
+    border-radius: var(--panel-content-border-radius);
 }
 
-.panel-nodes {
+.panel-entity-nodes {
     overflow: visible;
-    width: 0.2rem;
+    width: var(--panel-content-padding);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -142,44 +162,63 @@ html {
     gap: 0.3rem;
 }
 
-.panel-nodes.input {
+.panel-entity-nodes.input {
     position: relative;
     left: -0.8rem;
     z-index: -1;
 }
 
-.panel-nodes.output {
+.panel-entity-nodes.output {
     position: relative;
     right: -0.8rem;
     z-index: -1;
 }
 
-.panel-nodes div {
+.panel-entity-nodes div {
     position: relative;
     z-index: 10;
     width: 0.7rem;
     height: 0.7rem;
-    border-radius: 0.3rem;
-    background-color: rgb(242, 242, 242);
+    border-radius: 0.4rem;
+    background-color: rgb(214, 214, 214);
+    box-shadow: 0 0.03rem 0.3rem 0 #151515d6;
+    transition: background-color 0.1s;
     cursor: pointer;
-    border: 0.02rem solid #3f3f3f;
 }
 
-.panel-nodes div:hover {
-    background-color: #d8d8d8;
+.panel-entity-nodes div:hover {
+    background-color: #f0f0f0;
 }
 
-.panel-connection {
+.panel-entity-connection {
     position: absolute;
     background-color: rgb(142, 142, 142);
     height: 0.2rem;
     transform-origin: 0% 50%;
-    z-index: -2;
+    z-index: -10;
 }
-Z
+
 /* ----------------------- */
 
-.text-entity {
+.message {
+    font-family: "Cousine";
+    font-size: 0.8em;
+    background-color: white;
+    user-select: text;
+    padding: 0.2rem;
+}
+
+.message:nth-child(even) {
+    background-color: #e7e7e7;
+}
+
+.message span:hover {
+    background-color: #a6a6a6;
+}
+
+/* ----------------------- */
+
+.messages-entity {
     box-shadow: 0 0 5px #000000;
     display: flex;
     flex-direction: column;
@@ -187,24 +226,9 @@ Z
     justify-content: center;
 }
 
-.text-content {
-    font-size: 1em;
-    background-color: white;
-    user-select: text;
-    padding: 0.1rem;
-}
-
-.text-content:nth-child(even) {
-    background-color: #e7e7e7;
-}
-
-.text-content span:hover {
-    background-color: #a6a6a6;
-}
-
 /* ----------------------- */
 
-.split-text-entity {
+.split-messages-entity {
     box-shadow: 0 0 5px #000000;
     display: flex;
     height: 100%;

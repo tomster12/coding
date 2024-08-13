@@ -1,7 +1,7 @@
 namespace Globals {
     export let main: HTMLElement;
     export let logManager: Entities.LogManager;
-    export let pagePanelManager: Entities.PagePanelManager;
+    export let PanelEntityManager: Entities.PanelEntityManager;
 }
 
 namespace Util {
@@ -78,7 +78,7 @@ namespace Entities {
     }
 
     /** A proxy to a HTML element which can be moved around and removed. */
-    export class PageEntity {
+    export class BaseEntity {
         element: HTMLElement;
         events: Util.EventBus;
         position: { x: number; y: number };
@@ -115,17 +115,17 @@ namespace Entities {
         }
     }
 
-    /** Content which can be placed inside a PagePanel. */
-    export interface IPagePanelContent extends PageEntity {
-        setPanel(panel: PagePanel): void;
+    /** Content which can be placed inside a PanelEntity. */
+    export interface IPanelEntityContent extends BaseEntity {
+        setPanel(panel: PanelEntity): void;
         setInputNodeValue(index: number, value: Cipher.Message[]): void;
         getOutputNodeValue(index: number): Cipher.Message[];
     }
 
-    export type PagePanelNodeType = "input" | "output";
+    export type PanelEntityNodeType = "input" | "output";
 
     /** Panel which can contain content and have input / output nodes. */
-    export class PagePanel extends PageEntity {
+    export class PanelEntity extends BaseEntity {
         elementBar: HTMLElement;
         elementBarTitle: HTMLElement;
         elementBarClose: HTMLElement;
@@ -133,7 +133,7 @@ namespace Entities {
         elementNodesInput: HTMLElement;
         elementNodesOutput: HTMLElement;
 
-        content: IPagePanelContent;
+        content: IPanelEntityContent;
         nodeCounts: { input: number; output: number } = { input: 0, output: 0 };
         isDragging: boolean;
         initialMouseX: number;
@@ -141,25 +141,25 @@ namespace Entities {
         initialOffsetX: number;
         initialOffsetY: number;
 
-        constructor(content: IPagePanelContent, title = "") {
+        constructor(content: IPanelEntityContent, title: string) {
             super(`
                 <div class="panel-entity">
-                    <div class="panel-bar">
-                        <div class="panel-bar-title">Panel</div>
-                        <div class="panel-bar-close">X</div>
+                    <div class="panel-entity-bar">
+                        <div class="panel-entity-bar-title">${title}</div>
+                        <img class="panel-entity-bar-close"></img>
                     </div>
-                    <div class="panel-body">
-                        <div class="panel-nodes input"></div>
-                        <div class="panel-content"></div>
-                        <div class="panel-nodes output"></div>
+                    <div class="panel-entity-body">
+                        <div class="panel-entity-nodes input"></div>
+                        <div class="panel-entity-content"></div>
+                        <div class="panel-entity-nodes output"></div>
                     </div>
                 </div>`);
-            this.elementBar = this.element.querySelector(".panel-bar") as HTMLElement;
-            this.elementBarTitle = this.element.querySelector(".panel-bar-title") as HTMLElement;
-            this.elementBarClose = this.element.querySelector(".panel-bar-close") as HTMLElement;
-            this.elementContent = this.element.querySelector(".panel-content") as HTMLElement;
-            this.elementNodesInput = this.element.querySelector(".panel-nodes.input") as HTMLElement;
-            this.elementNodesOutput = this.element.querySelector(".panel-nodes.output") as HTMLElement;
+            this.elementBar = this.element.querySelector(".panel-entity-bar") as HTMLElement;
+            this.elementBarTitle = this.element.querySelector(".panel-entity-bar-title") as HTMLElement;
+            this.elementBarClose = this.element.querySelector(".panel-entity-bar-close") as HTMLElement;
+            this.elementContent = this.element.querySelector(".panel-entity-content") as HTMLElement;
+            this.elementNodesInput = this.element.querySelector(".panel-entity-nodes.input") as HTMLElement;
+            this.elementNodesOutput = this.element.querySelector(".panel-entity-nodes.output") as HTMLElement;
 
             this.elementBarClose.addEventListener("mousedown", (e) => this.onCloseMouseDown(e));
             this.elementBar.addEventListener("mousedown", (e) => this.onBarMouseDown(e));
@@ -177,7 +177,7 @@ namespace Entities {
             this.content.setPanel(this);
             this.content.events.on("outputUpdate", (index: number) => this.events.emit("outputUpdate", index));
 
-            Globals.pagePanelManager.registerPanel(this);
+            Globals.PanelEntityManager.registerPanel(this);
         }
 
         setNodeCount(inputCount: number, outputCount: number) {
@@ -210,7 +210,7 @@ namespace Entities {
             this.events.emit("move", this.position);
         }
 
-        getNodeHTML(type: PagePanelNodeType, index: number): HTMLElement {
+        getNodeHTML(type: PanelEntityNodeType, index: number): HTMLElement {
             if (type === "input") {
                 return this.elementNodesInput.querySelectorAll(".panel-node")[index] as HTMLElement;
             } else {
@@ -220,12 +220,12 @@ namespace Entities {
 
         setInputNodeValue(index: number, value: Cipher.Message[]) {
             Util.assert(this.content !== null, "Panel does not have any content");
-            (this.content as IPagePanelContent).setInputNodeValue(index, value);
+            (this.content as IPanelEntityContent).setInputNodeValue(index, value);
         }
 
         getOutputNodeValue(index: number): Cipher.Message[] {
             Util.assert(this.content !== null, "Panel does not have any content");
-            return (this.content as IPagePanelContent).getOutputNodeValue(index);
+            return (this.content as IPanelEntityContent).getOutputNodeValue(index);
         }
 
         onCloseMouseDown(e: MouseEvent) {
@@ -252,11 +252,11 @@ namespace Entities {
         }
     }
 
-    /** Global manager referenced by PagePanels to manage connections between them. */
-    export class PagePanelManager {
-        panels: PagePanel[];
-        connections: PagePanelConnection[];
-        currentConnection: PagePanelConnection | null;
+    /** Global manager referenced by PanelEntitys to manage connections between them. */
+    export class PanelEntityManager {
+        panels: PanelEntity[];
+        connections: PanelEntityConnection[];
+        currentConnection: PanelEntityConnection | null;
 
         constructor() {
             this.panels = [];
@@ -265,55 +265,81 @@ namespace Entities {
             Globals.main.addEventListener("mousedown", (e) => this.onMainMouseDown(e));
         }
 
-        registerPanel(panel: PagePanel) {
+        registerPanel(panel: PanelEntity) {
             panel.events.on("remove", this.onPanelRemoved.bind(this));
-            panel.events.on("nodeClicked", (type: PagePanelNodeType, index: number) => {
+            panel.events.on("nodeClicked", (type: PanelEntityNodeType, index: number) => {
                 if (type === "input") this.connectInputNode(panel, index);
                 else this.connectOutputNode(panel, index);
             });
         }
 
-        connectInputNode(panel: PagePanel, nodeIndex: number) {
+        connectInputNode(panel: PanelEntity, nodeIndex: number) {
             if (this.currentConnection) {
+                // Holding connection, remove if the connecting to self
                 if (this.currentConnection.sourcePanel === panel || this.currentConnection.targetPanel != null) {
                     this.currentConnection.remove();
                     this.currentConnection = null;
                     return;
                 }
+
+                // Connect the target node and finish if needed
                 this.currentConnection.setTarget(panel, nodeIndex);
                 if (this.currentConnection.isConnected) {
                     this.connections.push(this.currentConnection);
                     this.currentConnection = null;
                 }
             } else {
-                this.currentConnection = new PagePanelConnection();
-                this.currentConnection.setTarget(panel, nodeIndex);
+                // Check if the node is already connected, and if so grab
+                const existingConnection = this.connections.find((c) => c.targetPanel === panel && c.targetNodeIndex === nodeIndex);
+                if (existingConnection) {
+                    this.currentConnection = existingConnection;
+                    this.currentConnection.unsetTarget();
+                }
+
+                // Otherwise start a new connection if not holding one
+                else {
+                    this.currentConnection = new PanelEntityConnection();
+                    this.currentConnection.setTarget(panel, nodeIndex);
+                }
             }
         }
 
-        connectOutputNode(panel: PagePanel, nodeIndex: number) {
+        connectOutputNode(panel: PanelEntity, nodeIndex: number) {
             if (this.currentConnection) {
+                // Holding connection, remove if the connecting to self
                 if (this.currentConnection.targetPanel === panel || this.currentConnection.sourcePanel != null) {
                     this.currentConnection.remove();
                     this.currentConnection = null;
                     return;
                 }
+
+                // Connect the source node and finish if needed
                 this.currentConnection.setSource(panel, nodeIndex);
                 if (this.currentConnection.isConnected) {
                     this.connections.push(this.currentConnection);
                     this.currentConnection = null;
                 }
             } else {
-                this.currentConnection = new PagePanelConnection();
-                this.currentConnection.setSource(panel, nodeIndex);
+                // Check if the node is already connected, and if so grab
+                const existingConnection = this.connections.find((c) => c.sourcePanel === panel && c.sourceNodeIndex === nodeIndex);
+                if (existingConnection) {
+                    this.currentConnection = existingConnection;
+                    this.currentConnection.unsetSource();
+                }
+
+                // Start a new connection if not holding one
+                else {
+                    this.currentConnection = new PanelEntityConnection();
+                    this.currentConnection.setSource(panel, nodeIndex);
+                }
             }
         }
 
-        removeConnection(connection: PagePanelConnection) {
+        removeConnection(connection: PanelEntityConnection) {
             this.connections = this.connections.filter((c) => c !== connection);
         }
 
-        onPanelRemoved(panel: PagePanel) {
+        onPanelRemoved(panel: PanelEntity) {
             this.panels = this.panels.filter((p) => p !== panel);
         }
 
@@ -327,10 +353,10 @@ namespace Entities {
     }
 
     /** Visual and representation of a connection between two panels. */
-    export class PagePanelConnection extends PageEntity {
+    export class PanelEntityConnection extends BaseEntity {
         isConnected: boolean;
-        sourcePanel: PagePanel;
-        targetPanel: PagePanel;
+        sourcePanel: PanelEntity;
+        targetPanel: PanelEntity;
         sourceNodeIndex: number;
         targetNodeIndex: number;
         sourcePos: { x: number; y: number };
@@ -342,7 +368,7 @@ namespace Entities {
         removeListener: () => void;
 
         constructor() {
-            super(`<div class="panel-connection"></div>`);
+            super(`<div class="panel-entity-connection"></div>`);
 
             this.mouseMoveListener = this.onMouseMoved.bind(this);
             this.removeListener = this.remove.bind(this);
@@ -351,7 +377,7 @@ namespace Entities {
             this.isConnected = false;
         }
 
-        setSource(panel: PagePanel, nodeIndex: number) {
+        setSource(panel: PanelEntity, nodeIndex: number) {
             Util.assert(!this.isConnected, "Connection is already connected");
 
             this.sourcePanel = panel;
@@ -370,7 +396,7 @@ namespace Entities {
             if (this.targetPanel) this.establishConnection();
         }
 
-        setTarget(panel: PagePanel, nodeIndex: number) {
+        setTarget(panel: PanelEntity, nodeIndex: number) {
             Util.assert(!this.isConnected, "Connection is already connected");
 
             this.targetPanel = panel;
@@ -389,6 +415,29 @@ namespace Entities {
             if (this.sourcePanel) this.establishConnection();
         }
 
+        unsetSource() {
+            Util.assert(this.isConnected, "Connection is not connected");
+            this.isConnected = false;
+            document.addEventListener("mousemove", this.mouseMoveListener);
+            this.sourcePanel.events.remove("move", this.sourceMoveListener);
+            this.sourcePanel.events.remove("remove", this.removeListener);
+            this.sourcePanel.events.remove("outputUpdate", this.sourceOutputUpdateListener);
+            this.sourcePanel = null;
+            this.sourceNodeIndex = -1;
+            this.updateElement();
+        }
+
+        unsetTarget() {
+            Util.assert(this.isConnected, "Connection is not connected");
+            this.isConnected = false;
+            document.addEventListener("mousemove", this.mouseMoveListener);
+            this.targetPanel.events.remove("move", this.targetMoveListener);
+            this.targetPanel.events.remove("remove", this.removeListener);
+            this.targetPanel = null;
+            this.targetNodeIndex = -1;
+            this.updateElement();
+        }
+
         establishConnection() {
             this.isConnected = true;
             this.sourceOutputUpdateListener = (index: number) => {
@@ -402,6 +451,21 @@ namespace Entities {
             if (!this.isConnected) return;
             const sourceValue = this.sourcePanel.getOutputNodeValue(this.sourceNodeIndex);
             this.targetPanel.setInputNodeValue(this.targetNodeIndex, sourceValue);
+        }
+
+        remove() {
+            document.removeEventListener("mousemove", this.mouseMoveListener);
+            if (this.sourcePanel) {
+                this.sourcePanel.events.remove("move", this.sourceMoveListener);
+                this.sourcePanel.events.remove("remove", this.removeListener);
+            }
+            if (this.targetPanel) {
+                this.targetPanel.events.remove("move", this.targetMoveListener);
+                this.targetPanel.events.remove("remove", this.removeListener);
+            }
+            if (this.isConnected) this.sourcePanel.events.remove("outputUpdate", this.sourceOutputUpdateListener);
+            Globals.PanelEntityManager.removeConnection(this);
+            this.element.remove();
         }
 
         recalculateSourceNodePos() {
@@ -435,21 +499,6 @@ namespace Entities {
             this.element.style.transform = `rotate(${angle}rad)`;
         }
 
-        remove() {
-            document.removeEventListener("mousemove", this.mouseMoveListener);
-            if (this.sourcePanel) {
-                this.sourcePanel.events.remove("move", this.sourceMoveListener);
-                this.sourcePanel.events.remove("remove", this.removeListener);
-            }
-            if (this.targetPanel) {
-                this.targetPanel.events.remove("move", this.targetMoveListener);
-                this.targetPanel.events.remove("remove", this.removeListener);
-            }
-            if (this.isConnected) this.sourcePanel.events.remove("outputUpdate", this.sourceOutputUpdateListener);
-            Globals.pagePanelManager.removeConnection(this);
-            this.element.remove();
-        }
-
         onMouseMoved(e: MouseEvent) {
             // Stop caring the mouse position if it's already connected
             if (this.isConnected) document.removeEventListener("mousemove", this.mouseMoveListener);
@@ -463,18 +512,17 @@ namespace Entities {
         }
     }
 
-    /** PagePanel content, displays messages. */
-    export class TextEntity extends PageEntity implements IPagePanelContent {
-        panel: PagePanel;
+    /** PanelEntity content, displays messages. */
+    export class MessagesEntity extends BaseEntity implements IPanelEntityContent {
+        panel: PanelEntity;
         messages: Cipher.Message[];
 
         constructor(messages: Cipher.Message[]) {
-            super(`<div class="text-entity"></div>`);
-
+            super(`<div class="messages-entity"></div>`);
             this.setMessages(messages);
         }
 
-        setPanel(panel: PagePanel) {
+        setPanel(panel: PanelEntity) {
             this.panel = panel;
             this.panel.setNodeCount(0, 1);
         }
@@ -483,7 +531,7 @@ namespace Entities {
             this.messages = messages;
             this.element.innerHTML = "";
             this.messages.forEach((content: Cipher.Message) => {
-                this.element.appendChild(Util.createHTMLElement(`<div class="text-content">${content.toHTML()}</div>`));
+                this.element.appendChild(Util.createHTMLElement(`<div class="message">${content.toHTML()}</div>`));
             });
         }
 
@@ -497,38 +545,38 @@ namespace Entities {
         }
     }
 
-    /** PagePanel content, splits messages into lines. */
-    export class SplitTextEntity extends PageEntity implements IPagePanelContent {
-        panel: PagePanel;
-        contentList: Cipher.Message[];
+    /** PanelEntity content, splits messages into lines. */
+    export class SplitMessagesEntity extends BaseEntity implements IPanelEntityContent {
+        panel: PanelEntity;
+        messages: Cipher.Message[];
 
         constructor() {
-            super(`<div class="split-text-entity"></div>`);
+            super(`<div class="split-messages-entity"></div>`);
         }
 
-        setPanel(panel: PagePanel) {
+        setPanel(panel: PanelEntity) {
             this.panel = panel;
             this.panel.setNodeCount(1, 0);
         }
 
-        setContentList(contentList: Cipher.Message[]) {
-            this.contentList = contentList;
+        setMessages(messages: Cipher.Message[]) {
+            this.messages = messages;
             this.element.innerHTML = "";
-            this.contentList.forEach((content: Cipher.Message) => {
-                this.element.appendChild(Util.createHTMLElement(`<div class="text-content">${content.toHTML()}</div>`));
+            this.messages.forEach((content: Cipher.Message) => {
+                this.element.appendChild(Util.createHTMLElement(`<div class="message">${content.toHTML()}</div>`));
             });
         }
 
         setInputNodeValue(index: number, value: Cipher.Message[]) {
             Util.assert(index == 0, "SplitTextEntity only has one input");
-            this.setContentList(value);
-            this.panel.setNodeCount(1, this.contentList.length);
+            this.setMessages(value);
+            this.panel.setNodeCount(1, this.messages.length);
             this.events.emit("outputUpdate", 0);
         }
 
         getOutputNodeValue(index: number): Cipher.Message[] {
-            Util.assert(index < this.contentList.length, "Invalid output index");
-            return [this.contentList[index]];
+            Util.assert(index < this.messages.length, "Invalid output index");
+            return [this.messages[index]];
         }
     }
 }
@@ -536,16 +584,16 @@ namespace Entities {
 (function () {
     Globals.main = document.querySelector(".main");
     Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
-    Globals.pagePanelManager = new Entities.PagePanelManager();
+    Globals.PanelEntityManager = new Entities.PanelEntityManager();
 
-    const p1 = new Entities.PagePanel(new Entities.TextEntity([new Cipher.Message("Hello World")]), "Text Panel");
+    const p1 = new Entities.PanelEntity(new Entities.MessagesEntity([new Cipher.Message("Hello World")]), "Text Panel");
 
-    const p2 = new Entities.PagePanel(
-        new Entities.TextEntity([new Cipher.Message("01232324334252323"), new Cipher.Message("45645632234456454"), new Cipher.Message("13231212323232")]),
+    const p2 = new Entities.PanelEntity(
+        new Entities.MessagesEntity([new Cipher.Message("01232324334252323"), new Cipher.Message("45645632234456454"), new Cipher.Message("13231212323232")]),
         "Text Panel 2"
     );
 
-    const p3 = new Entities.PagePanel(new Entities.SplitTextEntity(), "Split Panel");
+    const p3 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split Panel");
 
     p1.setPosition(50, 50);
     p2.setPosition(70, 300);
