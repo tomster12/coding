@@ -86,12 +86,7 @@ class UIElement {
     }
 
     getBounds(): Bounds {
-        return new Bounds(
-            this.getGlobalPosition().x,
-            this.getGlobalPosition().y,
-            0,
-            0
-        );
+        return new Bounds(this.getGlobalPosition().x, this.getGlobalPosition().y, 0, 0);
     }
 }
 
@@ -100,13 +95,7 @@ class UIPanel extends UIElement {
     height: number;
     bgColour: string;
 
-    constructor(
-        uiManager: UIManager,
-        localPosition: Float2,
-        width: number,
-        height: number,
-        bgColour: string
-    ) {
+    constructor(uiManager: UIManager, localPosition: Float2, width: number, height: number, bgColour: string) {
         super(uiManager, localPosition);
         this.width = width;
         this.height = height;
@@ -115,12 +104,7 @@ class UIPanel extends UIElement {
 
     draw() {
         this.uiManager.app.fill(this.bgColour);
-        this.uiManager.app.rect(
-            this.getGlobalPosition().x,
-            this.getGlobalPosition().y,
-            this.width,
-            this.height
-        );
+        this.uiManager.app.rect(this.getGlobalPosition().x, this.getGlobalPosition().y, this.width, this.height);
     }
 
     getBounds(): Bounds {
@@ -138,12 +122,7 @@ class UIText extends UIElement {
     textSize: number;
     bounds!: bounds;
 
-    constructor(
-        uiManager: UIManager,
-        localPosition: Float2,
-        text: string,
-        textSize = 12
-    ) {
+    constructor(uiManager: UIManager, localPosition: Float2, text: string, textSize = 12) {
         super(uiManager, localPosition);
         this.text = text;
         this.textSize = textSize;
@@ -152,17 +131,10 @@ class UIText extends UIElement {
 
     draw() {
         this.uiManager.app.textSize(this.textSize);
-        this.uiManager.app.textAlign(
-            this.uiManager.app.LEFT,
-            this.uiManager.app.TOP
-        );
+        this.uiManager.app.textAlign(this.uiManager.app.LEFT, this.uiManager.app.TOP);
 
         this.uiManager.app.fill("#000000");
-        this.uiManager.app.text(
-            this.text,
-            this.getGlobalPosition().x - this.bounds.x,
-            this.getGlobalPosition().y - this.bounds.y
-        );
+        this.uiManager.app.text(this.text, this.getGlobalPosition().x - this.bounds.x, this.getGlobalPosition().y - this.bounds.y);
     }
 
     setText(text: string) {
@@ -172,16 +144,9 @@ class UIText extends UIElement {
 
     updateBounds() {
         this.uiManager.app.textSize(this.textSize);
-        this.uiManager.app.textAlign(
-            this.uiManager.app.LEFT,
-            this.uiManager.app.TOP
-        );
+        this.uiManager.app.textAlign(this.uiManager.app.LEFT, this.uiManager.app.TOP);
 
-        this.bounds = this.uiManager.app.font.textBounds(
-            this.text,
-            0,
-            0
-        ) as bounds;
+        this.bounds = this.uiManager.app.font.textBounds(this.text, 0, 0) as bounds;
     }
 }
 
@@ -220,22 +185,10 @@ class SimpleTextPanel {
     panel: UIPanel;
     textElement: UIText;
 
-    constructor(
-        uiManager: UIManager,
-        localPosition: Float2,
-        bgColour: string,
-        text: string,
-        textSize = 12,
-        margin = 10
-    ) {
+    constructor(uiManager: UIManager, localPosition: Float2, bgColour: string, text: string, textSize = 12, margin = 10) {
         this.panel = new UIPanel(uiManager, localPosition, 0, 0, bgColour);
 
-        this.textElement = new UIText(
-            uiManager,
-            new Float2(margin, margin),
-            text,
-            textSize
-        );
+        this.textElement = new UIText(uiManager, new Float2(margin, margin), text, textSize);
 
         this.panel.addChild(this.textElement);
 
@@ -267,14 +220,7 @@ class App extends p5 {
 
         this.uiManager = new UIManager(this);
 
-        this.tp = new SimpleTextPanel(
-            this.uiManager,
-            new Float2(400, 400),
-            "#f3f3f3",
-            "Hello World\nAnother Line",
-            15,
-            10
-        );
+        this.tp = new SimpleTextPanel(this.uiManager, new Float2(400, 400), "#f3f3f3", "Hello World\nAnother Line", 15, 10);
     }
 
     windowResized(event?: object | undefined): void {
