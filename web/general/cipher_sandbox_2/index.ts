@@ -1,5 +1,6 @@
 namespace Globals {
     export let main: HTMLElement;
+    export let svgContainer: HTMLElement;
     export let logManager: Entities.LogManager;
     export let PanelEntityManager: Entities.PanelEntityManager;
 }
@@ -135,6 +136,7 @@ namespace Entities {
 
         content: IPanelEntityContent;
         nodeCounts: { input: number; output: number } = { input: 0, output: 0 };
+        nodeLabels: { input: string[]; output: string[] } = { input: [], output: [] };
         isDragging: boolean;
         initialMouseX: number;
         initialMouseY: number;
@@ -184,7 +186,7 @@ namespace Entities {
             if (inputCount != this.nodeCounts.input) {
                 this.elementNodesInput.innerHTML = "";
                 for (let i = 0; i < inputCount; i++) {
-                    const el = Util.createHTMLElement(`<div class="panel-node"></div>`);
+                    const el = Util.createHTMLElement(`<div class="panel-entity-node"></div>`);
                     el.addEventListener("mousedown", (e) => {
                         e.stopPropagation();
                         this.events.emit("nodeClicked", "input", i);
@@ -196,7 +198,7 @@ namespace Entities {
             if (outputCount != this.nodeCounts.output) {
                 this.elementNodesOutput.innerHTML = "";
                 for (let i = 0; i < outputCount; i++) {
-                    const el = Util.createHTMLElement(`<div class="panel-node"></div>`);
+                    const el = Util.createHTMLElement(`<div class="panel-entity-node"></div>`);
                     el.addEventListener("mousedown", (e) => {
                         e.stopPropagation();
                         this.events.emit("nodeClicked", "output", i);
@@ -210,11 +212,26 @@ namespace Entities {
             this.events.emit("move", this.position);
         }
 
+        setNodeLabels(inputLabels: string[] | null, outputLabels: string[] | null) {
+            this.nodeLabels.input = inputLabels;
+            this.nodeLabels.output = outputLabels;
+            Util.assert(inputLabels == null || inputLabels.length == this.nodeCounts.input, "inputLabels wrong length.");
+            Util.assert(outputLabels == null || outputLabels.length == this.nodeCounts.output, "outputLabels wrong length.");
+            for (let i = 0; i < this.nodeCounts.input; i++) {
+                if (inputLabels == null) this.getNodeHTML("input", i).innerHTML = "";
+                else this.getNodeHTML("input", i).innerHTML = `<span>${inputLabels[i]}</span>`;
+            }
+            for (let i = 0; i < this.nodeCounts.output; i++) {
+                if (outputLabels == null) this.getNodeHTML("output", i).innerHTML = "";
+                else this.getNodeHTML("output", i).innerHTML = `<span>${outputLabels[i]}</span>`;
+            }
+        }
+
         getNodeHTML(type: PanelEntityNodeType, index: number): HTMLElement {
             if (type === "input") {
-                return this.elementNodesInput.querySelectorAll(".panel-node")[index] as HTMLElement;
+                return this.elementNodesInput.querySelectorAll(".panel-entity-node")[index] as HTMLElement;
             } else {
-                return this.elementNodesOutput.querySelectorAll(".panel-node")[index] as HTMLElement;
+                return this.elementNodesOutput.querySelectorAll(".panel-entity-node")[index] as HTMLElement;
             }
         }
 
@@ -375,11 +392,9 @@ namespace Entities {
 
         constructor() {
             super(`<div class="panel-entity-connection"></div>`);
-
             this.mouseMoveListener = this.onMouseMoved.bind(this);
             this.removeListener = this.remove.bind(this);
             document.addEventListener("mousemove", this.mouseMoveListener);
-
             this.isConnected = false;
         }
 
@@ -541,6 +556,7 @@ namespace Entities {
         setPanel(panel: PanelEntity) {
             this.panel = panel;
             this.panel.setNodeCount(0, 1);
+            this.panel.setNodeLabels(null, ["Messages"]);
         }
 
         setMessages(messages: Cipher.Message[]) {
@@ -573,6 +589,7 @@ namespace Entities {
         setPanel(panel: PanelEntity) {
             this.panel = panel;
             this.panel.setNodeCount(1, 1);
+            this.panel.setNodeLabels(["Messages"], ["Passthrough"]);
         }
 
         setMessages(messages: Cipher.Message[]) {
@@ -599,26 +616,31 @@ namespace Entities {
 
     /** PanelEntity content, splits messages into lines. */
     export class SplitMessagesEntity extends BaseEntity implements IPanelEntityContent {
+        elementCount: HTMLElement;
         panel: PanelEntity;
         messages: Cipher.Message[];
 
         constructor() {
-            super(`<div class="split-messages-entity"></div>`);
+            super(`<div class="split-messages-entity"><p>0</p></div>`);
+            this.elementCount = this.element.querySelector("p") as HTMLElement;
         }
 
         setPanel(panel: PanelEntity) {
             this.panel = panel;
             this.panel.setNodeCount(1, 0);
+            this.panel.setNodeLabels(["Messages"], null);
         }
 
         setInputNodeValue(index: number, value: Cipher.Message[]) {
             Util.assert(index == 0, "SplitTextEntity only has one input");
             this.messages = value;
             this.panel.setNodeCount(1, this.messages.length);
-            this.element.appendChild(Util.createHTMLElement(`<p>${this.messages.length}</p>`));
-            for (let i = 0; i < this.messages.length; i++) {
-                this.events.emit("outputUpdate", i);
-            }
+            this.panel.setNodeLabels(
+                ["Messages"],
+                this.messages.map((_, i) => `Message ${i}`)
+            );
+            this.elementCount.innerText = this.messages.length.toString();
+            for (let i = 0; i < this.messages.length; i++) this.events.emit("outputUpdate", i);
         }
 
         getOutputNodeValue(index: number): Cipher.Message[] {
@@ -630,6 +652,7 @@ namespace Entities {
 
 (function () {
     Globals.main = document.querySelector(".main");
+    Globals.svgContainer = document.querySelector(".svg-container");
     Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
     Globals.PanelEntityManager = new Entities.PanelEntityManager();
 

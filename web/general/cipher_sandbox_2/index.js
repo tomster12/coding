@@ -115,6 +115,7 @@ var Entities;
         elementNodesOutput;
         content;
         nodeCounts = { input: 0, output: 0 };
+        nodeLabels = { input: [], output: [] };
         isDragging;
         initialMouseX;
         initialMouseY;
@@ -158,7 +159,7 @@ var Entities;
             if (inputCount != this.nodeCounts.input) {
                 this.elementNodesInput.innerHTML = "";
                 for (let i = 0; i < inputCount; i++) {
-                    const el = Util.createHTMLElement(`<div class="panel-node"></div>`);
+                    const el = Util.createHTMLElement(`<div class="panel-entity-node"></div>`);
                     el.addEventListener("mousedown", (e) => {
                         e.stopPropagation();
                         this.events.emit("nodeClicked", "input", i);
@@ -169,7 +170,7 @@ var Entities;
             if (outputCount != this.nodeCounts.output) {
                 this.elementNodesOutput.innerHTML = "";
                 for (let i = 0; i < outputCount; i++) {
-                    const el = Util.createHTMLElement(`<div class="panel-node"></div>`);
+                    const el = Util.createHTMLElement(`<div class="panel-entity-node"></div>`);
                     el.addEventListener("mousedown", (e) => {
                         e.stopPropagation();
                         this.events.emit("nodeClicked", "output", i);
@@ -181,12 +182,30 @@ var Entities;
             this.nodeCounts.output = outputCount;
             this.events.emit("move", this.position);
         }
+        setNodeLabels(inputLabels, outputLabels) {
+            this.nodeLabels.input = inputLabels;
+            this.nodeLabels.output = outputLabels;
+            Util.assert(inputLabels == null || inputLabels.length == this.nodeCounts.input, "inputLabels wrong length.");
+            Util.assert(outputLabels == null || outputLabels.length == this.nodeCounts.output, "outputLabels wrong length.");
+            for (let i = 0; i < this.nodeCounts.input; i++) {
+                if (inputLabels == null)
+                    this.getNodeHTML("input", i).innerHTML = "";
+                else
+                    this.getNodeHTML("input", i).innerHTML = `<span>${inputLabels[i]}</span>`;
+            }
+            for (let i = 0; i < this.nodeCounts.output; i++) {
+                if (outputLabels == null)
+                    this.getNodeHTML("output", i).innerHTML = "";
+                else
+                    this.getNodeHTML("output", i).innerHTML = `<span>${outputLabels[i]}</span>`;
+            }
+        }
         getNodeHTML(type, index) {
             if (type === "input") {
-                return this.elementNodesInput.querySelectorAll(".panel-node")[index];
+                return this.elementNodesInput.querySelectorAll(".panel-entity-node")[index];
             }
             else {
-                return this.elementNodesOutput.querySelectorAll(".panel-node")[index];
+                return this.elementNodesOutput.querySelectorAll(".panel-entity-node")[index];
             }
         }
         setInputNodeValue(index, value) {
@@ -491,6 +510,7 @@ var Entities;
         setPanel(panel) {
             this.panel = panel;
             this.panel.setNodeCount(0, 1);
+            this.panel.setNodeLabels(null, ["Messages"]);
         }
         setMessages(messages) {
             this.messages = messages;
@@ -518,6 +538,7 @@ var Entities;
         setPanel(panel) {
             this.panel = panel;
             this.panel.setNodeCount(1, 1);
+            this.panel.setNodeLabels(["Messages"], ["Passthrough"]);
         }
         setMessages(messages) {
             this.messages = messages;
@@ -543,23 +564,26 @@ var Entities;
     Entities.PreviewMessagesEntity = PreviewMessagesEntity;
     /** PanelEntity content, splits messages into lines. */
     class SplitMessagesEntity extends BaseEntity {
+        elementCount;
         panel;
         messages;
         constructor() {
-            super(`<div class="split-messages-entity"></div>`);
+            super(`<div class="split-messages-entity"><p>0</p></div>`);
+            this.elementCount = this.element.querySelector("p");
         }
         setPanel(panel) {
             this.panel = panel;
             this.panel.setNodeCount(1, 0);
+            this.panel.setNodeLabels(["Messages"], null);
         }
         setInputNodeValue(index, value) {
             Util.assert(index == 0, "SplitTextEntity only has one input");
             this.messages = value;
             this.panel.setNodeCount(1, this.messages.length);
-            this.element.appendChild(Util.createHTMLElement(`<p>${this.messages.length}</p>`));
-            for (let i = 0; i < this.messages.length; i++) {
+            this.panel.setNodeLabels(["Messages"], this.messages.map((_, i) => `Message ${i}`));
+            this.elementCount.innerText = this.messages.length.toString();
+            for (let i = 0; i < this.messages.length; i++)
                 this.events.emit("outputUpdate", i);
-            }
         }
         getOutputNodeValue(index) {
             Util.assert(index < this.messages.length, "Invalid output index");
@@ -570,6 +594,7 @@ var Entities;
 })(Entities || (Entities = {}));
 (function () {
     Globals.main = document.querySelector(".main");
+    Globals.svgContainer = document.querySelector(".svg-container");
     Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
     Globals.PanelEntityManager = new Entities.PanelEntityManager();
     const p1 = new Entities.PanelEntity(new Entities.HardcodedEntity([Cipher.Message.parseFromString("Hello World")]), "Text");
