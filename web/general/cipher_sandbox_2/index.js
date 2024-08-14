@@ -1,6 +1,13 @@
 var Globals;
 (function (Globals) {
 })(Globals || (Globals = {}));
+var Easing;
+(function (Easing) {
+    function easeOutQuad(t) {
+        return 1 - (1 - t) * (1 - t);
+    }
+    Easing.easeOutQuad = easeOutQuad;
+})(Easing || (Easing = {}));
 var Util;
 (function (Util) {
     /** Create an HTML element from a string using innerHTML of a div.*/
@@ -64,7 +71,7 @@ var Entities;
         constructor(logParent) {
             this.logs = [];
             this.logParent = logParent;
-            this.logContainer = logParent.querySelector(".logs-container");
+            this.logContainer = logParent.querySelector(".logs-list");
         }
         log(message) {
             const timestamp = new Date().toLocaleTimeString();
@@ -82,7 +89,7 @@ var Entities;
             this.element = Util.createHTMLElement(elementString);
             this.events = new Util.EventBus();
             this.position = { x: 0, y: 0 };
-            this.setParent(Globals.main);
+            this.setParent(Globals.mainContainer);
         }
         remove() {
             this.events.emit("remove");
@@ -247,7 +254,7 @@ var Entities;
             this.panels = [];
             this.connections = [];
             this.currentConnection = null;
-            Globals.main.addEventListener("mousedown", (e) => this.onMainMouseDown(e));
+            Globals.mainContainer.addEventListener("mousedown", (e) => this.onMainMouseDown(e));
         }
         registerPanel(panel) {
             panel.events.on("remove", this.onPanelRemoved.bind(this));
@@ -338,7 +345,8 @@ var Entities;
     }
     Entities.PanelEntityManager = PanelEntityManager;
     /** Visual and representation of a connection between two panels. */
-    class PanelEntityConnection extends BaseEntity {
+    class PanelEntityConnection {
+        element;
         isConnected;
         sourcePanel;
         targetPanel;
@@ -352,7 +360,8 @@ var Entities;
         sourceOutputUpdateListener;
         removeListener;
         constructor() {
-            super(`<div class="panel-entity-connection"></div>`);
+            this.element = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            Globals.svgContainer.appendChild(this.element);
             this.mouseMoveListener = this.onMouseMoved.bind(this);
             this.removeListener = this.remove.bind(this);
             document.addEventListener("mousemove", this.mouseMoveListener);
@@ -368,12 +377,12 @@ var Entities;
             };
             this.sourcePanel.events.on("move", this.sourceMoveListener);
             this.sourcePanel.events.on("remove", this.removeListener);
+            if (this.targetPanel)
+                this.establishConnection();
             this.recalculateSourceNodePos();
             if (!this.targetPanel)
                 this.targetPos = this.sourcePos;
             this.updateElement();
-            if (this.targetPanel)
-                this.establishConnection();
         }
         setTarget(panel, nodeIndex) {
             Util.assert(!this.isConnected, "Connection is already connected");
@@ -385,12 +394,13 @@ var Entities;
             };
             this.targetPanel.events.on("move", this.targetMoveListener);
             this.targetPanel.events.on("remove", this.removeListener);
+            if (this.sourcePanel)
+                this.establishConnection();
             this.recalculateTargetNodePos();
             if (!this.sourcePanel)
                 this.sourcePos = this.targetPos;
+            this.recalculateTargetNodePos();
             this.updateElement();
-            if (this.sourcePanel)
-                this.establishConnection();
         }
         unsetSource() {
             Util.assert(this.isConnected, "Connection is not connected");
@@ -464,13 +474,19 @@ var Entities;
         updateElement() {
             const dx = this.targetPos.x - this.sourcePos.x;
             const dy = this.targetPos.y - this.sourcePos.y;
-            const dst = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(this.targetPos.y - this.sourcePos.y, this.targetPos.x - this.sourcePos.x);
-            // Make the element a line between the source and target
-            this.element.style.left = this.sourcePos.x + "px";
-            this.element.style.top = `calc(${this.sourcePos.y}px - 0.1rem)`;
-            this.element.style.width = dst + "px";
-            this.element.style.transform = `rotate(${angle}rad)`;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            // Interpolate from 0 -> 60 with distance 40 -> 100
+            const controlOffsetT = Math.min(1, Math.max(0, (dist - 30) / (120 - 30)));
+            const controlOffset = Easing.easeOutQuad(controlOffsetT) * 60;
+            const c1X = this.sourcePos.x + controlOffset;
+            const c1Y = this.sourcePos.y;
+            const c2X = this.targetPos.x - controlOffset;
+            const c2Y = this.targetPos.y;
+            const d = `M ${this.sourcePos.x} ${this.sourcePos.y} C ${c1X} ${c1Y}, ${c2X} ${c2Y}, ${this.targetPos.x} ${this.targetPos.y}`;
+            this.element.setAttribute("d", d);
+            this.element.setAttribute("stroke", "#d7d7d7");
+            this.element.setAttribute("stroke-width", "3");
+            this.element.setAttribute("fill", "none");
         }
         onMouseMoved(e) {
             // Stop caring the mouse position if it's already connected
@@ -593,9 +609,9 @@ var Entities;
     Entities.SplitMessagesEntity = SplitMessagesEntity;
 })(Entities || (Entities = {}));
 (function () {
-    Globals.main = document.querySelector(".main");
+    Globals.mainContainer = document.querySelector(".main-container");
     Globals.svgContainer = document.querySelector(".svg-container");
-    Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
+    Globals.logManager = new Entities.LogManager(document.querySelector(".logs-container"));
     Globals.PanelEntityManager = new Entities.PanelEntityManager();
     const p1 = new Entities.PanelEntity(new Entities.HardcodedEntity([Cipher.Message.parseFromString("Hello World")]), "Text");
     const p2 = new Entities.PanelEntity(new Entities.HardcodedEntity([
@@ -605,8 +621,10 @@ var Entities;
     ]), "Text");
     const p3 = new Entities.PanelEntity(new Entities.PreviewMessagesEntity(), "Preview");
     const p4 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split");
+    const p5 = new Entities.PanelEntity(new Entities.HardcodedEntity([new Cipher.Message(["1", "23", "54", "4"])]), "Text");
     p1.setPosition(70, 50);
     p2.setPosition(40, 300);
+    p5.setPosition(40, 550);
     p3.setPosition(550, 100);
     p4.setPosition(550, 300);
 })();

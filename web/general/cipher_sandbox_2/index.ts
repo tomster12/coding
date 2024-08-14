@@ -1,8 +1,14 @@
 namespace Globals {
-    export let main: HTMLElement;
+    export let mainContainer: HTMLElement;
     export let svgContainer: HTMLElement;
     export let logManager: Entities.LogManager;
     export let PanelEntityManager: Entities.PanelEntityManager;
+}
+
+namespace Easing {
+    export function easeOutQuad(t: number): number {
+        return 1 - (1 - t) * (1 - t);
+    }
 }
 
 namespace Util {
@@ -10,7 +16,7 @@ namespace Util {
     export function createHTMLElement(elementString: string): HTMLElement {
         const div = document.createElement("div");
         div.innerHTML = elementString;
-        return div.firstElementChild as HTMLElement;
+        return div.firstElementChild;
     }
 
     /** Assert a condition is true, otherwise throw an error with the given message. */
@@ -68,7 +74,7 @@ namespace Entities {
         constructor(logParent: HTMLElement) {
             this.logs = [];
             this.logParent = logParent;
-            this.logContainer = logParent.querySelector(".logs-container") as HTMLElement;
+            this.logContainer = logParent.querySelector(".logs-list");
         }
 
         log(message: string) {
@@ -88,7 +94,7 @@ namespace Entities {
             this.element = Util.createHTMLElement(elementString);
             this.events = new Util.EventBus();
             this.position = { x: 0, y: 0 };
-            this.setParent(Globals.main);
+            this.setParent(Globals.mainContainer);
         }
 
         remove() {
@@ -156,12 +162,12 @@ namespace Entities {
                         <div class="panel-entity-nodes output"></div>
                     </div>
                 </div>`);
-            this.elementBar = this.element.querySelector(".panel-entity-bar") as HTMLElement;
-            this.elementBarTitle = this.element.querySelector(".panel-entity-bar-title") as HTMLElement;
-            this.elementBarClose = this.element.querySelector(".panel-entity-bar-close") as HTMLElement;
-            this.elementContent = this.element.querySelector(".panel-entity-content") as HTMLElement;
-            this.elementNodesInput = this.element.querySelector(".panel-entity-nodes.input") as HTMLElement;
-            this.elementNodesOutput = this.element.querySelector(".panel-entity-nodes.output") as HTMLElement;
+            this.elementBar = this.element.querySelector(".panel-entity-bar");
+            this.elementBarTitle = this.element.querySelector(".panel-entity-bar-title");
+            this.elementBarClose = this.element.querySelector(".panel-entity-bar-close");
+            this.elementContent = this.element.querySelector(".panel-entity-content");
+            this.elementNodesInput = this.element.querySelector(".panel-entity-nodes.input");
+            this.elementNodesOutput = this.element.querySelector(".panel-entity-nodes.output");
 
             this.elementBarClose.addEventListener("mousedown", (e) => this.onCloseMouseDown(e));
             this.elementBar.addEventListener("mousedown", (e) => this.onBarMouseDown(e));
@@ -229,9 +235,9 @@ namespace Entities {
 
         getNodeHTML(type: PanelEntityNodeType, index: number): HTMLElement {
             if (type === "input") {
-                return this.elementNodesInput.querySelectorAll(".panel-entity-node")[index] as HTMLElement;
+                return this.elementNodesInput.querySelectorAll(".panel-entity-node")[index];
             } else {
-                return this.elementNodesOutput.querySelectorAll(".panel-entity-node")[index] as HTMLElement;
+                return this.elementNodesOutput.querySelectorAll(".panel-entity-node")[index];
             }
         }
 
@@ -279,7 +285,7 @@ namespace Entities {
             this.panels = [];
             this.connections = [];
             this.currentConnection = null;
-            Globals.main.addEventListener("mousedown", (e) => this.onMainMouseDown(e));
+            Globals.mainContainer.addEventListener("mousedown", (e) => this.onMainMouseDown(e));
         }
 
         registerPanel(panel: PanelEntity) {
@@ -376,7 +382,8 @@ namespace Entities {
     }
 
     /** Visual and representation of a connection between two panels. */
-    export class PanelEntityConnection extends BaseEntity {
+    export class PanelEntityConnection {
+        element: SVGPathElement;
         isConnected: boolean;
         sourcePanel: PanelEntity;
         targetPanel: PanelEntity;
@@ -391,7 +398,8 @@ namespace Entities {
         removeListener: () => void;
 
         constructor() {
-            super(`<div class="panel-entity-connection"></div>`);
+            this.element = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            Globals.svgContainer.appendChild(this.element);
             this.mouseMoveListener = this.onMouseMoved.bind(this);
             this.removeListener = this.remove.bind(this);
             document.addEventListener("mousemove", this.mouseMoveListener);
@@ -410,11 +418,10 @@ namespace Entities {
             this.sourcePanel.events.on("move", this.sourceMoveListener);
             this.sourcePanel.events.on("remove", this.removeListener);
 
+            if (this.targetPanel) this.establishConnection();
             this.recalculateSourceNodePos();
             if (!this.targetPanel) this.targetPos = this.sourcePos;
             this.updateElement();
-
-            if (this.targetPanel) this.establishConnection();
         }
 
         setTarget(panel: PanelEntity, nodeIndex: number) {
@@ -429,11 +436,11 @@ namespace Entities {
             this.targetPanel.events.on("move", this.targetMoveListener);
             this.targetPanel.events.on("remove", this.removeListener);
 
+            if (this.sourcePanel) this.establishConnection();
             this.recalculateTargetNodePos();
             if (!this.sourcePanel) this.sourcePos = this.targetPos;
+            this.recalculateTargetNodePos();
             this.updateElement();
-
-            if (this.sourcePanel) this.establishConnection();
         }
 
         unsetSource() {
@@ -510,14 +517,21 @@ namespace Entities {
         updateElement() {
             const dx = this.targetPos.x - this.sourcePos.x;
             const dy = this.targetPos.y - this.sourcePos.y;
-            const dst = Math.sqrt(dx * dx + dy * dy);
-            const angle = Math.atan2(this.targetPos.y - this.sourcePos.y, this.targetPos.x - this.sourcePos.x);
+            const dist = Math.sqrt(dx * dx + dy * dy);
 
-            // Make the element a line between the source and target
-            this.element.style.left = this.sourcePos.x + "px";
-            this.element.style.top = `calc(${this.sourcePos.y}px - 0.1rem)`;
-            this.element.style.width = dst + "px";
-            this.element.style.transform = `rotate(${angle}rad)`;
+            // Interpolate from 0 -> 60 with distance 40 -> 100
+            const controlOffsetT = Math.min(1, Math.max(0, (dist - 30) / (120 - 30)));
+            const controlOffset = Easing.easeOutQuad(controlOffsetT) * 60;
+
+            const c1X = this.sourcePos.x + controlOffset;
+            const c1Y = this.sourcePos.y;
+            const c2X = this.targetPos.x - controlOffset;
+            const c2Y = this.targetPos.y;
+            const d = `M ${this.sourcePos.x} ${this.sourcePos.y} C ${c1X} ${c1Y}, ${c2X} ${c2Y}, ${this.targetPos.x} ${this.targetPos.y}`;
+            this.element.setAttribute("d", d);
+            this.element.setAttribute("stroke", "#d7d7d7");
+            this.element.setAttribute("stroke-width", "3");
+            this.element.setAttribute("fill", "none");
         }
 
         onMouseMoved(e: MouseEvent) {
@@ -622,7 +636,7 @@ namespace Entities {
 
         constructor() {
             super(`<div class="split-messages-entity"><p>0</p></div>`);
-            this.elementCount = this.element.querySelector("p") as HTMLElement;
+            this.elementCount = this.element.querySelector("p");
         }
 
         setPanel(panel: PanelEntity) {
@@ -651,9 +665,9 @@ namespace Entities {
 }
 
 (function () {
-    Globals.main = document.querySelector(".main");
+    Globals.mainContainer = document.querySelector(".main-container");
     Globals.svgContainer = document.querySelector(".svg-container");
-    Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
+    Globals.logManager = new Entities.LogManager(document.querySelector(".logs-container"));
     Globals.PanelEntityManager = new Entities.PanelEntityManager();
 
     const p1 = new Entities.PanelEntity(new Entities.HardcodedEntity([Cipher.Message.parseFromString("Hello World")]), "Text");
@@ -671,8 +685,11 @@ namespace Entities {
 
     const p4 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split");
 
+    const p5 = new Entities.PanelEntity(new Entities.HardcodedEntity([new Cipher.Message(["1", "23", "54", "4"])]), "Text");
+
     p1.setPosition(70, 50);
     p2.setPosition(40, 300);
+    p5.setPosition(40, 550);
     p3.setPosition(550, 100);
     p4.setPosition(550, 300);
 })();
