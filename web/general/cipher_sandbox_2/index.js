@@ -296,6 +296,7 @@ var Entities;
                 if (existingConnection) {
                     this.currentConnection = existingConnection;
                     this.currentConnection.unsetSource();
+                    return;
                 }
                 // Otherwise start a new connection if not holding one
                 this.currentConnection = new PanelEntityConnection();
@@ -469,6 +470,7 @@ var Entities;
         }
     }
     Entities.PanelEntityConnection = PanelEntityConnection;
+    /** Convert a message into a consistent visual element. */
     function createMessageElement(message) {
         const parent = Util.createHTMLElement(`<div class="message"></div>`);
         for (const letter of message.letters) {
@@ -479,11 +481,11 @@ var Entities;
     }
     Entities.createMessageElement = createMessageElement;
     /** PanelEntity content, displays messages. */
-    class MessagesEntity extends BaseEntity {
+    class HardcodedEntity extends BaseEntity {
         panel;
         messages;
         constructor(messages) {
-            super(`<div class="messages-entity"></div>`);
+            super(`<div class="hardcoded-entity"></div>`);
             this.setMessages(messages);
         }
         setPanel(panel) {
@@ -505,7 +507,40 @@ var Entities;
             return this.messages;
         }
     }
-    Entities.MessagesEntity = MessagesEntity;
+    Entities.HardcodedEntity = HardcodedEntity;
+    /** PanelEntity content, previews messages. */
+    class PreviewMessagesEntity extends BaseEntity {
+        panel;
+        messages;
+        constructor() {
+            super(`<div class="preview-messages-entity empty"></div>`);
+        }
+        setPanel(panel) {
+            this.panel = panel;
+            this.panel.setNodeCount(1, 1);
+        }
+        setMessages(messages) {
+            this.messages = messages;
+            this.element.innerHTML = "";
+            this.messages.forEach((message) => {
+                this.element.appendChild(createMessageElement(message));
+            });
+            if (this.messages.length === 0)
+                this.element.classList.add("empty");
+            else
+                this.element.classList.remove("empty");
+        }
+        setInputNodeValue(index, value) {
+            Util.assert(index == 0, "TextEntity only has one input");
+            this.setMessages(value);
+            this.events.emit("outputUpdate", 0);
+        }
+        getOutputNodeValue(index) {
+            Util.assert(index == 0, "TextEntity only has one output");
+            return this.messages;
+        }
+    }
+    Entities.PreviewMessagesEntity = PreviewMessagesEntity;
     /** PanelEntity content, splits messages into lines. */
     class SplitMessagesEntity extends BaseEntity {
         panel;
@@ -517,18 +552,14 @@ var Entities;
             this.panel = panel;
             this.panel.setNodeCount(1, 0);
         }
-        setMessages(messages) {
-            this.messages = messages;
-            this.element.innerHTML = "";
-            this.messages.forEach((content) => {
-                this.element.appendChild(createMessageElement(content));
-            });
-        }
         setInputNodeValue(index, value) {
             Util.assert(index == 0, "SplitTextEntity only has one input");
-            this.setMessages(value);
+            this.messages = value;
             this.panel.setNodeCount(1, this.messages.length);
-            this.events.emit("outputUpdate", 0);
+            this.element.appendChild(Util.createHTMLElement(`<p>${this.messages.length}</p>`));
+            for (let i = 0; i < this.messages.length; i++) {
+                this.events.emit("outputUpdate", i);
+            }
         }
         getOutputNodeValue(index) {
             Util.assert(index < this.messages.length, "Invalid output index");
@@ -541,14 +572,16 @@ var Entities;
     Globals.main = document.querySelector(".main");
     Globals.logManager = new Entities.LogManager(document.querySelector(".logs"));
     Globals.PanelEntityManager = new Entities.PanelEntityManager();
-    const p1 = new Entities.PanelEntity(new Entities.MessagesEntity([Cipher.Message.parseFromString("Hello World")]), "Text");
-    const p2 = new Entities.PanelEntity(new Entities.MessagesEntity([
+    const p1 = new Entities.PanelEntity(new Entities.HardcodedEntity([Cipher.Message.parseFromString("Hello World")]), "Text");
+    const p2 = new Entities.PanelEntity(new Entities.HardcodedEntity([
         Cipher.Message.parseFromString("0123232433422323"),
         Cipher.Message.parseFromString("45645632234456454"),
         Cipher.Message.parseFromString("13231212323232"),
     ]), "Text");
-    const p3 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split");
+    const p3 = new Entities.PanelEntity(new Entities.PreviewMessagesEntity(), "Preview");
+    const p4 = new Entities.PanelEntity(new Entities.SplitMessagesEntity(), "Split");
     p1.setPosition(70, 50);
-    p2.setPosition(40, 450);
-    p3.setPosition(350, 300);
+    p2.setPosition(40, 300);
+    p3.setPosition(550, 100);
+    p4.setPosition(550, 300);
 })();

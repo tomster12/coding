@@ -96,18 +96,20 @@
 
 .panel-entity-bar {
     width: 100%;
-    min-width: 10em;
     height: 1.2rem;
     overflow: hidden;
     border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
     background-color: #e5e5e5;
     box-sizing: border-box;
     cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .panel-entity-bar-title {
-    position: absolute;
-    width: 100%;
+    flex-grow: 1;
     line-height: 1.2rem;
     border-radius: var(--panel-border-radius) var(--panel-border-radius) 0 0;
     transition: background-color 0.1s;
@@ -122,9 +124,6 @@
 }
 
 .panel-entity-bar-close {
-    position: absolute;
-    top: 0px;
-    right: 0px;
     width: 1.2rem;
     height: 1.2rem;
     border-radius: 0px var(--panel-close-border-radius) 0px 0px;
@@ -221,17 +220,13 @@
     background-color: #bdbdbd;
 }
 
-/* .message:nth-child(even) {
-    background-color: #e7e7e7;
-} */
-
 /* ----------------------- */
 
-.messages-entity {
-    box-shadow: 0 0 5px #000000;
+.hardcoded-entity {
+    min-width: 5rem;
     height: 100%;
     background-color: white;
-    overflow-y: auto;
+    box-shadow: 0 0 5px #000000;
 
     display: flex;
     justify-content: center;
@@ -243,13 +238,35 @@
 /* ----------------------- */
 
 .split-messages-entity {
-    box-shadow: 0 0 5px #000000;
+    min-width: 3.5rem;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.split-messages-entity p {
+    font-size: 1.5rem;
+    color: #2e2e2e;
+}
+
+/* ----------------------- */
+
+.preview-messages-entity {
+    min-width: 5rem;
     height: 100%;
     background-color: white;
+    box-shadow: 0 0 5px #000000;
 
     display: flex;
     flex-direction: column;
     justify-content: center;
     padding: 0.2rem;
     gap: 0.2rem;
+}
+
+.preview-messages-entity.empty {
+    padding: 0;
+    background-color: inherit;
 }
