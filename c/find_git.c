@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     searchDirectoriesForGit(argv[1], filePaths, &count);
 
     // Loop over found directories
-    printf("\nFound %d directories containing .git:\n", count);
+    printf("\nFound %d directories containing .git:\n\n", count);
     for (int i = 0; i < count; i++)
     {
         char *folderPath = filePaths[i];
@@ -112,11 +112,11 @@ int main(int argc, char *argv[])
         // Print out final information
         if (hasChanges)
         {
-            printf("\n(*) %s\n", folderPath);
+            printf("(*) %s\n", folderPath);
         }
         else
         {
-            printf("\n    %s\n", folderPath);
+            printf("    %s\n", folderPath);
         }
 
         // Perform sync if specified
@@ -127,15 +127,19 @@ int main(int argc, char *argv[])
             int result = system(command);
             if (result != 0)
             {
-                printf("        | Did not push.\n", folderPath);
+                printf("        | Did not push.\n\n", folderPath);
             }
             else
             {
-                printf("        | Successfully synced.\n", folderPath);
+                printf("        | Successfully synced.\n\n", folderPath);
             }
         }
     }
 
-    printf("\n");
+    if (!toSync)
+    {
+        printf("\n");
+    }
+
     return 0;
 }
