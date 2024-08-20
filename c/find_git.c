@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
                 printf("        | Successfully pulled.\n", folderPath);
             }
 
-            snprintf(command, sizeof(command), "cd %s && git add . >NUL && git commit -m \"sync\" >NUL && git push >NUL", folderPath);
+            snprintf(command, sizeof(command), "cd %s && git add . >NUL && git commit -m \"sync\" >NUL && git push", folderPath);
             result = system(command);
             if (result != 0)
             {
