@@ -128,11 +128,11 @@ int main(int argc, char *argv[])
             int result = system(command);
             if (result != 0)
             {
-                printf("        | Nothing to pull.\n\n", folderPath);
+                printf("        | Nothing to pull.\n", folderPath);
             }
             else
             {
-                printf("        | Successfully pulled.\n\n", folderPath);
+                printf("        | Successfully pulled.\n", folderPath);
             }
 
             snprintf(command, sizeof(command), "cd %s && git add . >nul && git commit -m \"sync\" >nul && git push >nul 2>&1", folderPath);
