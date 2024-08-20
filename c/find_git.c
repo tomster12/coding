@@ -122,9 +122,9 @@ int main(int argc, char *argv[])
         // Perform sync if specified
         if (toSync)
         {
-            printf("        | Checking directory\n", folderPath);
+            printf("        | Checking directory...\n", folderPath);
 
-            snprintf(command, sizeof(command), "cd %s && git pull >null 2>&1", folderPath);
+            snprintf(command, sizeof(command), "cd %s && git pull", folderPath);
             int result = system(command);
             if (result != 0)
             {
@@ -135,7 +135,7 @@ int main(int argc, char *argv[])
                 printf("        | Successfully pulled.\n", folderPath);
             }
 
-            snprintf(command, sizeof(command), "cd %s && git add . >nul && git commit -m \"sync\" >nul && git push >nul 2>&1", folderPath);
+            snprintf(command, sizeof(command), "cd %s && git add . >NUL && git commit -m \"sync\" >NUL && git push >NUL", folderPath);
             result = system(command);
             if (result != 0)
             {
