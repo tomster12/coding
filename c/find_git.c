@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
     searchDirectoriesForGit(argv[1], filePaths, &count);
 
     // Loop over found directories
-    printf("\nFound %d directories containing .git:\n\n", count);
+    printf("\nFound %d directories containing .git:\n", count);
     for (int i = 0; i < count; i++)
     {
         char *folderPath = filePaths[i];
