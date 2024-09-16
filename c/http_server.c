@@ -4,8 +4,6 @@
 #include <ws2tcpip.h>
 #include <stdio.h>
 
-#pragma comment(lib, "ws2_32.lib")
-
 int main(int argc, char *argv[])
 {
     int port = 8080;
@@ -28,25 +26,28 @@ int main(int argc, char *argv[])
     printf("Listening on port %d\n", port);
     listen(server, 1);
 
-    // Accept an incoming connection
-    SOCKET client = accept(server, NULL, NULL);
-    printf("Client connected\n");
+    while (1)
+    {
+        // Accept an incoming connection
+        SOCKET client = accept(server, NULL, NULL);
+        printf("Client connected\n");
 
-    // Receive data
-    char request[1024];
-    printf("Receiving...\n");
-    recv(client, request, sizeof(request), 0);
-    printf("Received: %s\n", request);
+        // Receive data
+        char request[1024];
+        printf("Receiving...\n");
+        recv(client, request, sizeof(request), 0);
+        printf("Received: %s\n", request);
 
-    // Send a response
-    char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, world!</h1></body></html>\r\n\r\n";
-    send(client, response, strlen(response), 0);
-    printf("Sent: %s\n", response);
+        // Send a response
+        char *response = "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n<html><body><h1>Hello, world!</h1></body></html>\r\n\r\n";
+        send(client, response, strlen(response), 0);
+        printf("Sent: %s\n", response);
 
-    getchar();
+        // Close client connection
+        closesocket(client);
+    }
 
     // Close the socket
-    closesocket(client);
     closesocket(server);
 
     return 0;
