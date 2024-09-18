@@ -37,7 +37,7 @@ int main(int argc, char const *argv[])
     {
         int val = data[ptr_b] - 'a';
 
-        if (ptr_a < prev_ptrs[val])
+        if (ptr_a <= prev_ptrs[val])
         {
             ptr_a = prev_ptrs[val] + 1;
         }
