@@ -24,6 +24,8 @@ DWORD WINAPI render_thread(LPVOID arg)
 {
     struct AppContext *ctx = (struct AppContext *)arg;
 
+    SetConsoleOutputCP(CP_UTF8);
+
     while (1)
     {
         WaitForSingleObject(ctx->ui_mutex, INFINITE);

@@ -1,6 +1,10 @@
 {
     "files.associations": {
-        "charconv": "cpp"
+        "charconv": "cpp",
+        "cstdio": "c",
+        "stdlib.h": "c",
+        "algorithm": "c"
     },
-    "java.dependency.packagePresentation": "hierarchical"
+    "java.dependency.packagePresentation": "hierarchical",
+    "C_Cpp.default.compilerPath": "D:\\Files\\Coding\\software\\MinGW\\bin\\gcc.exe"
 }

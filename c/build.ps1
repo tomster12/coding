@@ -5,7 +5,6 @@ param (
     [switch] $clear
 )
 
-$BUILD_DIR = ".\output"
 $TMP_FILE = ".\tmp.exe"
 $SEARCH_LINE = "// compiler:"
 
@@ -69,10 +68,10 @@ if ($LASTEXITCODE -ne 0) {
 Set-Location $base_dir
 
 $build_output = "$target_dir\$TMP_FILE"
-$build_dest = "$BUILD_DIR\$target_name_noext.exe"
+$build_dest = "$target_dir\output\$target_name_noext.exe"
 
-if (-not (Test-Path $BUILD_DIR)) {
-    New-Item -ItemType Directory -Path $BUILD_DIR
+if (-not (Test-Path $target_dir\output)) {
+    New-Item -ItemType Directory -Path $target_dir\output | out-null
 }
 
 Move-Item -Force -Path $build_output -Destination $build_dest

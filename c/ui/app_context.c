@@ -6,7 +6,6 @@ struct AppContext *new_app_context()
 {
     struct AppContext *ctx = (struct AppContext *)malloc(sizeof(struct AppContext));
     ctx->hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    SetConsoleOutputCP(CP_UTF8);
     ctx->history_count = 0;
     ctx->input_buffer[0] = '\0';
     ctx->to_update = 1;
