@@ -1,8 +1,8 @@
 
 #include <stdio.h>
 
-
-int main(void) {
+int main(void)
+{
   //  &val  ->  address of val
   // *&val  ->  evaluate the address of val
   int val = 10;
@@ -23,9 +23,8 @@ int main(void) {
   // space allocated afterwards for variables
   // array[1] = *(array + 1)  ->  where array is a pointer
   int array[] = {
-    7,
-    1,
-    3
-  };
+      7,
+      1,
+      3};
   printf("\nTesting: %d", *array);
 }

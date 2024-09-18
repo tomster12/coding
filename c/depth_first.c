@@ -2,8 +2,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
-typedef struct Node_s {
+typedef struct Node_s
+{
   int val;
   struct Node_s *left;
   struct Node_s *right;
@@ -12,8 +12,8 @@ Node *createNode(int val);
 void addNode(Node *node, int val);
 Node *depthFirstSearch(Node *node, int val);
 
-
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   Node *head = createNode(4);
   addNode(head, 2);
   addNode(head, 1);
@@ -24,50 +24,64 @@ int main(int argc, char **argv) {
   Node *target = depthFirstSearch(head, 5);
 }
 
-
-Node *createNode(int val) {
+Node *createNode(int val)
+{
   Node *head = malloc(sizeof(Node));
-  head -> val = val;
-  head -> left = NULL;
-  head -> right = NULL;
+  head->val = val;
+  head->left = NULL;
+  head->right = NULL;
   return head;
 }
 
-
-void addNode(Node *node, int val) {
-  if (val <= (node -> val)) {
-    if ((node -> left) == NULL) {
-      node -> left = createNode(val);
-    } else {
-      addNode(node -> left, val);
+void addNode(Node *node, int val)
+{
+  if (val <= (node->val))
+  {
+    if ((node->left) == NULL)
+    {
+      node->left = createNode(val);
     }
-
-  } else if (val > (node -> val)) {
-    if ((node -> right) == NULL) {
-      node -> right = createNode(val);
-    } else {
-      addNode(node -> right, val);
+    else
+    {
+      addNode(node->left, val);
+    }
+  }
+  else if (val > (node->val))
+  {
+    if ((node->right) == NULL)
+    {
+      node->right = createNode(val);
+    }
+    else
+    {
+      addNode(node->right, val);
     }
   }
 }
 
-
-Node *depthFirstSearch(Node *node, int val) {
-  if (node -> left != NULL) {
-    Node *output = depthFirstSearch(node -> left, val);
-    if (output != NULL) return output;
+Node *depthFirstSearch(Node *node, int val)
+{
+  if (node->left != NULL)
+  {
+    Node *output = depthFirstSearch(node->left, val);
+    if (output != NULL)
+      return output;
   }
 
-  printf("%d\n", node -> val);
-  if (node -> val == val) {
+  printf("%d\n", node->val);
+  if (node->val == val)
+  {
     printf("Found\n");
     return node;
-
-  } else if (node -> right != NULL) {
-    Node *output = depthFirstSearch(node -> right, val);
-    if (output != NULL) return output;
-
-  } else {
+  }
+  else if (node->right != NULL)
+  {
+    Node *output = depthFirstSearch(node->right, val);
+    if (output != NULL)
+      return output;
+  }
+  else
+  {
     return NULL;
   }
 }
