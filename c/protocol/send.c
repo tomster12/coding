@@ -1,6 +1,4 @@
-// flags: -lws2_32
-
-// https://chatgpt.com/share/66e8d085-bfb4-800d-9d53-19af1acfb21f
+// build: -lws2_32
 
 #include <stdio.h>
 #include <winsock2.h>
