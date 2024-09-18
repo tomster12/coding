@@ -6,7 +6,6 @@
 
 void fib(int);
 
-
 int main() {
   clock_t start = clock();
 
@@ -20,7 +19,6 @@ int main() {
 
   return 0;
 }
-
 
 void fib(int amount) {
   int x = 0;

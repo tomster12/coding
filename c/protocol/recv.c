@@ -1,4 +1,4 @@
-// build: -lws2_32
+// compiler: -lws2_32
 
 #include <stdio.h>
 #include <winsock2.h>

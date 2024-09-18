@@ -1,4 +1,4 @@
-// build: render.c app_context.c input.c
+// compiler: render.c app_context.c input.c
 
 #include <windows.h>
 #include <stdio.h>
