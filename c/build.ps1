@@ -5,6 +5,10 @@ param (
     [switch] $clear
 )
 
+$BUILD_DIR = ".\output"
+$TMP_FILE = ".\tmp.exe"
+$SEARCH_LINE = "// compiler:"
+
 function Log {
     param (
         [string] $message
@@ -42,9 +46,9 @@ if ($clear) {
 $base_dir = Get-Location
 Set-Location $target_dir
 
-$build_command = "gcc $target_name -o tmp.exe"
+$build_command = "gcc $target_name -o $TMP_FILE"
 $first_line = Get-Content $target_name -First 1
-if ($first_line -match '^// build:(.*)') {
+if ($first_line -match "^$SEARCH_LINE(.*)") {
     $build_command = $build_command + " " + $matches[1].Trim()
 }
 
@@ -64,12 +68,11 @@ if ($LASTEXITCODE -ne 0) {
 # Move back to base directory and move output to build directory
 Set-Location $base_dir
 
-$build_dir = ".\output"
-$build_output = "$target_dir\tmp.exe"
-$build_dest = "$build_dir\$target_name_noext.exe"
+$build_output = "$target_dir\$TMP_FILE"
+$build_dest = "$BUILD_DIR\$target_name_noext.exe"
 
-if (-not (Test-Path $build_dir)) {
-    New-Item -ItemType Directory -Path $build_dir
+if (-not (Test-Path $BUILD_DIR)) {
+    New-Item -ItemType Directory -Path $BUILD_DIR
 }
 
 Move-Item -Force -Path $build_output -Destination $build_dest

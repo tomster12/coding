@@ -1,6 +1,3 @@
-// gcc ./c/find_git.c -o ./c/find_git
-// ./c/find_git.exe "D:/Files/Coding" --sync
-
 #include <windows.h>
 #include <stdio.h>
 #include <string.h>
