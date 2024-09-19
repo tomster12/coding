@@ -21,28 +21,24 @@ int main(int argc, char const *argv[])
     fgets(data, DATA_SIZE, file);
     fclose(file);
 
-    // Move window end ptr_b through the data tracking the index of each char in prev_ptrs[]
-    // If char already in prev_ptrs[] inside window then update window start ptr_a to next index
+    // Grow window through the data tracking the index of each char in tracking_set[]
+    // If char position in tracking_set[] is inside window then move window start to next index
+    // Note: tracking_set[] uses 1 based indexing for ease of code (0 means not seen yet)
 
-    int prev_ptrs[26];
-    int ptr_a = 0;
-    int ptr_b = 0;
-
-    for (int i = 0; i < 26; i++)
-    {
-        prev_ptrs[i] = -1;
-    }
+    unsigned short tracking_set[26] = {0};
+    unsigned short ptr_a = 0;
+    unsigned short ptr_b = 0;
 
     while (ptr_b < DATA_SIZE && ptr_b - ptr_a < TARGET_LENGTH)
     {
-        int val = data[ptr_b] - 'a';
+        unsigned short val = data[ptr_b] - 'a';
 
-        if (ptr_a <= prev_ptrs[val])
+        if (ptr_a < tracking_set[val])
         {
-            ptr_a = prev_ptrs[val] + 1;
+            ptr_a = tracking_set[val];
         }
 
-        prev_ptrs[val] = ptr_b++;
+        tracking_set[val] = ++ptr_b;
     }
 
     printf("Result: %d -> %d\n", ptr_a, ptr_b);
