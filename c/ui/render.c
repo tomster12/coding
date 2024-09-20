@@ -3,21 +3,33 @@
 #include "render.h"
 #include "app_context.h"
 
+#define WINDOW_WIDTH 50
+#define MESSAGE_LIST_HEIGHT 12
+
 void move_cursor_to(int x, int y)
 {
     COORD coord = {x, y};
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-void clear_console(HANDLE hConsole)
+void init_render_window()
 {
-    CONSOLE_SCREEN_BUFFER_INFO csbi;
-    DWORD length, written;
+    system("cls");
 
-    GetConsoleScreenBufferInfo(hConsole, &csbi);
-    length = csbi.dwSize.X * csbi.dwSize.Y;
-    FillConsoleOutputCharacter(hConsole, ' ', length, (COORD){0, 0}, &written);
-    SetConsoleCursorPosition(hConsole, (COORD){0, 0});
+    printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    printf("┃                    Text Chat                ┃\n");
+    printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+
+    for (int i = 0; i < MESSAGE_LIST_HEIGHT; i++)
+    {
+        printf("                                               \n");
+    }
+
+    printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
+    printf("┃ >                                           ┃\n");
+    printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+
+    move_cursor_to(4, MESSAGE_LIST_HEIGHT + 4);
 }
 
 DWORD WINAPI render_thread(LPVOID arg)
@@ -26,33 +38,55 @@ DWORD WINAPI render_thread(LPVOID arg)
 
     SetConsoleOutputCP(CP_UTF8);
 
+    init_render_window();
+
     while (1)
     {
         WaitForSingleObject(ctx->ui_mutex, INFINITE);
 
-        if (ctx->to_update)
+        if (ctx->to_exit)
         {
-            clear_console(ctx->hConsole);
+            break;
+        }
 
-            printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-            printf("┃                   Text Chat                ┃\n");
-            printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+        if (ctx->to_update_messages)
+        {
+            // Get current cursor position
+            CONSOLE_SCREEN_BUFFER_INFO csbi;
+            GetConsoleScreenBufferInfo(ctx->hConsole, &csbi);
 
-            for (int i = 0; i < ctx->history_count; i++)
+            // Clear message box, then write each message
+            for (int i = 0; i < MESSAGE_LIST_HEIGHT; i++)
             {
-                printf("%s\n", ctx->history[i]);
+                move_cursor_to(2, 3 + i);
+                printf("                                               \n");
             }
 
-            printf("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+            for (int i = 0; i < ctx->messages_count && i < MESSAGE_LIST_HEIGHT; i++)
+            {
+                move_cursor_to(2, 3 + MESSAGE_LIST_HEIGHT - i - 1);
+                printf("%s", ctx->messages[ctx->messages_count - i - 1]);
+            }
 
-            printf("Input: %s", ctx->input_buffer);
+            // Move cursor back to where it was before
+            SetConsoleCursorPosition(ctx->hConsole, csbi.dwCursorPosition);
 
-            ctx->to_update = 0;
+            ctx->to_update_messages = 0;
+        }
+
+        if (ctx->to_clear_input)
+        {
+            move_cursor_to(0, MESSAGE_LIST_HEIGHT + 4);
+            printf("┃ >                                           ┃\n");
+            move_cursor_to(4, MESSAGE_LIST_HEIGHT + 4);
+            ctx->to_clear_input = 0;
         }
 
         ReleaseMutex(ctx->ui_mutex);
         Sleep(100);
     }
+
+    system("cls");
 
     return 0;
 }

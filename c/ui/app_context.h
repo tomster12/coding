@@ -8,12 +8,14 @@
 struct AppContext
 {
     HANDLE hConsole;
-    char input_buffer[MAX_BUFFER];
-    char *history[MAX_MESSAGES];
-    int history_count;
-    int to_update;
+    char *messages[MAX_MESSAGES];
+    int messages_count;
+    int to_update_messages;
+    int to_clear_input;
+    int to_exit;
     HANDLE ui_mutex;
 };
 
 struct AppContext *new_app_context();
 void free_app_context(struct AppContext *ctx);
+void add_user_message(struct AppContext *ctx, const char *message);

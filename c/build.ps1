@@ -46,6 +46,7 @@ $base_dir = Get-Location
 Set-Location $target_dir
 
 $build_command = "gcc $target_name -o $TMP_FILE"
+
 $first_line = Get-Content $target_name -First 1
 if ($first_line -match "^$SEARCH_LINE(.*)") {
     $build_command = $build_command + " " + $matches[1].Trim()
@@ -62,7 +63,6 @@ if ($LASTEXITCODE -ne 0) {
     Set-Location $base_dir
     exit 1
 }
-
 
 # Move back to base directory and move output to build directory
 Set-Location $base_dir

@@ -6,31 +6,27 @@
 DWORD WINAPI input_thread(LPVOID arg)
 {
     struct AppContext *ctx = (struct AppContext *)arg;
-    int input_index = 0;
-    char ch;
+    char buffer[MAX_BUFFER];
 
     while (1)
     {
-        ch = fgetc(stdin);
+        WaitForSingleObject(ctx->ui_mutex, INFINITE);
 
-        if (ch == '\n')
+        fgets(buffer, MAX_BUFFER, stdin);
+
+        buffer[strcspn(buffer, "\n")] = '\0';
+
+        if (strcmp(buffer, "/exit") == 0)
         {
-            WaitForSingleObject(ctx->ui_mutex, INFINITE);
-            ctx->history[ctx->history_count++] = _strdup(ctx->input_buffer);
-            ctx->input_buffer[0] = '\0';
-            input_index = 0;
-            ctx->to_update = 1;
-            ReleaseMutex(ctx->ui_mutex);
+            ctx->to_exit = 1;
+            break;
         }
 
-        else if (input_index < MAX_BUFFER - 1)
-        {
-            WaitForSingleObject(ctx->ui_mutex, INFINITE);
-            ctx->input_buffer[input_index++] = ch;
-            ctx->input_buffer[input_index] = '\0';
-            ctx->to_update = 1;
-            ReleaseMutex(ctx->ui_mutex);
-        }
+        add_user_message(ctx, buffer);
+
+        buffer[0] = '\0';
+
+        ReleaseMutex(ctx->ui_mutex);
     }
 
     return 0;
