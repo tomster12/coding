@@ -18,4 +18,3 @@ struct AppContext
 
 struct AppContext *new_app_context();
 void free_app_context(struct AppContext *ctx);
-void add_user_message(struct AppContext *ctx, const char *message);

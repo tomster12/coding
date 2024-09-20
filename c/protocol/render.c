@@ -87,6 +87,4 @@ DWORD WINAPI render_thread(LPVOID arg)
     }
 
     system("cls");
-
-    return 0;
 }
