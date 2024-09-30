@@ -1,17 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "input.h"
+#include "input_thread.h"
 #include "app_context.h"
 
 #define BROADCAST_IP "255.255.255.255"
 #define BROADCAST_PORT 5120
 
-DWORD WINAPI input_thread(LPVOID arg)
+SOCKET create_broadcast_socket(struct sockaddr_in *address)
 {
-    struct AppContext *ctx = (struct AppContext *)arg;
-    char buffer[MAX_BUFFER];
-
-    // Create a UDP socket
     SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock == INVALID_SOCKET)
     {
@@ -19,13 +15,10 @@ DWORD WINAPI input_thread(LPVOID arg)
         exit(1);
     }
 
-    // Setup broadcast address
-    struct sockaddr_in address;
-    address.sin_family = AF_INET;
-    address.sin_addr.s_addr = inet_addr(BROADCAST_IP);
-    address.sin_port = htons(BROADCAST_PORT);
+    address->sin_family = AF_INET;
+    address->sin_addr.s_addr = inet_addr(BROADCAST_IP);
+    address->sin_port = htons(BROADCAST_PORT);
 
-    // Enable broadcast
     BOOL broadcast = TRUE;
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR)
     {
@@ -34,9 +27,19 @@ DWORD WINAPI input_thread(LPVOID arg)
         exit(1);
     }
 
+    return sock;
+}
+
+DWORD WINAPI input_thread(LPVOID arg)
+{
+    struct AppContext *ctx = (struct AppContext *)arg;
+
+    struct sockaddr_in address;
+    SOCKET sock = create_broadcast_socket(&address);
+    char buffer[MAX_BUFFER];
+
     while (1)
     {
-
         // Get user input and remove newline
         fgets(buffer, MAX_BUFFER, stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
@@ -59,7 +62,7 @@ DWORD WINAPI input_thread(LPVOID arg)
             break;
         }
 
-        // Otherwise handle sending message
+        // Add message to history
         {
             WaitForSingleObject(ctx->ui_mutex, INFINITE);
             if (ctx->messages_count < MAX_MESSAGES)

@@ -1,6 +1,6 @@
 #include <windows.h>
 #include <stdio.h>
-#include "render.h"
+#include "render_thread.h"
 #include "app_context.h"
 
 #define WINDOW_WIDTH 50
