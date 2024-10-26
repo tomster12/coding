@@ -1,112 +1,360 @@
-const GRID_SIZE = 100;
+// ================= Constants =================
 
-let mainCanvas, mainCtx;
-let mousePos = { x: 0, y: 0 };
-let isMouseDown = false;
-let bgPattern;
+const CONSTANTS = {};
+CONSTANTS.GRID_SIZE = 120;
+CONSTANTS.WIRE_SIZE = CONSTANTS.GRID_SIZE * 0.15;
+CONSTANTS.COL_WIRE = "#ffd2a9";
 
-function setup() {
-    mainCanvas = document.getElementById("mainCanvas");
-    mainCtx = mainCanvas.getContext("2d");
-    mainCtx.imageSmoothingEnabled = false;
+CONSTANTS.MODULE_BASE_HEIGHT = CONSTANTS.GRID_SIZE * 0.15;
+CONSTANTS.MODULE_BASE_RADIUS = CONSTANTS.GRID_SIZE * 0.14;
+CONSTANTS.MODULE_COL_BASE_LIGHT = "#989898";
+CONSTANTS.MODULE_COL_BASE_DARK = "#a8a8a8";
 
-    window.addEventListener("resize", onWindowResized);
-    mainCanvas.addEventListener("click", onMouseClicked);
-    mainCanvas.addEventListener("mousemove", onMouseMoved);
-    mainCanvas.addEventListener("mousedown", onMouseDown);
-    mainCanvas.addEventListener("mouseup", onMouseUp);
-    onWindowResized();
+CONSTANTS.CABLE_SHAPE = {};
+CONSTANTS.CABLE_SHAPE.WIDTH = CONSTANTS.WIRE_SIZE * 0.65;
+CONSTANTS.CABLE_SHAPE.COL_OFF = "#b95b5b";
+CONSTANTS.CABLE_SHAPE.COL_ON = "#eb5e5e";
+CONSTANTS.CABLE_SHAPE.COL_END = "#a44e4e";
 
-    createBackgroundPattern();
+CONSTANTS.PEG_HOLE_SHAPE = {};
+CONSTANTS.PEG_HOLE_SHAPE.SIZE = CONSTANTS.GRID_SIZE * 0.2;
+CONSTANTS.PEG_HOLE_SHAPE.COL = "#eaeaea";
+
+CONSTANTS.PEG_SHAPE = {};
+CONSTANTS.PEG_SHAPE.HEIGHT = CONSTANTS.GRID_SIZE * 0.25;
+CONSTANTS.PEG_SHAPE.COL_LIGHT = "#937762";
+CONSTANTS.PEG_SHAPE.COL_DARK = "#7e6959";
+
+CONSTANTS.BULB_SHAPE = {};
+CONSTANTS.BULB_SHAPE.BASE_SIZE = CONSTANTS.GRID_SIZE * 0.7;
+CONSTANTS.BULB_SHAPE.JAR_RADIUS = CONSTANTS.BULB_SHAPE.BASE_SIZE * 0.35;
+CONSTANTS.BULB_SHAPE.JAR_HEIGHT = CONSTANTS.BULB_SHAPE.BASE_SIZE * 0.5;
+CONSTANTS.BULB_SHAPE.BLIP_WIDTH = CONSTANTS.BULB_SHAPE.JAR_RADIUS * 0.5;
+CONSTANTS.BULB_SHAPE.BLIP_STEM_WIDTH = CONSTANTS.BULB_SHAPE.JAR_RADIUS * 0.35;
+CONSTANTS.BULB_SHAPE.BLIP_HEIGHT = CONSTANTS.BULB_SHAPE.JAR_HEIGHT * 0.65;
+CONSTANTS.BULB_SHAPE.COL_JAR_BASE = "#868686";
+CONSTANTS.BULB_SHAPE.COL_JAR_GLASS = "#cecece9d";
+CONSTANTS.BULB_SHAPE.COL_BLIP = "#414141";
+CONSTANTS.BULB_SHAPE.COL_BLIP_ON = "#ffc74d";
+
+CONSTANTS.BUTTON_SHAPE = {};
+CONSTANTS.BUTTON_SHAPE.BASE_SIZE = CONSTANTS.GRID_SIZE * 0.55;
+CONSTANTS.BUTTON_SHAPE.BUTTON_HEIGHT_UP = CONSTANTS.GRID_SIZE * 0.1;
+CONSTANTS.BUTTON_SHAPE.BUTTON_HEIGHT_DOWN = CONSTANTS.GRID_SIZE * 0.06;
+CONSTANTS.BUTTON_SHAPE.COL_DARK = "#663737";
+CONSTANTS.BUTTON_SHAPE.COL_LIGHT = "#ad5959";
+
+let global = {};
+global.mainCanvas = null;
+global.mainCtx = null;
+global.mainAudio = null;
+global.mousePos = { x: 0, y: 0 };
+global.isMouseDown = false;
+global.assets = {};
+
+// ================= Main =================
+
+class Shape {
+    static roundedSquare(ctx, x, y, size, radius) {
+        ctx.beginPath();
+        ctx.moveTo(x - size * 0.5 + radius, y - size * 0.5);
+        ctx.arcTo(x + size * 0.5, y - size * 0.5, x + size * 0.5, y + size * 0.5, radius);
+        ctx.arcTo(x + size * 0.5, y + size * 0.5, x - size * 0.5, y + size * 0.5, radius);
+        ctx.arcTo(x - size * 0.5, y + size * 0.5, x - size * 0.5, y - size * 0.5, radius);
+        ctx.arcTo(x - size * 0.5, y - size * 0.5, x + size * 0.5, y - size * 0.5, radius);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    static pegHole(ctx, x, y) {
+        const { SIZE, COL } = CONSTANTS.PEG_HOLE_SHAPE;
+
+        ctx.fillStyle = COL;
+        ctx.beginPath();
+        ctx.arc(x, y, SIZE * 0.5, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    static peg(ctx, x, y) {
+        const { HEIGHT, COL_LIGHT, COL_DARK } = CONSTANTS.PEG_SHAPE;
+
+        ctx.fillStyle = COL_DARK;
+        ctx.beginPath();
+        ctx.fillRect(x - CONSTANTS.PEG_HOLE_SHAPE.SIZE * 0.5, y - HEIGHT, CONSTANTS.PEG_HOLE_SHAPE.SIZE, HEIGHT);
+
+        ctx.fillStyle = COL_LIGHT;
+        ctx.beginPath();
+        ctx.arc(x, y - HEIGHT, CONSTANTS.PEG_HOLE_SHAPE.SIZE * 0.5, 0, 2 * Math.PI);
+        ctx.fill();
+
+        ctx.fillStyle = COL_DARK;
+        ctx.beginPath();
+        ctx.arc(x, y, CONSTANTS.PEG_HOLE_SHAPE.SIZE * 0.5, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    static bulb(ctx, x, y, on = false) {
+        const { BASE_SIZE, JAR_RADIUS, JAR_HEIGHT, BLIP_WIDTH, BLIP_STEM_WIDTH, BLIP_HEIGHT, COL_JAR_BASE, COL_JAR_GLASS, COL_BLIP, COL_BLIP_ON } =
+            CONSTANTS.BULB_SHAPE;
+
+        // Draw base
+        ctx.fillStyle = CONSTANTS.MODULE_COL_BASE_LIGHT;
+        Shape.roundedSquare(ctx, x, y, BASE_SIZE, CONSTANTS.MODULE_BASE_RADIUS);
+        ctx.fillStyle = CONSTANTS.MODULE_COL_BASE_DARK;
+        Shape.roundedSquare(ctx, x, y - CONSTANTS.MODULE_BASE_HEIGHT, BASE_SIZE, CONSTANTS.MODULE_BASE_RADIUS);
+
+        // Draw bulb jar base
+        ctx.fillStyle = COL_JAR_BASE;
+        ctx.beginPath();
+        ctx.arc(x, y - CONSTANTS.MODULE_BASE_HEIGHT, JAR_RADIUS, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Draw bulb blip
+        ctx.fillStyle = COL_BLIP;
+        ctx.beginPath();
+        ctx.arc(x, y - CONSTANTS.MODULE_BASE_HEIGHT, BLIP_STEM_WIDTH * 0.5, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.fillRect(x - BLIP_STEM_WIDTH * 0.5, y - CONSTANTS.MODULE_BASE_HEIGHT - BLIP_HEIGHT, BLIP_STEM_WIDTH, BLIP_HEIGHT);
+        ctx.fillStyle = on ? COL_BLIP_ON : COL_BLIP;
+        ctx.beginPath();
+        ctx.arc(x, y - CONSTANTS.MODULE_BASE_HEIGHT - BLIP_HEIGHT, BLIP_WIDTH, 0, 2 * Math.PI);
+        ctx.fill();
+
+        // Draw bulb jar
+        ctx.fillStyle = COL_JAR_GLASS;
+        ctx.beginPath();
+        ctx.moveTo(x - JAR_RADIUS, y - CONSTANTS.MODULE_BASE_HEIGHT);
+        ctx.lineTo(x + JAR_RADIUS, y - CONSTANTS.MODULE_BASE_HEIGHT);
+        ctx.arcTo(x + JAR_RADIUS, y - CONSTANTS.MODULE_BASE_HEIGHT + JAR_RADIUS, x, y - CONSTANTS.MODULE_BASE_HEIGHT + JAR_RADIUS, JAR_RADIUS);
+        ctx.arcTo(x - JAR_RADIUS, y - CONSTANTS.MODULE_BASE_HEIGHT + JAR_RADIUS, x - JAR_RADIUS, y - CONSTANTS.MODULE_BASE_HEIGHT, JAR_RADIUS);
+        ctx.lineTo(x - JAR_RADIUS, y - CONSTANTS.MODULE_BASE_HEIGHT - JAR_HEIGHT);
+        ctx.arcTo(
+            x - JAR_RADIUS,
+            y - CONSTANTS.MODULE_BASE_HEIGHT - JAR_HEIGHT - JAR_RADIUS,
+            x,
+            y - CONSTANTS.MODULE_BASE_HEIGHT - JAR_HEIGHT - JAR_RADIUS,
+            JAR_RADIUS
+        );
+        ctx.arcTo(
+            x + JAR_RADIUS,
+            y - CONSTANTS.MODULE_BASE_HEIGHT - JAR_HEIGHT - JAR_RADIUS,
+            x + JAR_RADIUS,
+            y - CONSTANTS.MODULE_BASE_HEIGHT - JAR_HEIGHT,
+            JAR_RADIUS
+        );
+        ctx.lineTo(x + JAR_RADIUS, y - CONSTANTS.MODULE_BASE_HEIGHT);
+        ctx.closePath();
+        ctx.fill();
+
+        // Draw bulb glow
+        if (on) {
+            ctx.drawImage(global.assets.bulbGlowCanvas, x - CONSTANTS.GRID_SIZE / 2, y - CONSTANTS.MODULE_BASE_HEIGHT - BLIP_HEIGHT - CONSTANTS.GRID_SIZE / 2);
+        }
+    }
+
+    static wireHook(ctx, x, y, dir) {
+        ctx.fillStyle = CONSTANTS.COL_WIRE;
+        const rx = Math.cos(dir * Math.PI * 0.5) * CONSTANTS.GRID_SIZE * 0.5;
+        const ry = Math.sin(dir * Math.PI * 0.5) * CONSTANTS.GRID_SIZE * 0.5;
+        const wx = Math.cos(dir * Math.PI * 0.5) * CONSTANTS.GRID_SIZE + Math.sin(dir * Math.PI * 0.5) * CONSTANTS.WIRE_SIZE;
+        const wy = Math.sin(dir * Math.PI * 0.5) * CONSTANTS.GRID_SIZE + Math.cos(dir * Math.PI * 0.5) * CONSTANTS.WIRE_SIZE;
+        ctx.fillRect(x + rx - wx * 0.5, y + ry - wy * 0.5, wx, wy);
+
+        ctx.fillStyle = CONSTANTS.COL_WIRE;
+        ctx.lineWidth = CONSTANTS.WIRE_SIZE;
+        ctx.beginPath();
+        ctx.arc(x, y, CONSTANTS.PEG_HOLE_SHAPE.SIZE * 0.5 + CONSTANTS.WIRE_SIZE, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+
+    static button(ctx, x, y, down = false) {
+        const { BASE_SIZE, BUTTON_HEIGHT_DOWN, BUTTON_HEIGHT_UP, COL_DARK, COL_LIGHT } = CONSTANTS.BUTTON_SHAPE;
+
+        // Draw base
+        ctx.fillStyle = CONSTANTS.MODULE_COL_BASE_LIGHT;
+        Shape.roundedSquare(ctx, x, y, BASE_SIZE, CONSTANTS.MODULE_BASE_RADIUS);
+        ctx.fillStyle = CONSTANTS.MODULE_COL_BASE_DARK;
+        Shape.roundedSquare(ctx, x, y - CONSTANTS.MODULE_BASE_HEIGHT, BASE_SIZE, CONSTANTS.MODULE_BASE_RADIUS);
+
+        // Draw button
+        const buttonHeight = down ? BUTTON_HEIGHT_DOWN : BUTTON_HEIGHT_UP;
+        ctx.fillStyle = COL_DARK;
+        Shape.roundedSquare(ctx, x, y - CONSTANTS.MODULE_BASE_HEIGHT, BASE_SIZE * 0.8, CONSTANTS.MODULE_BASE_RADIUS * 0.8);
+        ctx.fillStyle = COL_LIGHT;
+        Shape.roundedSquare(ctx, x, y - CONSTANTS.MODULE_BASE_HEIGHT - buttonHeight, BASE_SIZE * 0.8, CONSTANTS.MODULE_BASE_RADIUS * 0.8);
+    }
 }
 
-function createBackgroundPattern() {
+class VisualCable {
+    constructor(startGrid, endGrid, cablePointCount) {
+        this.startGrid = startGrid;
+        this.endGrid = endGrid;
+
+        this.isPowered = false;
+        this.cablePointCount = cablePointCount;
+        this.cablePoints = [];
+        for (let i = 0; i < cablePointCount; i++) {
+            this.cablePoints.push({ x: 0, y: 0 });
+        }
+
+        this.update();
+    }
+
+    setStartGrid(startGrid) {
+        this.startGrid = startGrid;
+        this.update();
+    }
+
+    setEndGrid(endGrid) {
+        this.endGrid = endGrid;
+        this.update();
+    }
+
+    setPowered(isPowered) {
+        this.isPowered = isPowered;
+    }
+
+    update() {
+        if (!this.cablePoints) return;
+
+        this.startWorld = gridToWorld(this.startGrid.x, this.startGrid.y);
+        this.endWorld = gridToWorld(this.endGrid.x, this.endGrid.y);
+
+        this.cableStart = { x: this.startWorld.x, y: this.startWorld.y - CONSTANTS.PEG_SHAPE.HEIGHT };
+        this.cableEnd = { x: this.endWorld.x, y: this.endWorld.y - CONSTANTS.PEG_SHAPE.HEIGHT };
+
+        const dx = this.cableEnd.x - this.cableStart.x;
+        const dy = this.cableEnd.y - this.cableStart.y;
+        const segLenX = dx / (this.cablePointCount + 1);
+        const segLenY = dy / (this.cablePointCount + 1);
+        const maxSag = Math.hypot(dx, dy) * 0.15;
+
+        for (let i = 0; i < this.cablePointCount; i++) {
+            this.cablePoints[i].x = this.cableStart.x + segLenX * (i + 1);
+            this.cablePoints[i].y = this.cableStart.y + segLenY * (i + 1);
+
+            const t = (i + 1) / (this.cablePointCount + 1);
+            const sag = maxSag * Math.sin(t * Math.PI);
+            this.cablePoints[i].y += sag;
+        }
+    }
+
+    draw(ctx) {
+        // Draw pegs
+        Shape.peg(ctx, this.startWorld.x, this.startWorld.y);
+        Shape.peg(ctx, this.endWorld.x, this.endWorld.y);
+
+        // Draw cable segments
+        ctx.beginPath();
+        ctx.strokeStyle = this.isPowered ? CONSTANTS.CABLE_SHAPE.COL_ON : CONSTANTS.CABLE_SHAPE.COL_OFF;
+        ctx.lineWidth = CONSTANTS.CABLE_SHAPE.WIDTH;
+        ctx.moveTo(this.cableStart.x, this.cableStart.y);
+        for (let i = 0; i < this.cablePointCount; i++) {
+            ctx.lineTo(this.cablePoints[i].x, this.cablePoints[i].y);
+        }
+        ctx.lineTo(this.cableEnd.x, this.cableEnd.y);
+        ctx.stroke();
+
+        // Draw cable ends
+        ctx.fillStyle = CONSTANTS.CABLE_SHAPE.COL_END;
+        ctx.beginPath();
+        ctx.arc(this.cableStart.x, this.cableStart.y, CONSTANTS.CABLE_SHAPE.WIDTH * 0.65, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(this.cableEnd.x, this.cableEnd.y, CONSTANTS.CABLE_SHAPE.WIDTH * 0.65, 0, 2 * Math.PI);
+        ctx.fill();
+    }
+}
+
+function setup() {
+    global.mainCanvas = document.getElementById("mainCanvas");
+    global.mainCtx = global.mainCanvas.getContext("2d");
+    global.mainCtx.imageSmoothingEnabled = false;
+
+    global.mainAudio = new Audio();
+    global.mainAudio.volume = 0.5;
+
+    window.addEventListener("resize", onWindowResized);
+    global.mainCanvas.addEventListener("click", onMouseClicked);
+    global.mainCanvas.addEventListener("mousemove", onMouseMoved);
+    global.mainCanvas.addEventListener("mousedown", onMouseDown);
+    global.mainCanvas.addEventListener("mouseup", onMouseUp);
+    onWindowResized();
+
+    setupAssets();
+
+    global.testWire = new VisualCable({ x: 1, y: 2 }, { x: 3, y: 3 }, 10);
+}
+
+function setupAssets() {
+    // Setup background pattern
     const patternCanvas = document.createElement("canvas");
     const patternCtx = patternCanvas.getContext("2d");
-    patternCanvas.width = GRID_SIZE;
-    patternCanvas.height = GRID_SIZE;
-    drawPeg(patternCtx, GRID_SIZE / 2, GRID_SIZE / 2);
-    bgPattern = mainCtx.createPattern(patternCanvas, "repeat");
+    patternCanvas.width = CONSTANTS.GRID_SIZE;
+    patternCanvas.height = CONSTANTS.GRID_SIZE;
+    Shape.pegHole(patternCtx, CONSTANTS.GRID_SIZE / 2, CONSTANTS.GRID_SIZE / 2);
+    global.assets.bgPattern = global.mainCtx.createPattern(patternCanvas, "repeat");
+
+    // Setup radial glow gradient
+    const bulbGlowCanvas = document.createElement("canvas");
+    const bulbGlowCtx = bulbGlowCanvas.getContext("2d");
+    bulbGlowCanvas.width = CONSTANTS.GRID_SIZE;
+    bulbGlowCanvas.height = CONSTANTS.GRID_SIZE;
+    const gradient = bulbGlowCtx.createRadialGradient(
+        CONSTANTS.GRID_SIZE / 2,
+        CONSTANTS.GRID_SIZE / 2,
+        0,
+        CONSTANTS.GRID_SIZE / 2,
+        CONSTANTS.GRID_SIZE / 2,
+        CONSTANTS.GRID_SIZE / 2
+    );
+    gradient.addColorStop(0, "#ffd36d75");
+    gradient.addColorStop(0.2, "#ffd36d75");
+    gradient.addColorStop(1, "transparent");
+    bulbGlowCtx.fillStyle = gradient;
+    bulbGlowCtx.fillRect(0, 0, CONSTANTS.GRID_SIZE, CONSTANTS.GRID_SIZE);
+    global.assets.bulbGlowCanvas = bulbGlowCanvas;
 }
 
 function draw() {
-    mainCtx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+    global.mainCtx.clearRect(0, 0, global.mainCanvas.width, global.mainCanvas.height);
 
-    mainCtx.fillStyle = bgPattern;
-    mainCtx.fillRect(0, 0, mainCanvas.width, mainCanvas.height);
-    mainCtx.fill();
+    // Draw wire hook
+    const wireHook1Pos = gridToWorld(1, 2);
+    Shape.wireHook(global.mainCtx, wireHook1Pos.x, wireHook1Pos.y, 3);
+    const wireHook2Pos = gridToWorld(3, 3);
+    Shape.wireHook(global.mainCtx, wireHook2Pos.x, wireHook2Pos.y, 0);
 
-    drawBulb(mainCtx, (2 + 0.5) * GRID_SIZE, (2 + 0.5) * GRID_SIZE, isMouseDown);
+    // Draw peg holes
+    global.mainCtx.fillStyle = global.assets.bgPattern;
+    global.mainCtx.fillRect(0, 0, global.mainCanvas.width, global.mainCanvas.height);
+
+    // Draw objects
+    const bulbPos = gridToWorld(1, 1);
+    Shape.bulb(global.mainCtx, bulbPos.x, bulbPos.y, global.isMouseDown);
+
+    const buttonPos = gridToWorld(4, 3);
+    Shape.button(global.mainCtx, buttonPos.x, buttonPos.y, global.isMouseDown);
+
+    // Draw wires
+    global.testWire.setPowered(global.isMouseDown);
+    global.testWire.draw(global.mainCtx);
 
     requestAnimationFrame(draw);
 }
 
-function drawRoundedSquare(ctx, x, y, size, radius) {
-    ctx.beginPath();
-    ctx.moveTo(x - size * 0.5 + radius, y - size * 0.5);
-    ctx.arcTo(x + size * 0.5, y - size * 0.5, x + size * 0.5, y + size * 0.5, radius);
-    ctx.arcTo(x + size * 0.5, y + size * 0.5, x - size * 0.5, y + size * 0.5, radius);
-    ctx.arcTo(x - size * 0.5, y + size * 0.5, x - size * 0.5, y - size * 0.5, radius);
-    ctx.arcTo(x - size * 0.5, y - size * 0.5, x + size * 0.5, y - size * 0.5, radius);
-    ctx.closePath();
-    ctx.fill();
+function gridToWorld(x, y) {
+    return {
+        x: (x + 0.5) * CONSTANTS.GRID_SIZE,
+        y: (y + 0.5) * CONSTANTS.GRID_SIZE,
+    };
 }
 
-function drawPeg(ctx, x, y) {
-    const PEG_SIZE = GRID_SIZE * 0.1;
-
-    ctx.fillStyle = "#eaeaea";
-    ctx.beginPath();
-    ctx.arc(x - PEG_SIZE * 0.5, y - PEG_SIZE * 0.5, PEG_SIZE, 0, 2 * Math.PI);
-    ctx.fill();
-}
-
-function drawBulb(ctx, x, y, on = false) {
-    const SIZE = GRID_SIZE * 0.7;
-    const BASE_HEIGHT = GRID_SIZE * 0.15;
-    const BASE_RADIUS = SIZE * 0.2;
-    const JAR_RADIUS = SIZE * 0.35;
-    const JAR_HEIGHT = SIZE * 0.5;
-    const INDICATOR_WIDTH = JAR_RADIUS * 0.5;
-    const INDICATOR_STEM_WIDTH = JAR_RADIUS * 0.35;
-    const INDICTOR_HEIGHT = JAR_HEIGHT * 0.65;
-
-    // Draw base
-    ctx.fillStyle = "#989898";
-    drawRoundedSquare(ctx, x, y, SIZE, BASE_RADIUS);
-    ctx.fillStyle = "#a8a8a8";
-    drawRoundedSquare(ctx, x, y - BASE_HEIGHT, SIZE, BASE_RADIUS);
-
-    // Draw bulb jar base
-    ctx.fillStyle = "#868686";
-    ctx.beginPath();
-    ctx.arc(x, y - BASE_HEIGHT, JAR_RADIUS, 0, 2 * Math.PI);
-    ctx.fill();
-
-    // Draw bulb indicator
-    ctx.fillStyle = "#414141";
-    ctx.beginPath();
-    ctx.arc(x, y - BASE_HEIGHT, INDICATOR_STEM_WIDTH * 0.5, 0, 2 * Math.PI);
-    ctx.fill();
-    ctx.fillRect(x - INDICATOR_STEM_WIDTH * 0.5, y - BASE_HEIGHT - INDICTOR_HEIGHT, INDICATOR_STEM_WIDTH, INDICTOR_HEIGHT);
-    ctx.fillStyle = on ? "#ffc74d" : "#414141";
-    ctx.beginPath();
-    ctx.arc(x, y - BASE_HEIGHT - INDICTOR_HEIGHT, INDICATOR_WIDTH, 0, 2 * Math.PI);
-    ctx.fill();
-
-    // Draw bulb jar
-    ctx.fillStyle = on ? "#ded0af9d" : "#cecece9d";
-    ctx.beginPath();
-    ctx.moveTo(x - JAR_RADIUS, y - BASE_HEIGHT);
-    ctx.lineTo(x + JAR_RADIUS, y - BASE_HEIGHT);
-    ctx.arcTo(x + JAR_RADIUS, y - BASE_HEIGHT + JAR_RADIUS, x, y - BASE_HEIGHT + JAR_RADIUS, JAR_RADIUS);
-    ctx.arcTo(x - JAR_RADIUS, y - BASE_HEIGHT + JAR_RADIUS, x - JAR_RADIUS, y - BASE_HEIGHT, JAR_RADIUS);
-    ctx.lineTo(x - JAR_RADIUS, y - BASE_HEIGHT - JAR_HEIGHT);
-    ctx.arcTo(x - JAR_RADIUS, y - BASE_HEIGHT - JAR_HEIGHT - JAR_RADIUS, x, y - BASE_HEIGHT - JAR_HEIGHT - JAR_RADIUS, JAR_RADIUS);
-    ctx.arcTo(x + JAR_RADIUS, y - BASE_HEIGHT - JAR_HEIGHT - JAR_RADIUS, x + JAR_RADIUS, y - BASE_HEIGHT - JAR_HEIGHT, JAR_RADIUS);
-    ctx.lineTo(x + JAR_RADIUS, y - BASE_HEIGHT);
-    ctx.closePath();
-    ctx.fill();
+function worldToGrid(x, y) {
+    return {
+        x: Math.floor(x / CONSTANTS.GRID_SIZE),
+        y: Math.floor(y / CONSTANTS.GRID_SIZE),
+    };
 }
 
 // ================= Event Handlers =================
@@ -114,20 +362,24 @@ function drawBulb(ctx, x, y, on = false) {
 function onMouseClicked(e) {}
 
 function onMouseMoved(e) {
-    mousePos = { x: e.clientX, y: e.clientY };
+    global.mousePos = { x: e.clientX, y: e.clientY };
 }
 
 function onMouseDown(e) {
-    isMouseDown = true;
+    global.isMouseDown = true;
+    global.mainAudio.src = "assets/click_heavy_1_a.mp3";
+    global.mainAudio.play();
 }
 
 function onMouseUp(e) {
-    isMouseDown = false;
+    global.isMouseDown = false;
+    global.mainAudio.src = "assets/click_heavy_1_b.mp3";
+    global.mainAudio.play();
 }
 
 function onWindowResized() {
-    mainCanvas.width = window.innerWidth;
-    mainCanvas.height = window.innerHeight;
+    global.mainCanvas.width = window.innerWidth;
+    global.mainCanvas.height = window.innerHeight;
 }
 
 // ================= Driver =================
