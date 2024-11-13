@@ -248,7 +248,7 @@ def calc_if_prime(num):
 
 def conv_msgs_to_im(msgs):
     ml = max([len(m) for m in msgs])
-    return [m + [np.NaN] * (ml - len(m)) for m in msgs]
+    return [m + [np.nan] * (ml - len(m)) for m in msgs]
 
 
 def generate_blank_im(msgs, blank=np.nan):
@@ -308,8 +308,8 @@ def plot_msgs_freq_overall(msgs):
 
     print("Letter Frequencies (Overall)")
     print("----------------------------")
-    print(f"5 most common letters: { countsSorted[:5] }")
-    print(f"5 least common letters: { countsSorted[-5:] }")
+    print(f"5 most common letters: {countsSorted[:5]}")
+    print(f"5 least common letters: {countsSorted[-5:]}")
     print(f"Median frequency: {np.median(list(counts.values()))}")
     print(f"Mean frequency: {np.mean(list(counts.values()))}")
     print("")
