@@ -23,7 +23,7 @@ public class Attractor : MonoBehaviour {
   public void Start() {
     // Initialize if necessary then add to static list
     Universe.attractors.Add(this);
-    rb.velocity = initialVelocity;
+    rb.linearVelocity = initialVelocity;
   }
 
   // #endregion

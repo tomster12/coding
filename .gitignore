@@ -1,4 +1,4 @@
-# Definetly do not include
+# Definetly do not include top level folders
 /exclude/
 /software/
 /github/
@@ -23,6 +23,7 @@ _site/
 /rust/**/target/
 /processing/**/build/
 /unity/!Builds/
+/c/**/build/
 
 # Hidden local files
 token

@@ -30,6 +30,7 @@ for i in range(num):
                 stackSuits[0] = 0
             if card != 1:
                 stackSuits[1] = 0
+            
         matchingStacks[0] += stackSuits[0]
         matchingStacks[1] += stackSuits[1]
 

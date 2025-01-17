@@ -3,27 +3,4 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
-    "configurations": [
-        {
-            "type": "java",
-            "name": "FourierTransform",
-            "request": "launch",
-            "mainClass": "main.FourierTransform",
-            "projectName": "FourierTransform"
-        },
-        {
-            "type": "java",
-            "name": "Main",
-            "request": "launch",
-            "mainClass": "neat.Main",
-            "projectName": "NEATGeneticAlgorithm"
-        },
-        {
-            "name": "PowerShell: Launch Current File",
-            "type": "PowerShell",
-            "request": "launch",
-            "script": "${file}",
-            "args": []
-        }
-    ]
 }

@@ -556,7 +556,6 @@ class Rigidbody {
 
     static createSquare(world, isStatic, density, pos, size) {
         // Setup points
-        const WOBBLINESS = 0.15;
         const vertices = [];
         vertices.push(new Float2(-size.x * 0.5, -size.y * 0.5));
         vertices.push(new Float2(size.x * 0.5, -size.y * 0.5));
@@ -572,7 +571,6 @@ class Rigidbody {
 
     static createFunky(world, isStatic, density, pos, size) {
         // Setup points
-        const WOBBLINESS = 0.15;
         const vertices = [];
         vertices.push(new Float2(0, -size.y * 0.5));
         vertices.push(new Float2(size.x * 0.5, -size.y * 0.5));
