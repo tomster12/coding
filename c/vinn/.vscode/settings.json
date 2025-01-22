@@ -1,7 +1,0 @@
-{
-    "files.associations": {
-        "iostream": "c",
-        "stdio.h": "c",
-        "xutility": "c"
-    }
-}
