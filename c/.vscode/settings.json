@@ -7,7 +7,8 @@
         "windows.h": "c",
         "stdlib.h": "c",
         "render.h": "c",
-        "app_context.h": "c"
+        "app_context.h": "c",
+        "raylib.h": "c"
     },
     "C_Cpp.default.compilerPath": "cl.exe"
 }

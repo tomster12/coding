@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(collision VERSION 1.0 LANGUAGES C)
 
-# Fetch raylib if doesn't exist
+# Fetch raylib source if it doesn't exist
 if(NOT EXISTS ${CMAKE_SOURCE_DIR}/vendor/raylib/CMakeLists.txt)
     message(STATUS "Fetching raylib...")
     include(FetchContent)
