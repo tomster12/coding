@@ -8,7 +8,7 @@ project(collision VERSION 1.0 LANGUAGES C)
 # include_directories(${CMAKE_SOURCE_DIR}/raylib/include)
 
 # Add raylib source files
-add_subdirectory(${CMAKE_SOURCE_DIR}/raylib)
+add_subdirectory(${CMAKE_SOURCE_DIR}/vendor/raylib)
 
 # Add project source files
 set(SOURCES src/main.c)
