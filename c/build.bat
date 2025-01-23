@@ -1,6 +1,29 @@
 @echo off
 setlocal enabledelayedexpansion
 
+:: --------------------------------------------------------------------------------------------
+::
+::                           Simple build script for C projects
+::
+:: --------------------------------------------------------------------------------------------
+::
+::   Acts as a wrapper around "gcc file.c -o build/file.exe <FLAGS>".
+::   <FlAGS> are parsed from the first line of the target file (e.g. // build: <FLAGS>)
+::   This allows multiple .c files (unity build), lib include / link, and other compiler flags.
+::
+:: --------------------------------------------------------------------------------------------
+::
+:: Usage: build.bat <target_file> [options]
+:: Options:
+::   -output <dir>    : Specify output directory (default: build)
+::   -compiler <name> : Specify compiler to use (default: gcc)
+::   -run             : Run the executable after building
+::   -silent          : Suppress build output logging
+::   -clear           : Clear the console before building
+::   -help            : Display this help message
+::
+:: --------------------------------------------------------------------------------------------
+
 :: Default values for parameters
 set "output=build"
 set "compiler=gcc"
