@@ -9,11 +9,11 @@
 
 int main()
 {
-    struct AppContext *ctx = new_app_context();
+    AppContext *ctx = app_context_new();
 
     // Start Winsock
-    WSADATA wsaData;
-    if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0)
+    WSADATA wsa_data;
+    if (WSAStartup(MAKEWORD(2, 2), &wsa_data) != 0)
     {
         printf("WSAStartup failed.\n");
         exit(1);
@@ -51,7 +51,7 @@ int main()
     CloseHandle(input_tid);
     CloseHandle(listener_tid);
 
-    free_app_context(ctx);
+    app_context_free(ctx);
 
     WSACleanup();
 

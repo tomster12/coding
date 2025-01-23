@@ -32,10 +32,10 @@ SOCKET create_broadcast_socket(struct sockaddr_in *address)
 
 DWORD WINAPI input_thread(LPVOID arg)
 {
-    struct AppContext *ctx = (struct AppContext *)arg;
+    AppContext *ctx = (AppContext *)arg;
 
     struct sockaddr_in address;
-    SOCKET sock = create_broadcast_socket(&address);
+    SOCKET client_sock = create_broadcast_socket(&address);
     char buffer[MAX_BUFFER];
 
     while (1)
@@ -75,15 +75,15 @@ DWORD WINAPI input_thread(LPVOID arg)
         }
 
         // Broadcast message on network
-        if (sendto(sock, buffer, strlen(buffer), 0, (struct sockaddr *)&address, sizeof(address)) == SOCKET_ERROR)
+        if (sendto(client_sock, buffer, strlen(buffer), 0, (struct sockaddr *)&address, sizeof(address)) == SOCKET_ERROR)
         {
             printf("sendto failed: %d\n", WSAGetLastError());
-            closesocket(sock);
+            closesocket(client_sock);
             exit(1);
         }
 
         buffer[0] = '\0';
     }
 
-    closesocket(sock);
+    closesocket(client_sock);
 }

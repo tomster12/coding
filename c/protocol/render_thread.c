@@ -34,7 +34,7 @@ void init_render_window()
 
 DWORD WINAPI render_thread(LPVOID arg)
 {
-    struct AppContext *ctx = (struct AppContext *)arg;
+    AppContext *ctx = (AppContext *)arg;
 
     SetConsoleOutputCP(CP_UTF8);
 
@@ -53,9 +53,9 @@ DWORD WINAPI render_thread(LPVOID arg)
         {
             // Get current cursor position
             CONSOLE_SCREEN_BUFFER_INFO csbi;
-            GetConsoleScreenBufferInfo(ctx->hConsole, &csbi);
+            GetConsoleScreenBufferInfo(ctx->h_console, &csbi);
 
-            // Clear message box, then write each message
+            // Clear message box then write each message
             for (int i = 0; i < MESSAGE_LIST_HEIGHT; i++)
             {
                 move_cursor_to(2, 3 + i);
@@ -69,7 +69,7 @@ DWORD WINAPI render_thread(LPVOID arg)
             }
 
             // Move cursor back to where it was before
-            SetConsoleCursorPosition(ctx->hConsole, csbi.dwCursorPosition);
+            SetConsoleCursorPosition(ctx->h_console, csbi.dwCursorPosition);
 
             ctx->to_update_messages = 0;
         }
