@@ -83,6 +83,7 @@ DWORD WINAPI render_thread(LPVOID arg)
         }
 
         ReleaseMutex(ctx->ui_mutex);
+
         Sleep(100);
     }
 

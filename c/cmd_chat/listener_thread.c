@@ -13,7 +13,7 @@ SOCKET create_listener_socket(struct sockaddr_in *address)
 
     if (sock == INVALID_SOCKET)
     {
-        printf("Error creating socket: %ld\n", WSAGetLastError());
+        printf("Error creating listener socket: %ld\n", WSAGetLastError());
         exit(1);
     }
 
@@ -21,9 +21,17 @@ SOCKET create_listener_socket(struct sockaddr_in *address)
     address->sin_addr.s_addr = INADDR_ANY;
     address->sin_port = htons(LISTEN_PORT);
 
+    BOOL reuse = TRUE;
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == SOCKET_ERROR)
+    {
+        printf("Broadcast setsockopt reuse failed: %d\n", WSAGetLastError());
+        closesocket(sock);
+        exit(1);
+    }
+
     if (bind(sock, (struct sockaddr *)address, sizeof(*address)) == SOCKET_ERROR)
     {
-        printf("Bind failed with error: %d\n", WSAGetLastError());
+        printf("Listener bind failed with error: %d\n", WSAGetLastError());
         closesocket(sock);
         exit(1);
     }

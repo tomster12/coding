@@ -9,9 +9,10 @@
 SOCKET create_broadcast_socket(struct sockaddr_in *address)
 {
     SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
+
     if (sock == INVALID_SOCKET)
     {
-        printf("Error creating socket: %ld\n", WSAGetLastError());
+        printf("Error creating broadcast socket: %ld\n", WSAGetLastError());
         exit(1);
     }
 
@@ -22,7 +23,7 @@ SOCKET create_broadcast_socket(struct sockaddr_in *address)
     BOOL broadcast = TRUE;
     if (setsockopt(sock, SOL_SOCKET, SO_BROADCAST, (char *)&broadcast, sizeof(broadcast)) == SOCKET_ERROR)
     {
-        printf("setsockopt failed: %d\n", WSAGetLastError());
+        printf("Broadcast setsockopt broadcast failed: %d\n", WSAGetLastError());
         closesocket(sock);
         exit(1);
     }
@@ -34,8 +35,8 @@ DWORD WINAPI input_thread(LPVOID arg)
 {
     AppContext *ctx = (AppContext *)arg;
 
-    struct sockaddr_in address;
-    SOCKET client_sock = create_broadcast_socket(&address);
+    struct sockaddr_in broadcast_addr;
+    SOCKET broadcast_sock = create_broadcast_socket(&broadcast_addr);
     char buffer[MAX_BUFFER];
 
     while (1)
@@ -44,7 +45,7 @@ DWORD WINAPI input_thread(LPVOID arg)
         fgets(buffer, MAX_BUFFER, stdin);
         buffer[strcspn(buffer, "\n")] = '\0';
 
-        // On empty input just clear
+        // On empty input flag to clear input
         if (strlen(buffer) == 0)
         {
             WaitForSingleObject(ctx->ui_mutex, INFINITE);
@@ -53,7 +54,7 @@ DWORD WINAPI input_thread(LPVOID arg)
             continue;
         }
 
-        // Handle exit command
+        // Handle exit command flag to exit
         if (strcmp(buffer, "/exit") == 0)
         {
             WaitForSingleObject(ctx->ui_mutex, INFINITE);
@@ -65,25 +66,20 @@ DWORD WINAPI input_thread(LPVOID arg)
         // Add message to history
         {
             WaitForSingleObject(ctx->ui_mutex, INFINITE);
-            if (ctx->messages_count < MAX_MESSAGES)
-            {
-                ctx->messages[ctx->messages_count++] = _strdup(buffer);
-            }
-            ctx->to_update_messages = 1;
             ctx->to_clear_input = 1;
             ReleaseMutex(ctx->ui_mutex);
         }
 
         // Broadcast message on network
-        if (sendto(client_sock, buffer, strlen(buffer), 0, (struct sockaddr *)&address, sizeof(address)) == SOCKET_ERROR)
+        if (sendto(broadcast_sock, buffer, strlen(buffer), 0, (struct sockaddr *)&broadcast_addr, sizeof(broadcast_addr)) == SOCKET_ERROR)
         {
             printf("sendto failed: %d\n", WSAGetLastError());
-            closesocket(client_sock);
+            closesocket(broadcast_sock);
             exit(1);
         }
 
         buffer[0] = '\0';
     }
 
-    closesocket(client_sock);
+    closesocket(broadcast_sock);
 }

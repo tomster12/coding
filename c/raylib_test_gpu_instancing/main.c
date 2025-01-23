@@ -11,7 +11,7 @@
 
 int main()
 {
-    InitWindow(1800, 1200, "Mesh Instancing");
+    InitWindow(1800, 1200, "Mesh GPU Instancing");
 
     // Setup 3D camera
     Camera camera = {0};

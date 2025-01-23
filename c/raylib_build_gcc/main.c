@@ -4,7 +4,7 @@
 
 int main()
 {
-    InitWindow(800, 600, "GCC Build");
+    InitWindow(1800, 1200, "GCC Build");
 
     while (!WindowShouldClose())
     {
