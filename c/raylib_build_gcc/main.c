@@ -1,10 +1,10 @@
-// build: -I./raylib/include -L./raylib/lib -lraylib -lopengl32 -lgdi32 -lwinmm
+// build: -I../libs/raylib/include -L../libs/raylib/lib -lraylib -lopengl32 -lgdi32 -lwinmm
 
 #include "raylib.h"
 
 int main()
 {
-    InitWindow(800, 600, "Window Title");
+    InitWindow(800, 600, "GCC Build");
 
     while (!WindowShouldClose())
     {

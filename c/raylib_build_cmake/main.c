@@ -2,7 +2,7 @@
 
 int main()
 {
-    InitWindow(800, 600, "Window Title");
+    InitWindow(800, 600, "CMake Build");
 
     while (!WindowShouldClose())
     {
