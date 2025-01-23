@@ -1,4 +1,4 @@
-// compiler: app_context.c render_thread.c input_thread.c listener_thread.c -lws2_32
+// build: app_context.c render_thread.c input_thread.c listener_thread.c -lws2_32
 
 #include <windows.h>
 #include <stdio.h>

@@ -66,9 +66,7 @@ for %%A in ("%target%") do (
     set "target_name=%%~nxA"
     set "target_name_noext=%%~nA"
 )
-
 if not defined target_dir set "target_dir=."
-
 set "output_dir=%target_dir%%output%"
 set "output_exe=%output_dir%\%target_name_noext%.exe"
 
@@ -76,7 +74,7 @@ set "output_exe=%output_dir%\%target_name_noext%.exe"
 set "compiler_flags="
 for /f "usebackq tokens=*" %%A in ("%target%") do (
     set "line=%%A"
-    if "!line:~0,13!"=="// compiler: " ( set "compiler_flags=!line:~13!" )
+    if "!line:~0,10!"=="// build: " ( set "compiler_flags=!line:~10!" )
     goto exit_flag_search
 )
 :exit_flag_search
