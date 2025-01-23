@@ -49,6 +49,4 @@ int main(int argc, char *argv[])
 
     // Close the socket
     closesocket(server);
-
-    return 0;
 }

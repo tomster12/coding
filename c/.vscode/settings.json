@@ -8,7 +8,12 @@
         "stdlib.h": "c",
         "render.h": "c",
         "app_context.h": "c",
-        "raylib.h": "c"
+        "raylib.h": "c",
+        "initializer_list": "c",
+        "utility": "c",
+        "vector": "c",
+        "xstring": "c",
+        "xutility": "c"
     },
     "C_Cpp.default.compilerPath": "cl.exe"
 }

@@ -4,7 +4,7 @@
 
 #define MAX_FILES 1000
 
-void storeFilePath(char filePaths[MAX_FILES][MAX_PATH], int *count, const char *filePath)
+void store_file_path(char filePaths[MAX_FILES][MAX_PATH], int *count, const char *filePath)
 {
     if (*count < MAX_FILES)
     {
@@ -17,7 +17,7 @@ void storeFilePath(char filePaths[MAX_FILES][MAX_PATH], int *count, const char *
     }
 }
 
-void searchDirectoriesForGit(const char *basePath, char filePaths[MAX_FILES][MAX_PATH], int *count)
+void search_directories_for_git(const char *basePath, char filePaths[MAX_FILES][MAX_PATH], int *count)
 {
     char searchPath[MAX_PATH];
     snprintf(searchPath, MAX_PATH, "%s\\*", basePath);
@@ -46,7 +46,7 @@ void searchDirectoriesForGit(const char *basePath, char filePaths[MAX_FILES][MAX
         // Print the directory name if it contains ".git"
         if (strstr(currentFileData.cFileName, ".git") != NULL)
         {
-            storeFilePath(filePaths, count, basePath);
+            store_file_path(filePaths, count, basePath);
             continue;
         }
 
@@ -59,7 +59,7 @@ void searchDirectoriesForGit(const char *basePath, char filePaths[MAX_FILES][MAX
         // Recurse and look at subdirectories
         char nextSearchPath[MAX_PATH];
         snprintf(nextSearchPath, MAX_PATH, "%s\\%s", basePath, currentFileData.cFileName);
-        searchDirectoriesForGit(nextSearchPath, filePaths, count);
+        search_directories_for_git(nextSearchPath, filePaths, count);
 
     } while (FindNextFile(hCurrentFile, &currentFileData) != 0);
 
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     // Perform the search for directories containing ".git"
     char filePaths[MAX_FILES][MAX_PATH];
     int count = 0;
-    searchDirectoriesForGit(argv[1], filePaths, &count);
+    search_directories_for_git(argv[1], filePaths, &count);
 
     // Loop over found directories
     printf("\nFound %d directories containing .git:\n\n", count);
@@ -149,6 +149,4 @@ int main(int argc, char *argv[])
     {
         printf("\n");
     }
-
-    return 0;
 }
