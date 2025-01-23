@@ -2,18 +2,33 @@
     "configurations": [
         {
             "name": "Win32",
-            "includePath": [
-                "${workspaceFolder}/**"
-            ],
-            "defines": [
-                "_DEBUG",
-                "UNICODE",
-                "_UNICODE"
-            ],
+            "includePath": ["d:/Files/Coding/c/**"],
+            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
             "windowsSdkVersion": "10.0.22621.0",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "intelliSenseMode": "windows-gcc-x64"
+            "intelliSenseMode": "windows-msvc-x64",
+            "mergeConfigurations": false,
+            "browse": {
+                "path": ["d:/Files/Coding/c/**", "d:/Files/Coding/c"],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "compilerPath": "cl.exe"
+        },
+        {
+            "name": "GCCw64",
+            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "windowsSdkVersion": "10.0.22621.0",
+            "cStandard": "c17",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "windows-gcc-x64",
+            "mergeConfigurations": false,
+            "compilerPath": "D:/Files/Software/w64devkit/bin/gcc.exe",
+            "browse": {
+                "path": ["d:/Files/Coding/c/**", "d:/Files/Coding/c"],
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": ["${workspaceFolder}/**"]
         }
     ],
     "version": 4
