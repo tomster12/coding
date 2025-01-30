@@ -3,6 +3,9 @@
         "raylib.h": "c",
         "functional": "c",
         "cstddef": "c",
-        "windows.h": "c"
+        "windows.h": "c",
+        "stddef.h": "c",
+        "rlgl.h": "c",
+        "listener_thread.h": "c"
     }
 }

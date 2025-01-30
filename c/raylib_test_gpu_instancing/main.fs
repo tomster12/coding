@@ -4,7 +4,7 @@
 in vec3 fragNormal;
 uniform vec4 colDiffuse;
 
-// output
+// Output
 out vec4 finalColor;
 
 void main()

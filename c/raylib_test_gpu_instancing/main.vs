@@ -11,10 +11,10 @@ out vec3 fragNormal;
 
 void main()
 {
-    // send data to fragment shader
+    // send data to fragment
     fragNormal = vertexNormal;
 
-    // calculate final vertex position
+    // Calculate projected instance vertex position
     mat4 mvpi = projectionMatrix * instanceMatrix;
     vec4 pos = mvpi * vec4(vertexPosition, 1.0);
     gl_Position = pos;
