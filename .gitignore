@@ -5,6 +5,7 @@
 
 # Submodules
 /**/[Gg]it*/
+/c/libs/raylib-src/
 
 # Build byproducts
 _site/
