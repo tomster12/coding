@@ -133,6 +133,7 @@ if not defined silent echo [log] Build success: %output_exe% ^(took %build_time%
 
 :: [Optional] Run the executable
 if defined run (
+    pushd "%output_dir%"
     if not defined silent echo [run] %output_exe%
     "%output_exe%"
 )
