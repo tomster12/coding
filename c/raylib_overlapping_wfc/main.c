@@ -672,7 +672,7 @@ int wave_state_collapse(WaveState *wave_state)
             break;
         }
 
-        // There was a conflict so reset all the states back to the stable state0
+        // There was a conflict so reset all the states back to their stable states
         else
         {
             for (size_t i = 0; i < wave_state->width * wave_state->height; ++i)
