@@ -32,6 +32,12 @@ layout: default
 
   <hr /><h1>Notable Projects</h1><br />
 
+  <h2>C</h2>
+  <div class="gifs">
+    <a href="{{ "https://github.com/tomster12/coding/tree/master/c/raylib_overlapping_wfc" }}">
+      <img src="{{ "/assets/gifs/c/WFC.gif" | relative_url }}" /></a>
+  </div><br />
+
   <h2>C++</h2>
   <div class="gifs">
     <a href="{{ "https://github.com/tomster12/coding/tree/master/c++/Liquid" }}">

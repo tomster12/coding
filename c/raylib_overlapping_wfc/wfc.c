@@ -8,15 +8,15 @@
 
 #define Direction unsigned char
 
-static Vector2 NEIGHBOUR_DIRS[4] = {
+static Vector2 DIRECTION_VECTORS[4] = {
     {1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
-static Direction get_opposite_direction(Direction dir)
+static Direction get_opposite_direction(Direction direction)
 {
-    return (dir + 2) % 4;
+    return (direction + 2) % 4;
 }
 
-static bool compare_colors(Color color_a, Color color_b)
+static bool are_colors_equal(Color color_a, Color color_b)
 {
     return color_a.r == color_b.r && color_a.g == color_b.g && color_a.b == color_b.b && color_a.a == color_b.a;
 }
@@ -98,8 +98,8 @@ static bool pattern_can_overlap(PatternSet *pattern_set, size_t index_a, size_t 
         {
             // If it also inside pattern B
             Direction opposite_dir = get_opposite_direction(direction);
-            int bx = (int)ax + NEIGHBOUR_DIRS[opposite_dir].x;
-            int by = (int)ay + NEIGHBOUR_DIRS[opposite_dir].y;
+            int bx = (int)ax + DIRECTION_VECTORS[opposite_dir].x;
+            int by = (int)ay + DIRECTION_VECTORS[opposite_dir].y;
 
             if (bx < 0 || bx >= pattern_set->pattern_dim || by < 0 || by >= pattern_set->pattern_dim)
             {
@@ -110,7 +110,7 @@ static bool pattern_can_overlap(PatternSet *pattern_set, size_t index_a, size_t 
             Color color_a = pattern_set->patterns[index_a].pixels[ax + ay * pattern_set->pattern_dim];
             Color color_b = pattern_set->patterns[index_b].pixels[bx + by * pattern_set->pattern_dim];
 
-            if (!compare_colors(color_a, color_b))
+            if (!are_colors_equal(color_a, color_b))
             {
                 return false;
             }
@@ -379,8 +379,8 @@ static bool wave_state_propogate_entropy(WaveState *wave_state, size_t cell_inde
     for (Direction direction = 0; direction < 4; ++direction)
     {
         // Within bounds
-        size_t nb_cell_x = cell_x + NEIGHBOUR_DIRS[direction].x;
-        size_t nb_cell_y = cell_y + NEIGHBOUR_DIRS[direction].y;
+        size_t nb_cell_x = cell_x + DIRECTION_VECTORS[direction].x;
+        size_t nb_cell_y = cell_y + DIRECTION_VECTORS[direction].y;
         if (nb_cell_x < 0 || nb_cell_x >= wave_state->width || nb_cell_y < 0 || nb_cell_y >= wave_state->height)
         {
             continue;
