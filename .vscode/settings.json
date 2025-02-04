@@ -6,5 +6,5 @@
         "algorithm": "c"
     },
     "java.dependency.packagePresentation": "hierarchical",
-    "C_Cpp.default.compilerPath": "D:\\Files\\Coding\\software\\MinGW\\bin\\gcc.exe"
+    "C_Cpp.default.compilerPath": "D:/Files/Coding/software/MinGW/bin/gcc.exe"
 }
