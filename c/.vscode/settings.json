@@ -6,6 +6,8 @@
         "windows.h": "c",
         "stddef.h": "c",
         "rlgl.h": "c",
-        "listener_thread.h": "c"
+        "listener_thread.h": "c",
+        "*.m": "c",
+        "variant": "c"
     }
 }
