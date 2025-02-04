@@ -1,4 +1,4 @@
-// build: -Wall -Werror -I../libs/raylib/include -L../libs/raylib/lib -lraylib -lopengl32 -lgdi32 -lwinmm -lm -g
+// build: -Wall -Werror -I../libs/raylib/include -L../libs/raylib/lib -lraylib -lopengl32 -lgdi32 -lwinmm -lm
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,22 +6,39 @@
 #include <math.h>
 #include "raylib.h"
 
-#define SCREEN_WIDTH 1100
-#define SCREEN_HEIGHT 800
-#define RESULT_WIDTH 10
-#define RESULT_HEIGHT 10
-#define MAX_DEPTH 10
-#define LIMIT_FPS false
+#define SCREEN_WIDTH 1000
+#define SCREEN_HEIGHT 1200
+#define LIMIT_FPS 60
+#define RAND_SEED 1
+#define SAMPLE_PATH "../samples/Flowers.png"
+#define RESULT_WIDTH 64
+#define RESULT_HEIGHT 64
+#define MAX_DEPTH 256
+#define PATTERN_DIM 3
 #define PATTERN_WRAP true
 #define PATTERN_PADDING_COLOR WHITE
-#define CONFLICT_COLOR BLUE
-#define SAMPLE_PATH "D:/Files/Coding/c/raylib_overlapping_wfc/samples/City.png"
+#define DRAW_CONFLICT_COLOR BLUE
+#define DRAW_CELL_COUNT false
+#define RESTART_ON_CONFLICT true
 
-// [ EAST, SOUTH, WEST, NORTH ]
+// ------------------------
+
 Vector2 NEIGHBOUR_DIRS[4] = {
     {1, 0}, {0, 1}, {-1, 0}, {0, -1}};
 
 #define Direction unsigned char
+
+Direction get_opposite_direction(Direction dir)
+{
+    return (dir + 2) % 4;
+}
+
+bool compare_colors(Color color_a, Color color_b)
+{
+    return color_a.r == color_b.r && color_a.g == color_b.g && color_a.b == color_b.b && color_a.a == color_b.a;
+}
+
+// ------------------------
 
 typedef struct Pattern
 {
@@ -42,7 +59,10 @@ typedef struct CellState
 {
     size_t *choices;
     size_t choice_count;
+    size_t *stable_choices;
+    size_t stable_choice_count;
     bool is_visited;
+    bool is_changed;
     bool is_collapsed;
     float entropy;
 } CellState;
@@ -55,19 +75,8 @@ typedef struct WaveState
     CellState *cell_states;
     Color *pixels;
     Texture2D texture;
+    size_t collapse_counter;
 } WaveState;
-
-// ------------------------
-
-Direction get_opposite_direction(Direction dir)
-{
-    return (dir + 2) % 4;
-}
-
-bool compare_colors(Color color_a, Color color_b)
-{
-    return color_a.r == color_b.r && color_a.g == color_b.g && color_a.b == color_b.b && color_a.a == color_b.a;
-}
 
 // ------------------------
 
@@ -135,24 +144,23 @@ void pattern_init(Pattern *pattern, PatternSet *pattern_set, Color *pixels, size
 {
     pattern->pixels = pixels;
     pattern->frequency = frequency;
-
     pattern->overlaps = malloc(pattern_set->pattern_count * sizeof(unsigned char));
     for (size_t i = 0; i < pattern_set->pattern_count; ++i)
     {
         pattern->overlaps[i] = 0;
     }
 
-    // Image pattern_image = GenImageColor(pattern_set->pattern_dim, pattern_set->pattern_dim, PINK);
-    // pattern->texture = LoadTextureFromImage(pattern_image);
-    // UnloadImage(pattern_image);
-    // UpdateTexture(pattern->texture, pattern->pixels);
+    Image pattern_image = GenImageColor(pattern_set->pattern_dim, pattern_set->pattern_dim, PINK);
+    pattern->texture = LoadTextureFromImage(pattern_image);
+    UnloadImage(pattern_image);
+    UpdateTexture(pattern->texture, pattern->pixels);
 }
 
 void pattern_destroy(Pattern *pattern)
 {
     UnloadImageColors(pattern->pixels);
     free(pattern->overlaps);
-    // UnloadTexture(pattern->texture);
+    UnloadTexture(pattern->texture);
 }
 
 void pattern_overlap_add(Pattern *pattern, size_t index, Direction direction)
@@ -215,7 +223,7 @@ void pattern_set_init_from_image(PatternSet *pattern_set, const char *input_imag
 
     // Setup to track each of the unique patterns
     pattern_set->pattern_count = 0;
-    pattern_set->pattern_dim = 3;
+    pattern_set->pattern_dim = PATTERN_DIM;
 
     size_t max_pattern_count = source_image.width * source_image.height;
     unsigned long *pattern_hashes = malloc(max_pattern_count * sizeof(unsigned long));
@@ -325,13 +333,19 @@ void cell_state_init(CellState *cell_state, WaveState *wave_state)
 {
     // Initialize with all patterns allowed
     cell_state->choice_count = wave_state->pattern_set->pattern_count;
+    cell_state->stable_choice_count = wave_state->pattern_set->pattern_count;
+
     cell_state->choices = malloc(cell_state->choice_count * sizeof(size_t));
+    cell_state->stable_choices = malloc(cell_state->stable_choice_count * sizeof(size_t));
+
     for (size_t i = 0; i < cell_state->choice_count; ++i)
     {
         cell_state->choices[i] = i;
+        cell_state->stable_choices[i] = i;
     }
 
     cell_state->is_visited = false;
+    cell_state->is_changed = false;
     cell_state->is_collapsed = false;
     cell_state->entropy = 0;
 
@@ -341,6 +355,7 @@ void cell_state_init(CellState *cell_state, WaveState *wave_state)
 void cell_state_destroy(CellState *cell_state)
 {
     free(cell_state->choices);
+    free(cell_state->stable_choices);
 }
 
 void cell_state_block(CellState *cell_state, size_t choice)
@@ -349,6 +364,43 @@ void cell_state_block(CellState *cell_state, size_t choice)
     // This is done by moving the last pattern to the index and decrementing the count
     cell_state->choices[choice] = cell_state->choices[cell_state->choice_count - 1];
     cell_state->choice_count--;
+    cell_state->is_changed = true;
+}
+
+void cell_state_reset_to_stable(CellState *cell_state)
+{
+    // Reset the cell to the stable state only if it has changed
+    if (!cell_state->is_changed)
+    {
+        return;
+    }
+
+    cell_state->choice_count = cell_state->stable_choice_count;
+
+    for (size_t i = 0; i < cell_state->choice_count; ++i)
+    {
+        cell_state->choices[i] = cell_state->stable_choices[i];
+    }
+
+    cell_state->is_changed = false;
+}
+
+void cell_state_save_as_stable(CellState *cell_state)
+{
+    // Save the current state as the stable state only if it has changed
+    if (!cell_state->is_changed)
+    {
+        return;
+    }
+
+    cell_state->stable_choice_count = cell_state->choice_count;
+
+    for (size_t i = 0; i < cell_state->choice_count; ++i)
+    {
+        cell_state->stable_choices[i] = cell_state->choices[i];
+    }
+
+    cell_state->is_changed = false;
 }
 
 void cell_state_calculate_entropy(CellState *cell_state, PatternSet *pattern_set)
@@ -374,8 +426,6 @@ void cell_state_calculate_entropy(CellState *cell_state, PatternSet *pattern_set
 
 // ------------------------
 
-void wave_state_update_texture(WaveState *wave_state);
-
 void wave_state_init(WaveState *wave_state, PatternSet *pattern_set)
 {
     // Setup a new wave data output with the given pattern set
@@ -383,6 +433,7 @@ void wave_state_init(WaveState *wave_state, PatternSet *pattern_set)
     wave_state->width = RESULT_WIDTH;
     wave_state->height = RESULT_HEIGHT;
     wave_state->cell_states = malloc((wave_state->width * wave_state->height) * sizeof(CellState));
+    wave_state->collapse_counter = 0;
 
     Image image = GenImageColor(wave_state->width, wave_state->height, BLUE);
     wave_state->pixels = LoadImageColors(image);
@@ -393,8 +444,6 @@ void wave_state_init(WaveState *wave_state, PatternSet *pattern_set)
     {
         cell_state_init(&wave_state->cell_states[i], wave_state);
     }
-
-    wave_state_update_texture(wave_state);
 }
 
 void wave_state_destroy(WaveState *wave_state)
@@ -466,69 +515,56 @@ bool wave_state_propogate_entropy(WaveState *wave_state, size_t cell_index, int 
 
     cell_state->is_visited = true;
 
-    // For each neighbour of the current cell
+    // For each neighbour direction of the current cell
     for (Direction direction = 0; direction < 4; ++direction)
     {
+        // Within bounds
         size_t nb_cell_x = cell_x + NEIGHBOUR_DIRS[direction].x;
         size_t nb_cell_y = cell_y + NEIGHBOUR_DIRS[direction].y;
-        size_t nb_cell_index = nb_cell_x + nb_cell_y * wave_state->width;
-        CellState *nb_cell = &wave_state->cell_states[nb_cell_index];
-
-        // Within bounds
         if (nb_cell_x < 0 || nb_cell_x >= wave_state->width || nb_cell_y < 0 || nb_cell_y >= wave_state->height)
         {
             continue;
         }
 
         // Not collapsed
-        if (nb_cell->is_collapsed)
+        size_t nb_cell_index = nb_cell_x + nb_cell_y * wave_state->width;
+        CellState *nb_cell_state = &wave_state->cell_states[nb_cell_index];
+        if (nb_cell_state->is_collapsed)
         {
             continue;
         }
 
-        // For each pattern in the neighbour cell
-        bool has_changed = false;
-        size_t i = 0;
-        while (i < nb_cell->choice_count)
+        // Check each of the neighbours patterns overlaps atleast 1 of this cells
+        for (size_t i = 0; i < nb_cell_state->choice_count; ++i)
         {
-            size_t nb_pattern = nb_cell->choices[i];
-            bool is_allowed = false;
-
-            // For each pattern in this cell
-            for (size_t j = 0; j < cell_state->choice_count; ++j)
+            bool found = false;
+            for (size_t j = 0; j < cell_state->choice_count && !found; ++j)
             {
-                size_t cell_state_pattern = cell_state->choices[j];
-
-                // If an overlap is found then the neighbour pattern is allowed
-                Pattern *pattern = &wave_state->pattern_set->patterns[cell_state_pattern];
-                if (pattern_overlap_check(pattern, nb_pattern, direction))
-                {
-                    is_allowed = true;
-                    break;
-                }
+                size_t cell_pattern_index = cell_state->choices[j];
+                size_t nb_cell_pattern_index = nb_cell_state->choices[i];
+                Pattern *cell_pattern = &wave_state->pattern_set->patterns[cell_pattern_index];
+                found |= pattern_overlap_check(cell_pattern, nb_cell_pattern_index, direction);
             }
 
-            // If no overlap then block and stay at same index
-            if (!is_allowed)
+            // If none was found then block the pattern
+            if (!found)
             {
-                cell_state_block(nb_cell, i);
-                has_changed = true;
-                continue;
+                cell_state_block(nb_cell_state, i);
+                i--;
             }
-
-            i++;
         }
 
-        // Recalculate and then propogate the entropy
-        if (has_changed)
+        // Propogate the entropy if the neighbour is changed
+        // Also have guards for checking the neighbour was reduced to 0 choices
+        if (nb_cell_state->is_changed)
         {
-            if (nb_cell->choice_count == 0)
+            if (nb_cell_state->choice_count == 0)
             {
-                printf("Conflict at cell (%lld, %lld)\n", nb_cell_x, nb_cell_y);
                 return false;
             }
 
-            cell_state_calculate_entropy(nb_cell, wave_state->pattern_set);
+            cell_state_calculate_entropy(nb_cell_state, wave_state->pattern_set);
+
             if (!wave_state_propogate_entropy(wave_state, nb_cell_index, depth + 1))
             {
                 return false;
@@ -558,7 +594,7 @@ void wave_state_update_texture(WaveState *wave_state)
         // If cell is not collapsed but has no options then it is a conflict
         else if (wave_state->cell_states[i_cell].choice_count == 0)
         {
-            wave_state->pixels[i_cell] = CONFLICT_COLOR;
+            wave_state->pixels[i_cell] = DRAW_CONFLICT_COLOR;
         }
 
         // Otherwise average the colour of each possible pattern
@@ -595,58 +631,85 @@ void wave_state_update_texture(WaveState *wave_state)
 
 int wave_state_collapse(WaveState *wave_state)
 {
-    for (size_t i = 0; i < wave_state->width * wave_state->height; ++i)
-    {
-        wave_state->cell_states[i].is_visited = 0;
-    }
-
     // Grab the non-collapsed cell with the lowest entropy
-    int best_cell_state_index = wave_state_get_best_cell(wave_state);
+    int best_cell_index = wave_state_get_best_cell(wave_state);
 
     // If no cell is returned then all are collapsed the wave is successful
-    if (best_cell_state_index < 0)
+    if (best_cell_index < 0)
     {
-        printf("Completed due to no cells available\n");
-        return false;
+        printf("Completed due to all cells collapsed\n");
+        return 1;
     }
 
-    // Reduce the options of the best cell to a single random pattern
-    CellState *best_cell = &wave_state->cell_states[best_cell_state_index];
-    size_t chosen_pattern_index = rand() % best_cell->choice_count;
-    best_cell->choices[0] = best_cell->choices[chosen_pattern_index];
-    best_cell->choice_count = 1;
-
-    // Propogate the entropy reduction between neighbours in the wave
-    if (!wave_state_propogate_entropy(wave_state, best_cell_state_index, 0))
+    // Copy all of the possible choices
+    CellState *best_cell = &wave_state->cell_states[best_cell_index];
+    size_t *remaining_choices = malloc(best_cell->choice_count * sizeof(size_t));
+    size_t remaining_choice_count = best_cell->choice_count;
+    for (size_t i = 0; i < best_cell->choice_count; ++i)
     {
-        printf("Completed due to conflict\n");
-        return false;
+        remaining_choices[i] = best_cell->choices[i];
     }
 
-    // Check if any cells are collapsed
-    for (size_t i = 0; i < wave_state->width * wave_state->height; ++i)
+    // While there are possible choices
+    bool success = false;
+    while (remaining_choice_count > 0)
     {
-        if (!wave_state->cell_states[i].is_collapsed && wave_state->cell_states[i].choice_count == 1)
+        // Pick one at random and remove from the list
+        size_t choice = rand() % remaining_choice_count;
+        best_cell->choices[0] = remaining_choices[choice];
+        best_cell->choice_count = 1;
+        best_cell->is_changed = true;
+        remaining_choices[choice] = remaining_choices[remaining_choice_count - 1];
+        remaining_choice_count--;
+
+        // Propogate the entropy reduction between neighbours in the wave
+        success = wave_state_propogate_entropy(wave_state, best_cell_index, 0);
+
+        // Successfull so mark as collapsed and exit
+        if (success)
         {
-            wave_state->cell_states[i].is_collapsed = true;
+            best_cell->is_collapsed = true;
+            break;
+        }
 
-            // TODO: Remove
-            size_t x = i % wave_state->width;
-            size_t y = i / wave_state->width;
-            if (x == 4 && y == 9)
+        // There was a conflict so reset all the states back to the stable state0
+        else
+        {
+            for (size_t i = 0; i < wave_state->width * wave_state->height; ++i)
             {
-                printf("Collapsing (%lld, %lld) to %lld\n", x, y, wave_state->cell_states[i].choices[0]);
+                wave_state->cell_states[i].is_visited = false;
+                cell_state_reset_to_stable(&wave_state->cell_states[i]);
             }
         }
     }
 
-    return true;
+    free(remaining_choices);
+
+    // None of the choices were successful
+    if (!success)
+    {
+        printf("Completed due to none of the choices having no conflicts\n");
+        return -1;
+    }
+
+    // There was a successfull choice so save the new stable state configuration
+    wave_state->collapse_counter++;
+
+    for (size_t i = 0; i < wave_state->width * wave_state->height; ++i)
+    {
+        wave_state->cell_states[i].is_visited = false;
+        cell_state_save_as_stable(&wave_state->cell_states[i]);
+    }
+
+    return 0;
 }
 
 void wave_state_draw(WaveState *wave_state)
 {
+    wave_state_update_texture(wave_state);
+
     // Draw the output wave state
-    size_t draw_size = (SCREEN_HEIGHT * 0.75);
+    size_t draw_size = (SCREEN_WIDTH * 0.8);
     size_t draw_scale = draw_size / wave_state->height;
     Vector2 draw_pos = {
         SCREEN_WIDTH / 2 - draw_size / 2,
@@ -655,21 +718,23 @@ void wave_state_draw(WaveState *wave_state)
     DrawTextureEx(wave_state->texture, draw_pos, 0.0, draw_scale, WHITE);
 
     // Draw the number of states on each cell
-    for (size_t y = 0; y < wave_state->height; ++y)
+    if (DRAW_CELL_COUNT)
     {
-        for (size_t x = 0; x < wave_state->width; ++x)
+        for (size_t y = 0; y < wave_state->height; ++y)
         {
-            size_t cell = x + y * wave_state->width;
-            size_t count = wave_state->cell_states[cell].choice_count;
-
-            if (count == 0)
+            for (size_t x = 0; x < wave_state->width; ++x)
             {
-                DrawText("!!!", draw_pos.x + x * draw_scale + 10, draw_pos.y + y * draw_scale + 10, 20, LIGHTGRAY);
-            }
+                size_t cell = x + y * wave_state->width;
+                size_t count = wave_state->cell_states[cell].choice_count;
 
-            else if (!wave_state->cell_states[cell].is_collapsed)
-            {
-                DrawText(TextFormat("%i", count), draw_pos.x + x * draw_scale + 10, draw_pos.y + y * draw_scale + 10, 10, LIGHTGRAY);
+                if (count == 0)
+                {
+                    DrawText("!!!", draw_pos.x + x * draw_scale + 10, draw_pos.y + y * draw_scale + 10, 20, LIGHTGRAY);
+                }
+                else if (!wave_state->cell_states[cell].is_collapsed)
+                {
+                    DrawText(TextFormat("%i", count), draw_pos.x + x * draw_scale + 10, draw_pos.y + y * draw_scale + 10, 10, LIGHTGRAY);
+                }
             }
         }
     }
@@ -681,45 +746,58 @@ int main()
 {
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Overlapping WFC");
-    srand(2);
+    SetTargetFPS(LIMIT_FPS);
 
-    if (LIMIT_FPS)
+    if (RAND_SEED != -1)
     {
-        SetTargetFPS(60);
+        srand(RAND_SEED);
     }
 
+    // Initialize the WFC pattern set and state
     PatternSet pattern_set;
     WaveState wave_state;
 
     pattern_set_init_from_image(&pattern_set, SAMPLE_PATH);
     wave_state_init(&wave_state, &pattern_set);
 
-    int is_finished = 0;
+    int wfc_res = 0;
+    float wfc_update_avg = 0;
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
-
         ClearBackground(RAYWHITE);
 
-        if (IsKeyPressed(KEY_SPACE))
+        // Each draw frame run the WFC algorithm as much as possible
+        // Allocate 0.01 seconds to the rest of the frame (to keep at LIMIT_FPS)
+        double start = GetTime();
+        double current = GetTime();
+        size_t update_count = 0;
+        while (wfc_res == 0 && (current - start) < (1.0 / LIMIT_FPS - 0.01))
+        {
+            wfc_res = wave_state_collapse(&wave_state);
+            current = GetTime();
+            update_count++;
+        }
+
+        // Update the average update count
+        wfc_update_avg = (wfc_update_avg * 0.9) + (update_count * 0.1);
+
+        // Reset on space or on conflict
+        if (IsKeyPressed(KEY_SPACE) || (RESTART_ON_CONFLICT && wfc_res == -1))
         {
             wave_state_destroy(&wave_state);
             wave_state_init(&wave_state, &pattern_set);
-            is_finished = false;
-        }
-
-        if (!is_finished)
-        {
-            is_finished = !wave_state_collapse(&wave_state);
-            wave_state_update_texture(&wave_state);
+            wfc_res = 0;
         }
 
         wave_state_draw(&wave_state);
 
         DrawFPS(10, 10);
-        DrawText(is_finished ? "Complete" : "Incomplete", 10, 30, 20, BLACK);
-
+        DrawText(wfc_res == 0 ? "Incomplete" : (wfc_res == -1 ? "Failed" : "Complete"), 10, 30, 20, BLACK);
+        DrawText(TextFormat("Collapses: %i", wave_state.collapse_counter), 10, 50, 20, BLACK);
+        DrawText(TextFormat("Updates: %f", wfc_update_avg), 10, 70, 20, BLACK);
+        DrawText("Press [SPACE] to restart", 10, 90, 20, BLACK);
         EndDrawing();
     }
 
