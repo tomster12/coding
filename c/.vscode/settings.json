@@ -8,6 +8,11 @@
         "rlgl.h": "c",
         "listener_thread.h": "c",
         "*.m": "c",
-        "variant": "c"
+        "variant": "c",
+        "math.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "stdbool.h": "c",
+        "wfc.h": "c"
     }
 }
