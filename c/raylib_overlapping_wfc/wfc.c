@@ -120,7 +120,7 @@ static bool pattern_can_overlap(PatternSet *pattern_set, size_t index_a, size_t 
     return true;
 }
 
-static void pattern_set_init_from_image(PatternSet *pattern_set, const char *input_image_path, size_t pattern_dim)
+static void pattern_set_init(PatternSet *pattern_set, const char *input_image_path, size_t pattern_dim)
 {
     // Read source image colours
     Image source_image = LoadImage(input_image_path);
@@ -492,7 +492,7 @@ static void wave_state_update_texture(WaveState *wave_state)
 void wave_state_init(WaveState *wave_state, const char *input_image_path, size_t width, size_t height, size_t pattern_dim, size_t max_depth)
 {
     // Setup a new wave data output with the given pattern set
-    pattern_set_init_from_image(&wave_state->pattern_set, input_image_path, pattern_dim);
+    pattern_set_init(&wave_state->pattern_set, input_image_path, pattern_dim);
 
     wave_state->width = width;
     wave_state->height = height;

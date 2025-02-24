@@ -18,7 +18,7 @@ int main()
     size_t output_width = 64;
     size_t output_height = 64;
     size_t pattern_dim = 3;
-    size_t max_depth = 1024;
+    size_t max_depth = 128;
     wave_state_init(&wave_state, "../samples/Flowers.png", output_width, output_height, pattern_dim, max_depth);
 
     // Main draw and update loop
