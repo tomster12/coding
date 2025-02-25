@@ -13,6 +13,13 @@
         "stdlib.h": "c",
         "stdio.h": "c",
         "stdbool.h": "c",
-        "wfc.h": "c"
+        "wfc.h": "c",
+        "sdl.h": "c",
+        "sdl_main.h": "c",
+        "nuklear_sdl.h": "c",
+        "nuklear.h": "c",
+        "stdarg.h": "c",
+        "assert.h": "c",
+        "string.h": "c"
     }
 }

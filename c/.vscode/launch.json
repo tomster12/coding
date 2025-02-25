@@ -1,17 +1,21 @@
 {
     "configurations": [
+
         {
-            "name": "Debug build/main.exe",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${fileDirname}/build/main.exe",
-            "stopAtEntry": false,
+            "name": "Debug build/file.exe",
+            "program": "${fileDirname}/build/${fileBasenameNoExtension}.exe",
             "cwd": "${fileDirname}",
+            "args": [],
             "environment": [],
-            "externalConsole": false,
+            
+            "request": "launch",
+            "type": "cppdbg",
             "MIMode": "gdb",
-            // "miDebuggerPath": "C:/Users/tombu/Files/Software/w64devkit/bin/gdb.exe",
+            "stopAtEntry": false,
+            "externalConsole": false,
+            
             "miDebuggerPath": "D:/Files/Software/w64devkit/bin/gdb.exe",
+
             "setupCommands": [
                 {
                     "description": "Enable pretty-printing for gdb",

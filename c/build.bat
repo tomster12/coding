@@ -93,12 +93,18 @@ if not defined target_dir set "target_dir=."
 set "output_dir=%target_dir%%output%"
 set "output_exe=%output_dir%\%target_name_noext%.exe"
 
-:: Check for compiler flags in the first line of the target file
+:: Construct build command
+set "build_command=%compiler% %target_name% -o "%output_exe%" !compiler_flags!"
+
+:: Check for compiler flags in the target file
 set "compiler_flags="
 for /f "usebackq tokens=*" %%A in ("%target%") do (
     set "line=%%A"
-    if "!line:~0,10!"=="// build: " ( set "compiler_flags=!line:~10!" )
-    goto exit_flag_search
+    if "!line:~0,10!"=="// build: " (
+        set "compiler_flags=!compiler_flags! !line:~10!"
+    ) else (
+        goto exit_flag_search
+    )
 )
 :exit_flag_search
 
