@@ -8,9 +8,9 @@
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64",
             "mergeConfigurations": false,
-            "compilerPath": "D:/Files/Software/w64devkit/bin/gcc.exe",
+            "compilerPath": "C:/Users/tombu/Files/Software/w64devkit/bin/gcc.exe",
             "browse": {
-                "path": ["d:/Files/Coding/c/**", "d:/Files/Coding/c"],
+                "path": ["C:/Users/tombu/Files/Coding/c/**", "C:/Users/tombu/Files/Coding/c"],
                 "limitSymbolsToIncludedHeaders": true
             },
             "includePath": ["${workspaceFolder}/**"]
