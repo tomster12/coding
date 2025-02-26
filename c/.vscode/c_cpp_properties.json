@@ -2,18 +2,20 @@
     "configurations": [
         {
             "name": "win32",
-            "defines": ["_DEBUG", "UNICODE", "_UNICODE"],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE"
+            ],
             "windowsSdkVersion": "10.0.22621.0",
             "cStandard": "c17",
             "cppStandard": "c++17",
             "intelliSenseMode": "windows-gcc-x64",
             "mergeConfigurations": false,
-            "compilerPath": "C:/Users/tombu/Files/Software/w64devkit/bin/gcc.exe",
-            "browse": {
-                "path": ["C:/Users/tombu/Files/Coding/c/**", "C:/Users/tombu/Files/Coding/c"],
-                "limitSymbolsToIncludedHeaders": true
-            },
-            "includePath": ["${workspaceFolder}/**"]
+            "compilerPath": "${env:GCC_PATH}",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ]
         }
     ],
     "version": 4
