@@ -3,7 +3,8 @@
         "charconv": "cpp",
         "cstdio": "c",
         "stdlib.h": "c",
-        "algorithm": "c"
+        "algorithm": "c",
+        "stdio.h": "c"
     },
     "java.dependency.packagePresentation": "hierarchical",
     "C_Cpp.default.compilerPath": "D:/Files/Coding/software/MinGW/bin/gcc.exe"

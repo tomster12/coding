@@ -20,6 +20,9 @@
         "nuklear.h": "c",
         "stdarg.h": "c",
         "assert.h": "c",
-        "string.h": "c"
+        "string.h": "c",
+        "nuklear_sdl_gl3.h": "c",
+        "sdl_opengl.h": "c",
+        "nuklear_sdl_gl2.h": "c"
     }
 }
