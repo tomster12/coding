@@ -23,6 +23,8 @@
         "string.h": "c",
         "nuklear_sdl_gl3.h": "c",
         "sdl_opengl.h": "c",
-        "nuklear_sdl_gl2.h": "c"
+        "nuklear_sdl_gl2.h": "c",
+        "time.h": "c",
+        "stdint.h": "c"
     }
 }

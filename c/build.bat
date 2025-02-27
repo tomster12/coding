@@ -1,17 +1,17 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: --------------------------------------------------------------------------------------------
+:: --------------------------------------------------------------------------------------------------------------
 ::
 ::                           Simple build script for C projects
 ::
-:: --------------------------------------------------------------------------------------------
+:: --------------------------------------------------------------------------------------------------------------
 ::
-::   Acts as a wrapper around "gcc file.c -o build/file.exe <FLAGS>".
-::   <FlAGS> are parsed from the first line of the target file (e.g. // build: <FLAGS>)
-::   This allows multiple .c files (unity build), lib include / link, and other compiler flags.
+::   Acts as a wrapper around "gcc file.c -o build/file.exe <FLAGS>" with additional features
+::   <FlAGS> are parsed from the first consecutive of the target file containing // build: <FLAGS>
+::   Intended to be used to build multiple c files, include 3rd party libraries, and run the exe in 1 command
 ::
-:: --------------------------------------------------------------------------------------------
+:: --------------------------------------------------------------------------------------------------------------
 ::
 :: Usage: build.bat <target_file> [options]
 :: Options:
@@ -22,7 +22,7 @@ setlocal enabledelayedexpansion
 ::   -clear           : Clear the console before building
 ::   -help            : Display this help message
 ::
-:: --------------------------------------------------------------------------------------------
+:: --------------------------------------------------------------------------------------------------------------
 
 :: Default values for parameters
 set "output=build"
