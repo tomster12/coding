@@ -1,19 +1,19 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: --------------------------------------------------------------------------------------------------------------
+:: ----------------------------------------------------------------------------
 ::
-::                           Simple build script for C projects
+::                    Simple build script for C projects
 ::
-:: --------------------------------------------------------------------------------------------------------------
+:: ----------------------------------------------------------------------------
 ::
-::   Acts as a wrapper around "gcc file.c -o build/file.exe <FLAGS>" with additional features
-::   <FlAGS> are parsed from the first consecutive of the target file containing // build: <FLAGS>
-::   Intended to be used to build multiple c files, include 3rd party libraries, and run the exe in 1 command
+::   Effectively a wrapper around `gcc <file> -o build/<file>.exe <flags>`
+::   <flags> are parsed from the target file: // build: <flags>
+::   Useful for multiple c files, linking / including, and running in 1 command
 ::
-:: --------------------------------------------------------------------------------------------------------------
+:: ----------------------------------------------------------------------------
 ::
-:: Usage: build.bat <target_file> [options]
+:: Usage: build.bat <file> [options]
 :: Options:
 ::   -output <dir>    : Specify output directory (default: build)
 ::   -compiler <name> : Specify compiler to use (default: gcc)
@@ -22,9 +22,9 @@ setlocal enabledelayedexpansion
 ::   -clear           : Clear the console before building
 ::   -help            : Display this help message
 ::
-:: --------------------------------------------------------------------------------------------------------------
+:: ----------------------------------------------------------------------------
 
-:: Default values for parameters
+:: Parse arguments with defaults
 set "output=build"
 set "compiler=gcc"
 set "run="
@@ -32,18 +32,21 @@ set "silent="
 set "clear="
 set "help="
 
-:: Parse arguments
-:parse_args
-if "%~1"=="" goto check_help
-if "%~1"=="-output" (set "output=%~2" & shift & shift & goto parse_args)
-if "%~1"=="-compiler" (set "compiler=%~2" & shift & shift & goto parse_args)
-if "%~1"=="-run" (set "run=true" & shift & goto parse_args)
-if "%~1"=="-silent" (set "silent=true" & shift & goto parse_args)
-if "%~1"=="-clear" (set "clear=true" & shift & goto parse_args)
-if "%~1"=="-help" (set "help=true" & shift & goto parse_args)
+:start_parse_args
+if "%~1"=="" goto end_parse_args
+if "%~1"=="-help" (set "help=true" & goto check_help)
+if "%~1"=="-output" (set "output=%~2" & shift & shift & goto start_parse_args)
+if "%~1"=="-compiler" (set "compiler=%~2" & shift & shift & goto start_parse_args)
+if "%~1"=="-run" (set "run=true" & shift & goto start_parse_args)
+if "%~1"=="-silent" (set "silent=true" & shift & goto start_parse_args)
+if "%~1"=="-clear" (set "clear=true" & shift & goto start_parse_args)
 set "target=%~1"
 shift
-goto parse_args
+goto start_parse_args
+:end_parse_args
+
+:: [Optional] Clear console
+if defined clear cls
 
 :: [Optional] Print help message
 :check_help
@@ -61,16 +64,11 @@ if defined help (
     exit /b 0
 )
 
-:: Ensure target is specified
+:: Ensure target is specified and exists
 if not defined target (
     echo [error] No target file specified. See -help for usage.
     exit /b 1
 )
-
-:: [Optional] Clear console
-if defined clear cls
-
-:: Ensure target file exists
 if not exist "%target%" (
     echo [error] File not found: "%target%". See -help for usage.
     exit /b 1
@@ -83,7 +81,7 @@ if errorlevel 1 (
     exit /b 1
 )
 
-:: Resolve target and output paths
+:: Resolve target directory, output directory, and output executable name
 for %%A in ("%target%") do (
     set "target_dir=%%~dpA"
     set "target_name=%%~nxA"
@@ -93,10 +91,7 @@ if not defined target_dir set "target_dir=."
 set "output_dir=%target_dir%%output%"
 set "output_exe=%output_dir%\%target_name_noext%.exe"
 
-:: Construct build command
-set "build_command=%compiler% %target_name% -o "%output_exe%" !compiler_flags!"
-
-:: Check for compiler flags in the target file
+:: Extract build flags from subsequent lines in the target file
 set "compiler_flags="
 for /f "usebackq tokens=*" %%A in ("%target%") do (
     set "line=%%A"
@@ -109,32 +104,29 @@ for /f "usebackq tokens=*" %%A in ("%target%") do (
 :exit_flag_search
 
 :: Construct build command
-set "build_command=%compiler% %target_name% -o "%output_exe%" !compiler_flags!"
+set "build_command=%compiler% %target_name% -o "%output_exe%" %compiler_flags%"
 
 :: Create output directory
 if not exist "%output_dir%" mkdir "%output_dir%"
 
-:: Run and time the build command in the target directory
+:: Run and time the build command from the target file directory
 for /f "tokens=1-4 delims=:.," %%T in ("%time%") do ( set "start_h=%%T" && set "start_m=%%U" && set "start_s=%%V" && set "start_ms=%%W" )
-
 pushd "%target_dir%"
 if not defined silent echo [run] !build_command!
 %build_command%
 set "exit_code=%errorlevel%"
 popd
-
 for /f "tokens=1-4 delims=:.," %%T in ("%time%") do ( set "end_h=%%T" && set "end_m=%%U" && set "end_s=%%V" && set "end_ms=%%W" )
 
-set /a "start_total=(start_h*3600000) + (start_m*60000) + (start_s*1000) + start_ms"
-set /a "end_total=(end_h*3600000) + (end_m*60000) + (end_s*1000) + end_ms"
-if %end_total% LSS %start_total% set /a "end_total+=86400000"
-set /a "build_time=end_total-start_total"
-
-:: Check build result
+:: Check and log build command result
 if not "%exit_code%"=="0" (
     echo [error] Build failed: %exit_code%
     exit /b 1
 )
+set /a "start_total=(start_h*3600000) + (start_m*60000) + (start_s*1000) + start_ms"
+set /a "end_total=(end_h*3600000) + (end_m*60000) + (end_s*1000) + end_ms"
+if %end_total% LSS %start_total% set /a "end_total+=86400000"
+set /a "build_time=end_total-start_total"
 if not defined silent echo [log] Build success: %output_exe% ^(took %build_time% ms^)
 
 :: [Optional] Run the executable
