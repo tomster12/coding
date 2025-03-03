@@ -1,11 +1,10 @@
-# Definetly do not include top level folders
+# Explicit hidden files
 /exclude/
 /software/
 /github/
 
-# Submodules
+# My submodule syntax
 /**/[Gg]it*/
-/c/libs/raylib-src/
 
 # Build byproducts
 _site/
@@ -16,21 +15,22 @@ _site/
 /c++/**/x64/
 /c++/**/Release/
 /c++/**/Debug/
-/c/**/build/
 /c/**/external/
 /**/node_modules/
 /**/.parcel-cache/
-/**/dist/
-/general/**/build/
 /general/docker/docker_network/mongodb/
-/rust/**/target/
-/processing/**/build/
-/unity/!Builds/
 
-# Hidden local files
+# Build byproducts catch-all (these could be a bit over reaching)
+/**/target/
+/**/dist/
+/**/bin/
+/**/build/
+
+# Local files
 token
 
 # Unity Projects
+/unity/!Builds/
 /unity/**/[Ll]ibrary/
 /unity/**/[Tt]emp/
 /unity/**/[Oo]bj/
