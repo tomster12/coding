@@ -4,18 +4,12 @@
 
 ## General
 
-An interpreter first walks "up a mountain" (frontend):
+An interpreter first walks "up a mountain" (frontend), then walks across (middle end), then walks "down the mountain" (backend):
 
-- Characters -> tokens (scanner / lexer, regular language, lexical analysis)
-- Tokens -> AST (parser, context-free grammar, syntactic analysis)
-
-Then walks across (middle end):
-
+- Characters -> tokens: scanner / lexer, regular language, lexical analysis
+- Tokens -> AST: parser, context-free grammar, syntactic analysis
 - Optimize the code with series of well researched methods
 - Potentially convert to an Intermediate Language for modularity
-
-Then walks "down the mountain" (backend):
-
 - Convert to bytecode (effectively another IL) if running in a language VM
 - Convert to machine code if targetting a specific architecture
 
@@ -35,7 +29,7 @@ Languages have difficulty adding a row or column based on their paradigm:
 The visitor pattern helps alleviate this for object oriented languages, and
 feels like black magic with compile time polymorphism.
 
-## Interesting
+## Interesting Ideas
 
 An interpreter is effectively a compiler that runs the code as well
 
