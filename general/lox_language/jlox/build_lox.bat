@@ -1,0 +1,1 @@
+javac -d .\bin\ .\src\lox\*.java
