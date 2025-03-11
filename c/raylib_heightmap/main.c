@@ -6,25 +6,37 @@
 #include <stdlib.h>
 #include "raylib.h"
 
+Shader shader;
+int shader_loc_time;
+int shader_loc_resolution;
+float time;
+Vector2 resolution;
+
+float time;
+
 int main(void)
 {
+    // Setup raylib window
     SetTraceLogLevel(LOG_WARNING);
     InitWindow(800, 800, "Heightmap");
     SetTargetFPS(60);
 
-    // Main variables
-    float time = 0.0f;
+    // Initialize variables
+    time = 0.0f;
+    resolution = (Vector2){ (float)GetScreenWidth(), (float)GetScreenHeight() };
 
-    // Load and setup shader
-    Shader shader = LoadShader(0, TextFormat("../shader.fs", 330));
-    int shader_loc_time = GetShaderLocation(shader, "time");
+    // Load shader
+    shader = LoadShader(TextFormat("../shader.vs", 330), TextFormat("../shader.fs", 330));
+    shader_loc_time = GetShaderLocation(shader, "time");
+    shader_loc_resolution = GetShaderLocation(shader, "resolution");
+    SetShaderValue(shader, shader_loc_time, &time, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(shader, shader_loc_resolution, &resolution, SHADER_UNIFORM_VEC2);
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
-        ClearBackground(RAYWHITE);
 
-        // Set shader uniform values
+        // Increment time in shader
         time += GetFrameTime();
         SetShaderValue(shader, shader_loc_time, &time, SHADER_UNIFORM_FLOAT);
 
