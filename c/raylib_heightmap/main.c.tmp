@@ -1,0 +1,91 @@
+// build: -Wall -Werror -O3
+// build: -I../libs/raylib/include -L../libs/raylib/lib
+// build: -lraylib -lopengl32 -lgdi32 -lwinmm
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include "raylib.h"
+
+Shader sh_heightmap;
+RenderTexture2D rt_heightmap;
+// Texture2D tex_voronoi;
+// Shader sh_shadow;
+
+Vector2 resolution = { 800.0f, 800.0f };
+Vector2 map_pos = { 0.0f, -0.1f };
+// Vector3 sunSetCol = { 0.5f, 0.1f, 0.1f };
+// Vector3 midDayCol = { 1.0f, 1.0f, 0.9f };
+// Vector3 sun = { 0.0f, 0.5f, 1.0f };
+// float waterLevel = 0.3f;
+
+void initialize_heightmap(void);
+
+int main(void)
+{
+    SetTraceLogLevel(LOG_WARNING);
+    InitWindow((int)resolution.x, (int)resolution.y, "Heightmap");
+    SetTargetFPS(60);
+
+    sh_heightmap = LoadShader(TextFormat("../shader.vs", 330), TextFormat("../heightmap.fs", 300));
+    rt_heightmap = LoadRenderTexture((int)resolution.x, (int)resolution.y);
+    initialize_heightmap();
+    // sh_shadow = LoadShader(TextFormat("../shadow.fs", 300), TextFormat("../shadow.vs", 330));
+    // tex_voronoi = LoadTexture("voronoi.jpeg");
+
+    while (!WindowShouldClose())
+    {
+        // Update variables
+        // sun.x = (float)GetMouseX() / resolution.x;
+        // sun.y = (float)GetMouseY() / resolution.y;
+        // float distSq = pow(sun.x - 0.5f, 2) + pow(sun.y - 0.5f, 2);
+        // float sunD = sqrt(distSq);
+        // sun.z = Clamp(sqrt(1.0f - distSq), 0.0f, 1.0f);
+        // float amb = 1.0f - distSq;
+        // Vector3 col = Lerp(sunSetCol, midDayCol, 1.0f - distSq);
+
+        // Draw shadow quad with correct values
+        // BeginDrawing();
+        // ClearBackground(RAYWHITE);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "tex_voronoi"), &tex_voronoi, SHADER_UNIFORM_SAMPLER2D);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "heightMod"), &(float){1.0f}, SHADER_UNIFORM_FLOAT);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "heightMap"), &heightMap.texture, SHADER_UNIFORM_SAMPLER2D);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "sunPos"), &sun, SHADER_UNIFORM_VEC3);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "pix"), (float[]){1.0f / resolution.x, 1.0f / resolution.y, 0.0f}, SHADER_UNIFORM_VEC3);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "waterLevel"), &waterLevel, SHADER_UNIFORM_FLOAT);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "ambientStrength"), &(float){amb * 0.1f}, SHADER_UNIFORM_FLOAT);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "ambientColour"), &col, SHADER_UNIFORM_VEC3);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "lightColour"), &col, SHADER_UNIFORM_VEC3);
+        // SetShaderValue(sh_shadow, GetShaderLocation(sh_shadow, "res"), (float[]){resolution.x / resolution.y, 1.0f}, SHADER_UNIFORM_VEC2);
+        // BeginShaderMode(sh_shadow);
+        // DrawRectangle(0, 0, (int)resolution.x, (int)resolution.y, WHITE);
+        // EndShaderMode();
+
+        // Draw heightmap
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawTextureRec(rt_heightmap.texture, (Rectangle){0, 0, resolution.x, resolution.y}, (Vector2){0, 0}, WHITE);
+        EndDrawing();
+    }
+
+    UnloadShader(sh_heightmap);
+    UnloadRenderTexture(rt_heightmap);
+    // UnloadShader(sh_shadow);
+    // UnloadTexture(tex_voronoi);
+
+    CloseWindow();
+    return 0;
+}
+
+void initialize_heightmap(void)
+{
+    // Draw with sh_heightmap onto the heightmap render texture
+    BeginTextureMode(rt_heightmap);
+    ClearBackground(RAYWHITE);
+    BeginShaderMode(sh_heightmap);
+    SetShaderValue(sh_heightmap, GetShaderLocation(sh_heightmap, "mapPos"), &map_pos, SHADER_UNIFORM_VEC2);
+    SetShaderValue(sh_heightmap, GetShaderLocation(sh_heightmap, "res"), (float[]){resolution.x / resolution.y, 1.0f}, SHADER_UNIFORM_VEC2);
+    DrawRectangle(0, 0, (int)resolution.x, (int)resolution.y, WHITE);
+    EndShaderMode();
+    EndTextureMode();
+}

@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "*.jlox": "bat",
+        "*.lox": "ruby",
+        "raylib.h": "c"
+    }
+}

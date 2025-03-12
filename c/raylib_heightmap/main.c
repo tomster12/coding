@@ -4,53 +4,61 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include "raylib.h"
 
-Shader shader;
-int shader_loc_time;
-int shader_loc_resolution;
-float time;
-Vector2 resolution;
+const int screen_width = 800;
+const int screen_height = 800;
+float screen_resolution[2] = {screen_height, screen_width};
+float world_scale = 5.0f;
 
-float time;
+Shader heightmap_sh;
+RenderTexture2D heightmap_rt;
+
+void draw_heightmap(void);
 
 int main(void)
 {
-    // Setup raylib window
     SetTraceLogLevel(LOG_WARNING);
-    InitWindow(800, 800, "Heightmap");
+    InitWindow(screen_width, screen_height, "Heightmap");
     SetTargetFPS(60);
 
-    // Initialize variables
-    time = 0.0f;
-    resolution = (Vector2){ (float)GetScreenWidth(), (float)GetScreenHeight() };
-
-    // Load shader
-    shader = LoadShader(TextFormat("../shader.vs", 330), TextFormat("../shader.fs", 330));
-    shader_loc_time = GetShaderLocation(shader, "time");
-    shader_loc_resolution = GetShaderLocation(shader, "resolution");
-    SetShaderValue(shader, shader_loc_time, &time, SHADER_UNIFORM_FLOAT);
-    SetShaderValue(shader, shader_loc_resolution, &resolution, SHADER_UNIFORM_VEC2);
+    heightmap_sh = LoadShader(TextFormat("../shaders/shader.vs", 330), TextFormat("../shaders/heightmap.fs", 330));
+    heightmap_rt = LoadRenderTexture(screen_width, screen_height);
+    draw_heightmap();
 
     while (!WindowShouldClose())
     {
         BeginDrawing();
-
-        // Increment time in shader
-        time += GetFrameTime();
-        SetShaderValue(shader, shader_loc_time, &time, SHADER_UNIFORM_FLOAT);
-
-        // Draw rect with shader
-        BeginDrawing();
-        ClearBackground(BLACK);
-        BeginShaderMode(shader);
-        DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), WHITE);
-        EndShaderMode();
-
+        DrawTexture(heightmap_rt.texture, 0, 0, WHITE);
         EndDrawing();
     }
 
-    UnloadShader(shader);
+    UnloadShader(heightmap_sh);
+    UnloadRenderTexture(heightmap_rt);
+
     CloseWindow();
     return 0;
+}
+
+void try_set_shader_value(Shader* shader, const char* name, const void* value, int type)
+{
+    int loc = GetShaderLocation(*shader, name);
+    if (loc == -1) TraceLog(LOG_WARNING, "Could not find uniform: %s", name);
+    SetShaderValue(*shader, loc, value, type);
+}
+
+void draw_heightmap(void)
+{
+    try_set_shader_value(&heightmap_sh, "screenResolution", &screen_resolution, SHADER_UNIFORM_VEC2);
+    try_set_shader_value(&heightmap_sh, "worldScale", &world_scale, SHADER_UNIFORM_FLOAT);
+
+    BeginTextureMode(heightmap_rt);
+    BeginShaderMode(heightmap_sh);
+
+    ClearBackground(RAYWHITE);
+    DrawRectangle(0, 0, heightmap_rt.texture.width, heightmap_rt.texture.height, WHITE);
+
+    EndShaderMode();
+    EndTextureMode();
 }
