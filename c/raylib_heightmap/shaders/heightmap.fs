@@ -1,20 +1,17 @@
 #version 330
 
 in vec2 posScreen;
-uniform vec2 screenResolution;
-uniform float worldScale;
 out vec4 finalColor;
+uniform vec2 screenRatio;
 
-#define HEIGHT_NOISE_SCALE 1.1
-#define HEIGHT_NOISE_POWER 1.5
-#define HEIGHT_NOISE_POWER 1.5
-#define HEIGHT_NOISE_GRADIENT 1.3
-
-#define FBM_OCTAVE_COUNT 5
-#define FBM_INITIAL_AMPLITUDE 0.5
-#define FBM_INITIAL_AMPLITUDE_SCALE 0.5
-#define FBM_OCTAVE_SCALE 2.0
-#define FBM_OCTAVE_SHIFT 100.0
+const float heightNoiseScale = 6.0;
+const float heightMountainScale = 1.1;
+const float heightMountainPower = 1.6;
+const int fbmOctaveCount = 5;
+const float fbmInitialAmplitude = 0.5;
+const float fbmInitialAmplitudeScale = 0.5;
+const float fbmOctaveScale = 2.0;
+const float fbmOctaveShift = 100.0;
 
 float hash(vec2 p) {
   // 2D hash from: https://www.shadertoy.com/view/4dS3Wd
@@ -40,56 +37,47 @@ float noise(vec2 x) {
 float fbm(vec2 x) {
   // Fractal Brownian Motion
   float value = 0.0;
-  float amplitude = FBM_INITIAL_AMPLITUDE;
+  float amplitude = fbmInitialAmplitude;
 
   // For each octave: grab noise, scale/rotate/shift sample position, then reduce amplitude
   mat2 octaveRot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
-  vec2 octaveShift = vec2(FBM_OCTAVE_SHIFT);
-  for(int i = 0; i < FBM_OCTAVE_COUNT; ++i) {
+  vec2 octaveShift = vec2(fbmOctaveShift);
+  for(int i = 0; i < fbmOctaveCount; ++i) {
     value += amplitude * noise(x);
-    x = octaveRot * x * FBM_OCTAVE_SCALE + octaveShift;
-    amplitude *= FBM_INITIAL_AMPLITUDE_SCALE;
+    x = octaveRot * x * fbmOctaveScale + octaveShift;
+    amplitude *= fbmInitialAmplitudeScale;
   }
 
   return value;
 }
 
-float getHeight(vec2 p) {
+float getHeight(vec2 pos) {
   // Sample FBM noise with scaled position
-  float n = fbm(p * worldScale);
+  float n = fbm(pos * heightNoiseScale);
 
   // Scale the noise to be more mountainous
-  n = pow(n * HEIGHT_NOISE_SCALE, HEIGHT_NOISE_POWER);
+  n = pow(n * heightMountainScale, heightMountainPower);
 
   // Gradient magnitude from centre
-  float d = length(p - vec2(0.5)) * 2.0;
-  return n * (HEIGHT_NOISE_GRADIENT - d);
+  float d = length(pos - vec2(0.5)) * 2.0;
+  return clamp(n * (1.0 - d), 0, 1);
+
+  return n;
 }
 
-vec4 packHeight(float h) {
-  // Packs the height value (0-1) across 4 bytes of a vec4
+vec4 packHeight(float height) {
+  // Packs the height value (0 - 1) across vec4
   vec4 packedHeight = vec4(0.0);
-  h *= 4.0;
-  packedHeight.r = clamp(h - 3.0, 0.0, 1.0);
-  packedHeight.g = clamp(h - 2.0, 0.0, 1.0);
-  packedHeight.b = clamp(h - 1.0, 0.0, 1.0);
-  packedHeight.a = clamp(h, 0.0, 1.0);
+  height *= 4.0;
+  packedHeight.r = clamp(height - 3.0, 0.0, 1.0);
+  packedHeight.g = clamp(height - 2.0, 0.0, 1.0);
+  packedHeight.b = clamp(height - 1.0, 0.0, 1.0);
+  packedHeight.a = clamp(height, 0.0, 1.0);
   return packedHeight;
 }
 
-vec2 ratioCorrectScreenSpace(vec2 pos, vec2 res) {
-  // Convert a (0,0) -> (1,1) screen space to a ratio-corrected space
-  // E.g. if (width = height * 1.2) then (0,0) -> (1,0.833)
-  if (res.x > res.y) {
-    return vec2(pos.x, pos.y * res.y / res.x);
-  } else {
-    return vec2(pos.x * res.x / res.y, pos.y);
-  }
-}
-
 void main() {
-  vec2 pos = ratioCorrectScreenSpace(posScreen, screenResolution);
-  float h = getHeight(pos);
-  // finalColor = packHeight(h);
-  finalColor = vec4(h, h, h, 1.0);
+  vec2 pos = posScreen * screenRatio;
+  float height = getHeight(pos);
+  finalColor = packHeight(height);
 }

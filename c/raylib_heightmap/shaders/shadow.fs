@@ -1,11 +1,147 @@
-#version 300 es
-precision mediump float;
+#version 330
 
-in vec2 posTex;
+in vec2 posScreen;
 out vec4 finalColor;
+uniform vec2 screenRatio;
+uniform vec2 pixelSize;
+uniform sampler2D heightmap;
 
-uniform sampler2D heightMap;
-uniform sampler2D voronoiTex;
+#define HASH_M1 1597334677U
+#define HASH_M2 3812015801U
+float hash(vec2 p) {
+  // Hash function from: https://www.shadertoy.com/view/4dVBzz
+	uvec2 q = uvec2(p);
+	q *= uvec2(HASH_M1, HASH_M2);
+	uint n = q.x ^ q.y;
+	n = n * (n ^ (n >> 15));
+	return float(n) * (1.0/float(0xffffffffU));
+}
+
+float unpackHeight(vec4 h) {
+  // Unpack a vec4 into a height (0 - 1)
+  return (h.r + h.g + h.b + h.a) / 4.0;
+}
+
+float getHeightmapHeight(vec2 posScreen) {
+  return unpackHeight(texture(heightmap, posScreen));
+
+  /* TODO: Reimplement
+  // Get the height at a specific screen position
+  // This could be between pixels so we need to interpolate
+  vec2 res = 1./pix.xy;
+  vec2 p = pos * res;
+  vec2 lerpP = fract(p);
+  p = floor(p);
+  p *= pix.xy;
+  float tl = unpackHeight(texture(heightMap, p));
+  float bl = unpackHeight(texture(heightMap, p + pix.zy));
+  float tr = unpackHeight(texture(heightMap, p + pix.xz));
+  float br = unpackHeight(texture(heightMap, p + pix.xy));
+  float t = mix(tl, tr, lerpP.x);
+  float b = mix(bl, br, lerpP.x);
+  return mix(t, b, lerpP.y) * heightMod;
+  */
+}
+
+float getWaterNoise(vec2 pos) {
+  return 0.0;
+  
+  /* TODO: Reimplement
+  return 0.002 * (texture(voronoiTex, fract(pos * res * 8.)).r * 2. - 1.);
+  */
+}
+
+float getWaterHeight(vec2 posScreen) {
+  return 0.1;
+
+  /* TODO Reimplement
+  float t = millis/200000.;
+  float waveHeight = getWaterNoise(pos + t);
+  mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
+  waveHeight += getWaterNoise(pos * rot - vec2(t, 0.));
+  return waterLevel + waveHeight;
+  */
+}
+
+float getFinalHeight(vec2 posScreen) {
+  // Get the highest height at this position
+  return max(getHeightmapHeight(posScreen), getWaterHeight(posScreen));
+}
+
+void main() {
+  // Start raycast from surface of terrain
+  vec3 startPos = vec3(posScreen, getFinalHeight(posScreen));
+  vec3 currentPos = startPos;
+
+  finalColor = vec4(vec3(getFinalHeight(posScreen)), 1.0);
+}
+
+  /* TODO: Reimplement
+  float minStepSize = min(pix.x, pix.y);
+  
+  // Direction of raycast is towards the sun from centre of screen
+  vec3 sunDir = sunPos - vec3(0.5, 0.5, 0.);
+  vec3 stepDir = normalize(sunDir);
+    
+  float inShadow = 0.;
+  int n = 0;
+  for(int i = 1; i <= maxSteps; i ++) {    
+    n++;
+    // Check height at new location
+    float h = getHeight(p.xy);
+    if(h > p.z) {
+      // ray is inside the terrain
+      // therefore must be in shadow
+      inShadow = 1.;
+      break;
+    }
+    if(p.z > 1.) {
+      // above the heighest terrain level
+      // will not be in shadow
+      break;
+    }
+    
+    // Step towards the sun by dist to heightmap
+    p += stepDir * max(minStepSize, (p.z - h) * 0.05);
+  }
+  if(n == maxSteps) {
+    inShadow = 1.;
+  }
+
+  float rayDist = length(op - p);
+  
+  float shadowIntensity = inShadow * 0.5 * (1. - smoothstep(0., 0.7, rayDist));
+  
+  // calculate normal based on surrounding tiles
+  vec3 normal = getNormal(posTex);
+  float normalShadow = 1. - (dot(normal, stepDir) + 1.)/2.;
+  
+  // Add normal shadows into shadow variable
+  shadowIntensity = clamp(shadowIntensity * rayIntensity + normalShadow * normalIntensity, 0., 1.);
+  float lightStrength = 1. - shadowIntensity;
+  
+  vec3 ambient = clamp(ambientColour * ambientStrength, 0., 1.);
+  vec3 directional = clamp(lightColour * lightStrength, 0., 1.);
+
+  float terrainHeight = getHeightRaw(posTex);
+  float waterHeight = getWaterLevel(posTex);
+  float waterDepth =  waterHeight - terrainHeight;
+  vec3 sceneColour = getSceneColour(terrainHeight, waterDepth, waterHeight, normal);
+  
+  float isWater = step(0., waterDepth);
+  
+  vec3 viewDir = normalize(viewPos - op);
+  vec3 halfwayDir = normalize(sunDir + viewDir);
+  
+  float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.);
+  vec3 specular = (1. - inShadow) * isWater * specularStrength * spec * lightColour;
+  
+    
+  vec3 light = ambient + directional + specular;
+  
+  finalColor = vec4(light * sceneColour, 1.);
+}
+
 uniform float heightMod;
 uniform float millis;
 uniform float ambientStrength;
@@ -15,7 +151,6 @@ uniform vec3 sunPos;
 uniform vec3 pix;
 uniform float waterLevel;
 uniform vec2 res;
-
 const int maxSteps = 200;
 const float rayIntensity = 0.8;
 const float normalIntensity = 0.6;
@@ -33,62 +168,6 @@ const vec3 colourForest = vec3(0.278,0.463,0.271);
 const vec3 colourStone = vec3(0.427,0.463,0.529);
 const vec3 colourSlate = vec3(0.518,0.553,0.604);
 const vec3 colourSnow = vec3(0.824,0.878,0.871);
-
-// Hash function from: https://www.shadertoy.com/view/4dVBzz
-#define M1 1597334677U     //1719413*929
-#define M2 3812015801U     //140473*2467*11
-float hash(vec2 p) {
-	uvec2 q = uvec2(p);
-	q *= uvec2(M1, M2);
-	uint n = q.x ^ q.y;
-	n = n * (n ^ (n >> 15));
-	return float(n) * (1.0/float(0xffffffffU));
-}
-
-float unpackHeight(vec4 h) {
-  return (h.r + h.g + h.b + h.a)/4.;
-}
-
-float getHeightRaw(vec2 pos) {
-  vec2 res = 1./pix.xy;
-  
-  vec2 p = pos * res;
-  
-  vec2 lerpP = fract(p);
-  
-  p = floor(p);
-  
-  p *= pix.xy;
-  
-  float tl = unpackHeight(texture(heightMap, p));
-  float bl = unpackHeight(texture(heightMap, p + pix.zy));
-  
-  float tr = unpackHeight(texture(heightMap, p + pix.xz));
-  float br = unpackHeight(texture(heightMap, p + pix.xy));
-  
-  float t = mix(tl, tr, lerpP.x);
-  float b = mix(bl, br, lerpP.x);
-  
-  return mix(t, b, lerpP.y) * heightMod;
-}
-
-float getWaterNoise(vec2 pos) {
-  return 0.002 * (texture(voronoiTex, fract(pos * res * 8.)).r * 2. - 1.);
-}
-
-float getWaterLevel(vec2 pos) {
-  float t = millis/200000.;
-  
-  float waveHeight = getWaterNoise(pos + t);
-  mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
-  waveHeight += getWaterNoise(pos * rot - vec2(t, 0.));
-  
-  return waterLevel + waveHeight;
-}
-
-float getHeight(vec2 pos) {
-  return max(getHeightRaw(pos), getWaterLevel(pos));
-}
 
 vec3 getTerrainColour(float h, vec3 normal) {
   // add some random variation around the bands;
@@ -158,75 +237,4 @@ vec3 getSceneColour(float terrainHeight, float waterDepth, float waterHeight, ve
   
   return col;
 }
-
-void main() {
-  // Starting point for ray cast is surface of terrain
-  vec3 op = vec3(posTex, getHeight(posTex));
-  vec3 p = op;
-  
-  float minStepSize = min(pix.x, pix.y);
-  
-  // Direction of raycast is towards the sun from centre of screen
-  vec3 sunDir = sunPos - vec3(0.5, 0.5, 0.);
-  vec3 stepDir = normalize(sunDir);
-    
-  float inShadow = 0.;
-  int n = 0;
-  for(int i = 1; i <= maxSteps; i ++) {    
-    n++;
-    // Check height at new location
-    float h = getHeight(p.xy);
-    if(h > p.z) {
-      // ray is inside the terrain
-      // therefore must be in shadow
-      inShadow = 1.;
-      break;
-    }
-    if(p.z > 1.) {
-      // above the heighest terrain level
-      // will not be in shadow
-      break;
-    }
-    
-    // Step towards the sun by dist to heightmap
-    p += stepDir * max(minStepSize, (p.z - h) * 0.05);
-  }
-  if(n == maxSteps) {
-    inShadow = 1.;
-  }
-
-  float rayDist = length(op - p);
-  
-  float shadowIntensity = inShadow * 0.5 * (1. - smoothstep(0., 0.7, rayDist));
-  
-  // calculate normal based on surrounding tiles
-  vec3 normal = getNormal(posTex);
-  float normalShadow = 1. - (dot(normal, stepDir) + 1.)/2.;
-  
-  // Add normal shadows into shadow variable
-  shadowIntensity = clamp(shadowIntensity * rayIntensity + normalShadow * normalIntensity, 0., 1.);
-  float lightStrength = 1. - shadowIntensity;
-  
-  vec3 ambient = clamp(ambientColour * ambientStrength, 0., 1.);
-  vec3 directional = clamp(lightColour * lightStrength, 0., 1.);
-
-  float terrainHeight = getHeightRaw(posTex);
-  float waterHeight = getWaterLevel(posTex);
-  float waterDepth =  waterHeight - terrainHeight;
-  vec3 sceneColour = getSceneColour(terrainHeight, waterDepth, waterHeight, normal);
-  
-  float isWater = step(0., waterDepth);
-  
-  vec3 viewDir = normalize(viewPos - op);
-  vec3 halfwayDir = normalize(sunDir + viewDir);
-  
-  float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.);
-  vec3 specular = (1. - inShadow) * isWater * specularStrength * spec * lightColour;
-  
-    
-  vec3 light = ambient + directional + specular;
-  
-  finalColor = vec4(light * sceneColour, 1.);
-}
-
-
+*/

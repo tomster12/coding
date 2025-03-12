@@ -2,6 +2,8 @@
     "files.associations": {
         "*.jlox": "bat",
         "*.lox": "ruby",
-        "raylib.h": "c"
+        "raylib.h": "c",
+        "math.h": "c",
+        "stdlib.h": "c"
     }
 }
