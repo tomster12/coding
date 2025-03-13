@@ -4,14 +4,14 @@ in vec2 posScreen;
 out vec4 finalColour;
 uniform vec2 screenRatio;
 
-const float heightNoiseScale = 6.0;
-const float heightMountainScale = 1.1;
-const float heightMountainPower = 1.6;
-const int fbmOctaveCount = 5;
-const float fbmInitialAmplitude = 0.5;
-const float fbmInitialAmplitudeScale = 0.5;
-const float fbmOctaveScale = 2.0;
-const float fbmOctaveShift = 100.0;
+const float HEIGHT_NOISE_SCALE = 6.0;
+const float HEIGHT_MOUNTAIN_SCALE = 1.1;
+const float HEIGHT_MOUNTAIN_POWER = 1.6;
+const int FBM_OCTAVE_COUNT = 8;
+const float FBM_INITIAL_AMPLITUDE = 0.6;
+const float FBM_INITIAL_AMPLITUDE_SCALE = 0.42;
+const float FB_OCTAVE_SCALE = 2.0;
+const float FBM_OCTAVE_SHIFT = 100.0;
 
 float hash(vec2 p) {
   // 2D hash from: https://www.shadertoy.com/view/4dS3Wd
@@ -37,15 +37,15 @@ float noise(vec2 x) {
 float fbm(vec2 x) {
   // Fractal Brownian Motion
   float value = 0.0;
-  float amplitude = fbmInitialAmplitude;
+  float amplitude = FBM_INITIAL_AMPLITUDE;
 
   // For each octave: grab noise, scale/rotate/shift sample position, then reduce amplitude
   mat2 octaveRot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
-  vec2 octaveShift = vec2(fbmOctaveShift);
-  for(int i = 0; i < fbmOctaveCount; ++i) {
+  vec2 octaveShift = vec2(FBM_OCTAVE_SHIFT);
+  for(int i = 0; i < FBM_OCTAVE_COUNT; ++i) {
     value += amplitude * noise(x);
-    x = octaveRot * x * fbmOctaveScale + octaveShift;
-    amplitude *= fbmInitialAmplitudeScale;
+    x = octaveRot * x * FB_OCTAVE_SCALE + octaveShift;
+    amplitude *= FBM_INITIAL_AMPLITUDE_SCALE;
   }
 
   return value;
@@ -53,10 +53,10 @@ float fbm(vec2 x) {
 
 float getHeight(vec2 pos) {
   // Sample FBM noise with scaled position
-  float n = fbm(pos * heightNoiseScale);
+  float n = fbm(pos * HEIGHT_NOISE_SCALE);
 
   // Scale the noise to be more mountainous
-  n = pow(n * heightMountainScale, heightMountainPower);
+  n = pow(n * HEIGHT_MOUNTAIN_SCALE, HEIGHT_MOUNTAIN_POWER);
 
   // Gradient magnitude from centre
   float d = length(pos - vec2(0.5)) * 2.0;

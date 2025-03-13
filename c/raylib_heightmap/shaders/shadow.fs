@@ -3,9 +3,9 @@
 in vec2 posScreen;
 out vec4 finalColour;
 
-uniform vec2 pixelSize;
 uniform sampler2D heightmapTex;
 uniform sampler2D voronoiTex;
+uniform vec2 pixelSize;
 uniform vec3 sunDir;
 uniform float globalLightStrength;
 uniform vec3 globalLightColour;
@@ -13,7 +13,6 @@ uniform float directLightStrength;
 uniform vec3 directLightColour;
 uniform float timeMs;
 uniform float waterLevel;
-// uniform vec3 viewDir;
 
 const int MAX_RAYCAST_ITERATIONS = 200;
 const float NORMAL_HEIGHT_MULT = 200.0;
@@ -35,10 +34,13 @@ const float HEIGHT_SAND = 0.2;
 const float HEIGHT_GRASS = 0.275;
 const float HEIGHT_BUSH = 0.32;
 const float HEIGHT_FOREST = 0.4;
-const float HEIGHT_STONE = 0.45;
-const float HEIGHT_SNOW = 0.6;
-// const float lightSpecularPower = 32.0;
-// const float specularLightStrength = 0.4;
+const float HEIGHT_STONE = 0.5;
+const float HEIGHT_SNOW = 0.7;
+const float HEIGHT_VARIATION_MAGNITUDE = 0.004;
+const float WAVE_HEIGHT = 0.001;
+const vec2 HEIGHT_VARIATION_FREQ = vec2(0.1);
+const float SPECULAR_POWER = 32.0;
+const float SPECULAR_LIGHT_STRENGTH = 0.4;
 
 #define HASH_M1 1597334677U
 #define HASH_M2 3812015801U
@@ -81,14 +83,17 @@ float getHeightmapHeight(vec2 posScreen) {
 }
 
 float getWaterNoise(vec2 posScreen) {
-  return 0.002 * (texture(voronoiTex, fract(8.0 * posScreen / pixelSize)).r * 2.0 - 1.0);
+  return WAVE_HEIGHT * (texture(voronoiTex, fract(posScreen * 10)).r * 2.0 - 1.0);
 }
 
 float getWaterHeight(vec2 posScreen) {
+  // Sample wave noise at two different angles with a 200s loop
   float t = timeMs / 200000.0;
-  float waveHeight = getWaterNoise(posScreen + t);
   mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
-  waveHeight += getWaterNoise(posScreen * rot - vec2(t, 0.0));
+  float waveNoise0 = getWaterNoise(posScreen + t);
+  float waveNoise1 = getWaterNoise(posScreen * rot - vec2(t, 0.0));
+  float waveHeight = waveNoise0 + waveNoise1;
+
   return waterLevel + waveHeight;
 }
 
@@ -106,7 +111,10 @@ vec3 getSurfaceNormal(vec2 posScreen) {
   return normalize(vec3((l - r) * NORMAL_HEIGHT_MULT, (d - u) * NORMAL_HEIGHT_MULT, 1.0));
 }
 
-vec3 getTerrainColour(float height, vec3 normal) {
+vec3 getTerrainColour(vec2 posScreen, float height, vec3 normal) {
+  // Add some variation for the bands
+  height += (hash(HEIGHT_VARIATION_FREQ * posScreen / pixelSize) * 2.0 - 1.0) * HEIGHT_VARIATION_MAGNITUDE;
+
   // If steep and high up then use snow
   float flatness = dot(normal, vec3(0.0, 0.0, 1.0));
   float isSteep = 1.0 - step(NORMAL_IS_SLOPE_THRESHOLD, flatness);
@@ -133,7 +141,7 @@ vec3 getTerrainColour(float height, vec3 normal) {
   }
 }
 
-vec3 getSceneColour(float terrainHeight, float waterHeight, vec3 normal) {
+vec3 getSceneColour(vec2 posScreen, float terrainHeight, float waterHeight, vec3 normal) {
   float waterDepth = waterHeight - terrainHeight;
   float isWater = step(terrainHeight, waterHeight);
 
@@ -148,7 +156,7 @@ vec3 getSceneColour(float terrainHeight, float waterHeight, vec3 normal) {
 
   // Mix water colour with terrain colour
   float terrainWaterLerp = easeOut(waterDepth / waterHeight, 6.0);
-  vec3 terrainColour = getTerrainColour(terrainHeight, normal);
+  vec3 terrainColour = getTerrainColour(posScreen, terrainHeight, normal);
   vec3 finalColour = mix(terrainColour, waterColour, terrainWaterLerp);
 
   // Add shoreline effect
@@ -197,20 +205,19 @@ void main() {
 
   float terrainHeight = getHeightmapHeight(posScreen);
   float waterHeight = getWaterHeight(posScreen);
-  vec3 sceneColour = getSceneColour(terrainHeight, waterHeight, normal);
+  vec3 sceneColour = getSceneColour(posScreen, terrainHeight, waterHeight, normal);
 
   float directShadow = clamp(sunShadow * SUN_SHADOW_COEF + normalsShadow * NORMALS_SHADOW_COEF, 0.0, 1.0);
   vec3 directLight = clamp(directLightColour * (1.0 - directShadow) * directLightStrength, 0.0, 1.0);
   vec3 globalLight = clamp(globalLightColour * globalLightStrength, 0.0, 1.0);
 
-  // float isWater = step(terrainHeight, waterHeight);
-  // float specularValue = pow(max(dot(normal, viewDir), 0.0), lightSpecularPower);
-  // vec3 specularLight = (1.0 - inShadow) * isWater * specularLightStrength * specularValue * directLightColour;
-  // vec3 finalLight = directLight + globalLight + specularLight;
+  vec3 viewPos = vec3(0.5, 0.5, 1.0) + sunDir;
+  vec3 viewDir = normalize(viewPos - vec3(0.5, 0.5, 0.5));
+  float isWater = step(terrainHeight, waterHeight);
+  float specularValue = pow(max(dot(normal, viewDir), 0.0), SPECULAR_POWER);
+  vec3 specularLight = (1.0 - inShadow) * isWater * SPECULAR_LIGHT_STRENGTH * specularValue * directLightColour;
 
   // Calculate final light based on the components
-  vec3 finalLight = directLight + globalLight;
+  vec3 finalLight = directLight + globalLight + specularLight;
   finalColour = vec4(finalLight * sceneColour, 1.0);
-
-  finalColour = texture(voronoiTex, posScreen);
 }
