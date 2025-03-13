@@ -4,13 +4,14 @@ in vec2 posScreen;
 out vec4 finalColour;
 
 uniform vec2 pixelSize;
-uniform sampler2D heightmap;
+uniform sampler2D heightmapTex;
+uniform sampler2D voronoiTex;
 uniform vec3 sunDir;
 uniform float globalLightStrength;
 uniform vec3 globalLightColour;
 uniform float directLightStrength;
 uniform vec3 directLightColour;
-uniform float timeMilliseconds;
+uniform float timeMs;
 uniform float waterLevel;
 // uniform vec3 viewDir;
 
@@ -36,7 +37,6 @@ const float HEIGHT_BUSH = 0.32;
 const float HEIGHT_FOREST = 0.4;
 const float HEIGHT_STONE = 0.45;
 const float HEIGHT_SNOW = 0.6;
-const float HEIGHT_SLATE = 0.8;
 // const float lightSpecularPower = 32.0;
 // const float specularLightStrength = 0.4;
 
@@ -69,10 +69,10 @@ float getHeightmapHeight(vec2 posScreen) {
   vec2 pct = fract(posWorld);
 
   // Sample the texture at the 4 surrounding pixels
-  float tl = unpackHeight(texture(heightmap, vec2((pix.x - 0.5) * pixelSize.x, (pix.y - 0.5) * pixelSize.y)));
-  float bl = unpackHeight(texture(heightmap, vec2((pix.x - 0.5) * pixelSize.x, (pix.y + 0.5) * pixelSize.y)));
-  float tr = unpackHeight(texture(heightmap, vec2((pix.x + 0.5) * pixelSize.x, (pix.y - 0.5) * pixelSize.y)));
-  float br = unpackHeight(texture(heightmap, vec2((pix.x + 0.5) * pixelSize.x, (pix.y + 0.5) * pixelSize.y)));
+  float tl = unpackHeight(texture(heightmapTex, vec2((pix.x - 0.5) * pixelSize.x, (pix.y - 0.5) * pixelSize.y)));
+  float bl = unpackHeight(texture(heightmapTex, vec2((pix.x - 0.5) * pixelSize.x, (pix.y + 0.5) * pixelSize.y)));
+  float tr = unpackHeight(texture(heightmapTex, vec2((pix.x + 0.5) * pixelSize.x, (pix.y - 0.5) * pixelSize.y)));
+  float br = unpackHeight(texture(heightmapTex, vec2((pix.x + 0.5) * pixelSize.x, (pix.y + 0.5) * pixelSize.y)));
 
   // Interpolate between the 4 pixels
   float t = mix(tl, tr, pct.x);
@@ -80,18 +80,16 @@ float getHeightmapHeight(vec2 posScreen) {
   return mix(t, b, pct.y);
 }
 
-float getWaterNoise(vec2 pos) {
-  return 0.0;
-  // return 0.002 * (texture(voronoiTex, fract(pos * res * 8.)).r * 2. - 1.);
+float getWaterNoise(vec2 posScreen) {
+  return 0.002 * (texture(voronoiTex, fract(8.0 * posScreen / pixelSize)).r * 2.0 - 1.0);
 }
 
 float getWaterHeight(vec2 posScreen) {
-  return waterLevel;
-  // float t = timeMilliseconds / 200000.0;
-  // float waveHeight = getWaterNoise(posScreen + t);
-  // mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
-  // waveHeight += getWaterNoise(posScreen * rot - vec2(t, 0.0));
-  // return waterLevel + waveHeight;
+  float t = timeMs / 200000.0;
+  float waveHeight = getWaterNoise(posScreen + t);
+  mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
+  waveHeight += getWaterNoise(posScreen * rot - vec2(t, 0.0));
+  return waterLevel + waveHeight;
 }
 
 float getHeight(vec2 posScreen) {
@@ -141,7 +139,7 @@ vec3 getSceneColour(float terrainHeight, float waterHeight, vec3 normal) {
 
   // Oscillating shoreline effect
   float shorelineAmount = isWater * (1.0 - smoothstep(0.0, 0.01, waterDepth));
-  shorelineAmount *= (sin(cos(timeMilliseconds / 500.0) * 2.0 + waterDepth * 500.0) + 1.0) / 2.0;
+  shorelineAmount *= (sin(cos(timeMs / 500.0) * 2.0 + waterDepth * 500.0) + 1.0) / 2.0;
 
   // Lerp between water colours based on depth
   float shallowDeepLerp = easeOut(waterDepth / waterHeight, 2.0);
@@ -199,17 +197,20 @@ void main() {
 
   float terrainHeight = getHeightmapHeight(posScreen);
   float waterHeight = getWaterHeight(posScreen);
-  float isWater = step(terrainHeight, waterHeight);
   vec3 sceneColour = getSceneColour(terrainHeight, waterHeight, normal);
 
   float directShadow = clamp(sunShadow * SUN_SHADOW_COEF + normalsShadow * NORMALS_SHADOW_COEF, 0.0, 1.0);
   vec3 directLight = clamp(directLightColour * (1.0 - directShadow) * directLightStrength, 0.0, 1.0);
   vec3 globalLight = clamp(globalLightColour * globalLightStrength, 0.0, 1.0);
+
+  // float isWater = step(terrainHeight, waterHeight);
   // float specularValue = pow(max(dot(normal, viewDir), 0.0), lightSpecularPower);
   // vec3 specularLight = (1.0 - inShadow) * isWater * specularLightStrength * specularValue * directLightColour;
+  // vec3 finalLight = directLight + globalLight + specularLight;
 
   // Calculate final light based on the components
-  // vec3 finalLight = directLight + globalLight + specularLight;
   vec3 finalLight = directLight + globalLight;
   finalColour = vec4(finalLight * sceneColour, 1.0);
+
+  finalColour = texture(voronoiTex, posScreen);
 }
