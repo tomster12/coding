@@ -1,240 +1,215 @@
 #version 330
 
 in vec2 posScreen;
-out vec4 finalColor;
-uniform vec2 screenRatio;
+out vec4 finalColour;
+
 uniform vec2 pixelSize;
 uniform sampler2D heightmap;
+uniform vec3 sunDir;
+uniform float globalLightStrength;
+uniform vec3 globalLightColour;
+uniform float directLightStrength;
+uniform vec3 directLightColour;
+uniform float timeMilliseconds;
+uniform float waterLevel;
+// uniform vec3 viewDir;
+
+const int MAX_RAYCAST_ITERATIONS = 200;
+const float NORMAL_HEIGHT_MULT = 200.0;
+const float SUN_SHADOW_COEF = 0.4;
+const float NORMALS_SHADOW_COEF = 0.6;
+const float HEIGHT_IS_HIGH_THRESHOLD = 0.3;
+const float NORMAL_IS_SLOPE_THRESHOLD = 0.3;
+const vec3 COL_SHORELINE = vec3(1.0, 1.0, 1.0);
+const vec3 COL_DEEP_WATER = vec3(0.0, 0.431, 0.694);
+const vec3 COL_WATER = vec3(0.384, 0.651, 0.663);
+const vec3 COL_SAND = vec3(0.839, 0.714, 0.62);
+const vec3 COL_GRASS = vec3(0.596, 0.678, 0.353);
+const vec3 COL_BUSH = vec3(0.396, 0.522, 0.255);
+const vec3 COL_FOREST = vec3(0.278, 0.463, 0.271);
+const vec3 COL_STONE = vec3(0.427, 0.463, 0.529);
+const vec3 COL_SNOW = vec3(0.824, 0.878, 0.871);
+const vec3 COL_SLATE = vec3(0.518, 0.553, 0.604);
+const float HEIGHT_SAND = 0.2;
+const float HEIGHT_GRASS = 0.275;
+const float HEIGHT_BUSH = 0.32;
+const float HEIGHT_FOREST = 0.4;
+const float HEIGHT_STONE = 0.45;
+const float HEIGHT_SNOW = 0.6;
+const float HEIGHT_SLATE = 0.8;
+// const float lightSpecularPower = 32.0;
+// const float specularLightStrength = 0.4;
 
 #define HASH_M1 1597334677U
 #define HASH_M2 3812015801U
+
 float hash(vec2 p) {
   // Hash function from: https://www.shadertoy.com/view/4dVBzz
-	uvec2 q = uvec2(p);
-	q *= uvec2(HASH_M1, HASH_M2);
-	uint n = q.x ^ q.y;
-	n = n * (n ^ (n >> 15));
-	return float(n) * (1.0/float(0xffffffffU));
+  uvec2 q = uvec2(p);
+  q *= uvec2(HASH_M1, HASH_M2);
+  uint n = q.x ^ q.y;
+  n = n * (n ^ (n >> 15));
+  return float(n) * (1.0 / float(0xffffffffU));
 }
 
-float unpackHeight(vec4 h) {
+float easeOut(float x, float factor) {
+  if (x <= 0.001) return 0.0;
+  return clamp(1.0 - pow(1.0 - x, factor), 0.0, 1.0);
+}
+
+float unpackHeight(vec4 color) {
   // Unpack a vec4 into a height (0 - 1)
-  return (h.r + h.g + h.b + h.a) / 4.0;
+  return (color.r + color.g + color.b + color.a) / 4.0;
 }
 
 float getHeightmapHeight(vec2 posScreen) {
-  return unpackHeight(texture(heightmap, posScreen));
+  // Extract the exact pixel position
+  vec2 posWorld = posScreen / pixelSize;
+  vec2 pix = floor(posWorld);
+  vec2 pct = fract(posWorld);
 
-  /* TODO: Reimplement
-  // Get the height at a specific screen position
-  // This could be between pixels so we need to interpolate
-  vec2 res = 1./pix.xy;
-  vec2 p = pos * res;
-  vec2 lerpP = fract(p);
-  p = floor(p);
-  p *= pix.xy;
-  float tl = unpackHeight(texture(heightMap, p));
-  float bl = unpackHeight(texture(heightMap, p + pix.zy));
-  float tr = unpackHeight(texture(heightMap, p + pix.xz));
-  float br = unpackHeight(texture(heightMap, p + pix.xy));
-  float t = mix(tl, tr, lerpP.x);
-  float b = mix(bl, br, lerpP.x);
-  return mix(t, b, lerpP.y) * heightMod;
-  */
+  // Sample the texture at the 4 surrounding pixels
+  float tl = unpackHeight(texture(heightmap, vec2((pix.x - 0.5) * pixelSize.x, (pix.y - 0.5) * pixelSize.y)));
+  float bl = unpackHeight(texture(heightmap, vec2((pix.x - 0.5) * pixelSize.x, (pix.y + 0.5) * pixelSize.y)));
+  float tr = unpackHeight(texture(heightmap, vec2((pix.x + 0.5) * pixelSize.x, (pix.y - 0.5) * pixelSize.y)));
+  float br = unpackHeight(texture(heightmap, vec2((pix.x + 0.5) * pixelSize.x, (pix.y + 0.5) * pixelSize.y)));
+
+  // Interpolate between the 4 pixels
+  float t = mix(tl, tr, pct.x);
+  float b = mix(bl, br, pct.x);
+  return mix(t, b, pct.y);
 }
 
 float getWaterNoise(vec2 pos) {
   return 0.0;
-  
-  /* TODO: Reimplement
-  return 0.002 * (texture(voronoiTex, fract(pos * res * 8.)).r * 2. - 1.);
-  */
+  // return 0.002 * (texture(voronoiTex, fract(pos * res * 8.)).r * 2. - 1.);
 }
 
 float getWaterHeight(vec2 posScreen) {
-  return 0.1;
-
-  /* TODO Reimplement
-  float t = millis/200000.;
-  float waveHeight = getWaterNoise(pos + t);
-  mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
-  waveHeight += getWaterNoise(pos * rot - vec2(t, 0.));
-  return waterLevel + waveHeight;
-  */
+  return waterLevel;
+  // float t = timeMilliseconds / 200000.0;
+  // float waveHeight = getWaterNoise(posScreen + t);
+  // mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.50));
+  // waveHeight += getWaterNoise(posScreen * rot - vec2(t, 0.0));
+  // return waterLevel + waveHeight;
 }
 
-float getFinalHeight(vec2 posScreen) {
+float getHeight(vec2 posScreen) {
   // Get the highest height at this position
   return max(getHeightmapHeight(posScreen), getWaterHeight(posScreen));
 }
 
+vec3 getSurfaceNormal(vec2 posScreen) {
+  // Calculate the normal based on the surrounding heights
+  float l = getHeight(vec2(posScreen.x - pixelSize.x, posScreen.y));
+  float r = getHeight(vec2(posScreen.x + pixelSize.x, posScreen.y));
+  float d = getHeight(vec2(posScreen.x, posScreen.y - pixelSize.y));
+  float u = getHeight(vec2(posScreen.x, posScreen.y + pixelSize.y));
+  return normalize(vec3((l - r) * NORMAL_HEIGHT_MULT, (d - u) * NORMAL_HEIGHT_MULT, 1.0));
+}
+
+vec3 getTerrainColour(float height, vec3 normal) {
+  // If steep and high up then use snow
+  float flatness = dot(normal, vec3(0.0, 0.0, 1.0));
+  float isSteep = 1.0 - step(NORMAL_IS_SLOPE_THRESHOLD, flatness);
+  float isHigh = step(HEIGHT_IS_HIGH_THRESHOLD, height);
+  if ((isSteep * isHigh) == 1) {
+    return COL_SLATE;
+  }
+
+  // Otherwise return colour based on height
+  if (height < HEIGHT_SAND) {
+    return COL_SAND;
+  } else if (height < HEIGHT_GRASS) {
+    return COL_GRASS;
+  } else if (height < HEIGHT_BUSH) {
+    return COL_BUSH;
+  } else if (height < HEIGHT_FOREST) {
+    return COL_FOREST;
+  } else if (height < HEIGHT_STONE) {
+    return COL_STONE;
+  } else if (height < HEIGHT_SNOW) {
+    return COL_SNOW;
+  } else {
+    return vec3(0);
+  }
+}
+
+vec3 getSceneColour(float terrainHeight, float waterHeight, vec3 normal) {
+  float waterDepth = waterHeight - terrainHeight;
+  float isWater = step(terrainHeight, waterHeight);
+
+  // Oscillating shoreline effect
+  float shorelineAmount = isWater * (1.0 - smoothstep(0.0, 0.01, waterDepth));
+  shorelineAmount *= (sin(cos(timeMilliseconds / 500.0) * 2.0 + waterDepth * 500.0) + 1.0) / 2.0;
+
+  // Lerp between water colours based on depth
+  float shallowDeepLerp = easeOut(waterDepth / waterHeight, 2.0);
+  vec3 waterColour = mix(COL_WATER, COL_DEEP_WATER, shallowDeepLerp);
+  waterColour = mix(waterColour, COL_SHORELINE, shorelineAmount);
+
+  // Mix water colour with terrain colour
+  float terrainWaterLerp = easeOut(waterDepth / waterHeight, 6.0);
+  vec3 terrainColour = getTerrainColour(terrainHeight, normal);
+  vec3 finalColour = mix(terrainColour, waterColour, terrainWaterLerp);
+
+  // Add shoreline effect
+  finalColour += shorelineAmount * 0.167;
+
+  return finalColour;
+}
+
 void main() {
-  // Start raycast from surface of terrain
-  vec3 startPos = vec3(posScreen, getFinalHeight(posScreen));
-  vec3 currentPos = startPos;
-
-  finalColor = vec4(vec3(getFinalHeight(posScreen)), 1.0);
-}
-
-  /* TODO: Reimplement
-  float minStepSize = min(pix.x, pix.y);
-  
-  // Direction of raycast is towards the sun from centre of screen
-  vec3 sunDir = sunPos - vec3(0.5, 0.5, 0.);
+  // Variables for raycasting from the current position to the sun
+  float currentHeight = getHeight(posScreen);
+  vec3 currentPos = vec3(posScreen, currentHeight);
+  vec3 startPos = currentPos;
+  float minStepSize = min(pixelSize.x, pixelSize.y);
   vec3 stepDir = normalize(sunDir);
-    
-  float inShadow = 0.;
-  int n = 0;
-  for(int i = 1; i <= maxSteps; i ++) {    
-    n++;
-    // Check height at new location
-    float h = getHeight(p.xy);
-    if(h > p.z) {
-      // ray is inside the terrain
-      // therefore must be in shadow
-      inShadow = 1.;
+  float inShadow = 0.0;
+  int iterations = 0;
+
+  // Perform raymarching until we know for sure if we are in shadow
+  for(; iterations <= MAX_RAYCAST_ITERATIONS; iterations++) {
+    if(iterations >= MAX_RAYCAST_ITERATIONS) {
+      inShadow = 1.0;
       break;
     }
-    if(p.z > 1.) {
-      // above the heighest terrain level
-      // will not be in shadow
+    currentPos += stepDir * max(minStepSize, (currentPos.z - currentHeight) * 0.05);
+    if(currentPos.z > 1.0) {
+      inShadow = 0.0;
       break;
     }
-    
-    // Step towards the sun by dist to heightmap
-    p += stepDir * max(minStepSize, (p.z - h) * 0.05);
-  }
-  if(n == maxSteps) {
-    inShadow = 1.;
-  }
-
-  float rayDist = length(op - p);
-  
-  float shadowIntensity = inShadow * 0.5 * (1. - smoothstep(0., 0.7, rayDist));
-  
-  // calculate normal based on surrounding tiles
-  vec3 normal = getNormal(posTex);
-  float normalShadow = 1. - (dot(normal, stepDir) + 1.)/2.;
-  
-  // Add normal shadows into shadow variable
-  shadowIntensity = clamp(shadowIntensity * rayIntensity + normalShadow * normalIntensity, 0., 1.);
-  float lightStrength = 1. - shadowIntensity;
-  
-  vec3 ambient = clamp(ambientColour * ambientStrength, 0., 1.);
-  vec3 directional = clamp(lightColour * lightStrength, 0., 1.);
-
-  float terrainHeight = getHeightRaw(posTex);
-  float waterHeight = getWaterLevel(posTex);
-  float waterDepth =  waterHeight - terrainHeight;
-  vec3 sceneColour = getSceneColour(terrainHeight, waterDepth, waterHeight, normal);
-  
-  float isWater = step(0., waterDepth);
-  
-  vec3 viewDir = normalize(viewPos - op);
-  vec3 halfwayDir = normalize(sunDir + viewDir);
-  
-  float spec = pow(max(dot(normal, halfwayDir), 0.0), 32.);
-  vec3 specular = (1. - inShadow) * isWater * specularStrength * spec * lightColour;
-  
-    
-  vec3 light = ambient + directional + specular;
-  
-  finalColor = vec4(light * sceneColour, 1.);
-}
-
-uniform float heightMod;
-uniform float millis;
-uniform float ambientStrength;
-uniform vec3 ambientColour;
-uniform vec3 lightColour;
-uniform vec3 sunPos;
-uniform vec3 pix;
-uniform float waterLevel;
-uniform vec2 res;
-const int maxSteps = 200;
-const float rayIntensity = 0.8;
-const float normalIntensity = 0.6;
-const float specularStrength = 0.4;
-const vec3 viewPos = vec3(0.5, 0.5, 2.);
-const float slopeCutoff = 0.3;
-const float heightCutoff = 0.5;
-const float terrainVariation = 0.03;
-const vec3 colourDeepWater = vec3(0.,0.431,0.694);
-const vec3 colourWater = vec3(0.384,0.651,0.663);
-const vec3 colourSand = vec3(0.839,0.714,0.62);
-const vec3 colourGrass = vec3(0.596,0.678,0.353);
-const vec3 colourBush = vec3(0.396,0.522,0.255);
-const vec3 colourForest = vec3(0.278,0.463,0.271);
-const vec3 colourStone = vec3(0.427,0.463,0.529);
-const vec3 colourSlate = vec3(0.518,0.553,0.604);
-const vec3 colourSnow = vec3(0.824,0.878,0.871);
-
-vec3 getTerrainColour(float h, vec3 normal) {
-  // add some random variation around the bands;
-  h += (hash(posTex/pix.xy) * 2. - 1.) * terrainVariation;
-  
-  float flatness = dot(normal, vec3(0., 0., 1.));
-  float isSteep = 1. - step(slopeCutoff, flatness);
-  float isHigh = step(heightCutoff, h);
-  
-  float forceStone = isSteep * isHigh; //must be steep and high
-
-  vec3 col = colourSnow;
-
-  if(h < 0.4) {
-    col = colourSand;
-  } else if(h < 0.5) {
-    col = colourGrass;
-  } else if(h < 0.6) {
-    col = colourBush;
-  } else if(h < 0.7) {
-    col = colourForest;
-  } else if(h < 0.8) {
-    col = colourStone;
-  } else if(h < 0.9) {
-    col = colourSlate;
+    if(currentPos.x < 0.0 || currentPos.x > 1.0 || currentPos.y < 0.0 || currentPos.y > 1.0) {
+      inShadow = 0.0;
+      break;
+    }
+    currentHeight = getHeight(currentPos.xy);
+    if(currentHeight > currentPos.z) {
+      inShadow = 1.0;
+      break;
+    }
   }
 
-  return col * (1. - forceStone) + colourStone * forceStone;
-}
+  // Calculate shadow, light and colour values
+  float rayDist = length(currentPos - startPos);
+  float sunShadow = inShadow * (0.5 * (1.0 - smoothstep(0.0, 0.7, rayDist)));
+  vec3 normal = getSurfaceNormal(posScreen);
+  float normalsShadow = (1.0 - dot(normal, stepDir)) / 2.0;
 
-vec3 getNormal(vec2 pos) {
-  float h = 200.;
-  float l = h * getHeight(pos - pix.xz);
-  float r = h * getHeight(pos + pix.xz);
-  
-  float d = h * getHeight(pos - pix.zy);
-  float u = h * getHeight(pos + pix.zy);
-  
-  return normalize(vec3(l-r, d-u, 1.));
-}
+  float terrainHeight = getHeightmapHeight(posScreen);
+  float waterHeight = getWaterHeight(posScreen);
+  float isWater = step(terrainHeight, waterHeight);
+  vec3 sceneColour = getSceneColour(terrainHeight, waterHeight, normal);
 
-float easeOut(float x, float factor) {
-  return clamp(1. - pow(1. - x, factor), 0., 1.);
-}
+  float directShadow = clamp(sunShadow * SUN_SHADOW_COEF + normalsShadow * NORMALS_SHADOW_COEF, 0.0, 1.0);
+  vec3 directLight = clamp(directLightColour * (1.0 - directShadow) * directLightStrength, 0.0, 1.0);
+  vec3 globalLight = clamp(globalLightColour * globalLightStrength, 0.0, 1.0);
+  // float specularValue = pow(max(dot(normal, viewDir), 0.0), lightSpecularPower);
+  // vec3 specularLight = (1.0 - inShadow) * isWater * specularLightStrength * specularValue * directLightColour;
 
-vec3 getSceneColour(float terrainHeight, float waterDepth, float waterHeight, vec3 normal) {
-  vec3 col = getTerrainColour(terrainHeight, normal);
-  
-  // Add water if the terrain is below water level
-  float isWater = step(0., waterDepth);
-  // Add waves if the water depth is really shallow
-  float isWave = isWater * (1. - smoothstep(0., 0.01, waterDepth));
-  // isWave *= (sin(cos(millis/500.)*2. + waterDepth * 500.) + 1.)/2.;
-  
-  float waterLerp = easeOut(waterDepth/waterHeight, 6.);
-  
-  vec3 waterColour = mix(colourWater, colourDeepWater, easeOut(waterDepth/waterHeight, 2.));
-  
-  waterColour = mix(waterColour, vec3(1.), isWave);
-  
-  // Simulate see-through water by mixing between the terrain and water
-  // colour based on depth
-  col = mix(col, waterColour, waterLerp);
-  
-  // Add the waves into the colour
-  // col += isWave/6.;
-  
-  return col;
+  // Calculate final light based on the components
+  // vec3 finalLight = directLight + globalLight + specularLight;
+  vec3 finalLight = directLight + globalLight;
+  finalColour = vec4(finalLight * sceneColour, 1.0);
 }
-*/

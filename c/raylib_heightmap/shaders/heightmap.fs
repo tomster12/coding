@@ -1,7 +1,7 @@
 #version 330
 
 in vec2 posScreen;
-out vec4 finalColor;
+out vec4 finalColour;
 uniform vec2 screenRatio;
 
 const float heightNoiseScale = 6.0;
@@ -61,8 +61,6 @@ float getHeight(vec2 pos) {
   // Gradient magnitude from centre
   float d = length(pos - vec2(0.5)) * 2.0;
   return clamp(n * (1.0 - d), 0, 1);
-
-  return n;
 }
 
 vec4 packHeight(float height) {
@@ -79,5 +77,5 @@ vec4 packHeight(float height) {
 void main() {
   vec2 pos = posScreen * screenRatio;
   float height = getHeight(pos);
-  finalColor = packHeight(height);
+  finalColour = packHeight(height);
 }
