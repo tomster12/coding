@@ -1,8 +1,9 @@
 const projects = {
+    "Heightmap": { url: "https://github.com/tomster12/coding/tree/master/c/raylib_heightmap", showcase: "Heightmap", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c", "raylib"] },
     "Wave Function Collapse": { url: "https://github.com/tomster12/coding/tree/master/c/raylib_overlapping_wfc", showcase: "WFC", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c", "raylib"] },
-    "Entity Component System (ECS)": { url: "https://github.com/tomster12/coding/tree/master/c++/ECS", showcase: "ECS", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
+    "Entity Component System": { url: "https://github.com/tomster12/coding/tree/master/c++/ECS", showcase: "ECS", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
     "Liquid Simulation": { url: "https://github.com/tomster12/coding/tree/master/c++/Liquid", showcase: "Liquid", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
-    "Machine Learning (from scratch)": { url: "https://github.com/tomster12/machine-learning-cpp", showcase: "MachineLearning", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
+    "Machine Learning<br/>(from scratch)": { url: "https://github.com/tomster12/machine-learning-cpp", showcase: "MachineLearning", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
     "Collision 1D": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/collision_1D", showcase: "1DCollision", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
     "Boids": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/boids_2D", showcase: "Boids1", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
     "Cave Generation": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/cave_generation", showcase: "CaveGeneration1", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
