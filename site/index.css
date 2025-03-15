@@ -64,6 +64,7 @@ body {
 .project {
     height:fit-content;
     width: min-content;
+    min-width: 15rem;
 	border-radius: 0.4rem;
     padding: 0.8rem 1.2rem 0.5rem 1.2rem;
     display: flex;
@@ -133,6 +134,9 @@ body {
 	box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.226);
 	border-radius: 0.4rem;
     transition: filter 0.2s;
+    text-wrap: nowrap;
+
+
 }
 
 .project .footer-section .tag:hover {
