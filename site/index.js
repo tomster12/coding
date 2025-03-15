@@ -1,38 +1,38 @@
 const projects = {
-    "Wave Function Collapse": { url: "https://github.com/tomster12/coding/tree/master/c/raylib_overlapping_wfc", showcase: "assets/gifs/WFC.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c", "raylib"] },
-    "Entity Component System (ECS)": { url: "https://github.com/tomster12/coding/tree/master/c++/ECS", showcase: "assets/gifs/ECS.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
-    "Liquid Simulation": { url: "https://github.com/tomster12/coding/tree/master/c++/Liquid", showcase: "assets/gifs/Liquid.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
-    "Machine Learning (from scratch)": { url: "https://github.com/tomster12/machine-learning-cpp", showcase: "assets/gifs/MachineLearning.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
-    "Collision 1D": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/collision_1D", showcase: "assets/gifs/1DCollision.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Boids": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/boids_2D", showcase: "assets/gifs/Boids1.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Cave Generation": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/cave_generation", showcase: "assets/gifs/CaveGeneration1.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Dungeon Generation": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/dungeon_generation", showcase: "assets/gifs/DungeonGeneration1.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Fourier": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/fourier", showcase: "assets/gifs/Fourier.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Gate Simulation": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/gates_attempt_3", showcase: "assets/gifs/Gates1.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Pathfinding Visualization": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/pathfinding_visualization", showcase: "assets/gifs/Pathfinding.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Slide": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/slide", showcase: "assets/gifs/Slide.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
-    "Boids": { url: "https://github.com/tomster12/coding/tree/master/processing/Boids", showcase: "assets/gifs/Boids2.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Camera": { url: "https://github.com/tomster12/coding/tree/master/processing/Camera", showcase: "assets/gifs/Camera.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Camera 3D": { url: "https://github.com/tomster12/coding/tree/master/processing/Camera3D", showcase: "assets/gifs/Camera3D.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Cave Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/CaveGeneration", showcase: "assets/gifs/CaveGeneration2.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Dungeon Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/DungeonGeneration", showcase: "assets/gifs/DungeonGeneration2.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Roguelike Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/RoguelikeGeneration", showcase: "assets/gifs/RoguelikeGeneration.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Chaos Equations": { url: "https://github.com/tomster12/coding/tree/master/processing/ChaosEquations", showcase: "assets/gifs/ChaosEquations.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Cut Mesh": { url: "https://github.com/tomster12/coding/tree/master/processing/CutMesh", showcase: "assets/gifs/CutMesh.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Fluid Sim Main": { url: "https://github.com/tomster12/coding/tree/master/processing/FluidSimMain", showcase: "assets/gifs/FluidSimulation.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Game Of Life": { url: "https://github.com/tomster12/coding/tree/master/processing/GameOfLife", showcase: "assets/gifs/GameOfLife.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Gate Simulation": { url: "https://github.com/tomster12/coding/tree/master/processing/GatesAttempt2", showcase: "assets/gifs/Gates2.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Gravity Simulation": { url: "https://github.com/tomster12/coding/tree/master/processing/Gravity", showcase: "assets/gifs/Gravity.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Lissajous Curves": { url: "https://github.com/tomster12/coding/tree/master/processing/LissajousCurves", showcase: "assets/gifs/LissajousCurves.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Mandelbrot": { url: "https://github.com/tomster12/coding/tree/master/processing/Mandelbrot", showcase: "assets/gifs/Mandelbrot.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Marching Squares": { url: "https://github.com/tomster12/coding/tree/master/processing/MarchingSquares", showcase: "assets/gifs/MarchingSquares.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Maze Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/MazeGeneration", showcase: "assets/gifs/MazeGeneration.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Sorting": { url: "https://github.com/tomster12/coding/tree/master/processing/Sorting", showcase: "assets/gifs/SortingAlgorithms.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Particle Clock": { url: "https://github.com/tomster12/coding/tree/master/processing/ParticleClock", showcase: "assets/gifs/ParticleClock.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Ray Marching 2D": { url: "https://github.com/tomster12/coding/tree/master/processing/RayMarching2D", showcase: "assets/gifs/RayMarching.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Ray Marching 3D": { url: "https://github.com/tomster12/coding/tree/master/processing/RayMarching3D", showcase: "assets/gifs/RayMarching3D.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "Ray Marching 2D Shadows": { url: "https://github.com/tomster12/coding/tree/master/processing/RayMarching2DShadows", showcase: "assets/gifs/RayMarchingShadows.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
-    "RB Collision 2D": { url: "https://github.com/tomster12/coding/tree/master/processing/RBCollision2D", showcase: "assets/gifs/RigidbodyCollision.gif", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] }
+    "Wave Function Collapse": { url: "https://github.com/tomster12/coding/tree/master/c/raylib_overlapping_wfc", showcase: "WFC", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c", "raylib"] },
+    "Entity Component System (ECS)": { url: "https://github.com/tomster12/coding/tree/master/c++/ECS", showcase: "ECS", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
+    "Liquid Simulation": { url: "https://github.com/tomster12/coding/tree/master/c++/Liquid", showcase: "Liquid", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
+    "Machine Learning (from scratch)": { url: "https://github.com/tomster12/machine-learning-cpp", showcase: "MachineLearning", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["c++", "sfml"] },
+    "Collision 1D": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/collision_1D", showcase: "1DCollision", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Boids": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/boids_2D", showcase: "Boids1", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Cave Generation": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/cave_generation", showcase: "CaveGeneration1", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Dungeon Generation": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/dungeon_generation", showcase: "DungeonGeneration1", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Fourier": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/fourier", showcase: "Fourier", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Gate Simulation": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/gates_attempt_3", showcase: "Gates1", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Pathfinding Visualization": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/pathfinding_visualization", showcase: "Pathfinding", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Slide": { url: "https://github.com/tomster12/coding/tree/master/web/p5js/slide", showcase: "Slide", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["js", "p5js"] },
+    "Boids": { url: "https://github.com/tomster12/coding/tree/master/processing/Boids", showcase: "Boids2", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Camera": { url: "https://github.com/tomster12/coding/tree/master/processing/Camera", showcase: "Camera", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Camera 3D": { url: "https://github.com/tomster12/coding/tree/master/processing/Camera3D", showcase: "Camera3D", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Cave Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/CaveGeneration", showcase: "CaveGeneration2", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Dungeon Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/DungeonGeneration", showcase: "DungeonGeneration2", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Roguelike Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/RoguelikeGeneration", showcase: "RoguelikeGeneration", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Chaos Equations": { url: "https://github.com/tomster12/coding/tree/master/processing/ChaosEquations", showcase: "ChaosEquations", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Cut Mesh": { url: "https://github.com/tomster12/coding/tree/master/processing/CutMesh", showcase: "CutMesh", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Fluid Sim Main": { url: "https://github.com/tomster12/coding/tree/master/processing/FluidSimMain", showcase: "FluidSimulation", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Game Of Life": { url: "https://github.com/tomster12/coding/tree/master/processing/GameOfLife", showcase: "GameOfLife", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Gate Simulation": { url: "https://github.com/tomster12/coding/tree/master/processing/GatesAttempt2", showcase: "Gates2", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Gravity Simulation": { url: "https://github.com/tomster12/coding/tree/master/processing/Gravity", showcase: "Gravity", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Lissajous Curves": { url: "https://github.com/tomster12/coding/tree/master/processing/LissajousCurves", showcase: "LissajousCurves", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Mandelbrot": { url: "https://github.com/tomster12/coding/tree/master/processing/Mandelbrot", showcase: "Mandelbrot", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Marching Squares": { url: "https://github.com/tomster12/coding/tree/master/processing/MarchingSquares", showcase: "MarchingSquares", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Maze Generation": { url: "https://github.com/tomster12/coding/tree/master/processing/MazeGeneration", showcase: "MazeGeneration", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Sorting": { url: "https://github.com/tomster12/coding/tree/master/processing/Sorting", showcase: "SortingAlgorithms", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Particle Clock": { url: "https://github.com/tomster12/coding/tree/master/processing/ParticleClock", showcase: "ParticleClock", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Ray Marching 2D": { url: "https://github.com/tomster12/coding/tree/master/processing/RayMarching2D", showcase: "RayMarching", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Ray Marching 3D": { url: "https://github.com/tomster12/coding/tree/master/processing/RayMarching3D", showcase: "RayMarching3D", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "Ray Marching 2D Shadows": { url: "https://github.com/tomster12/coding/tree/master/processing/RayMarching2DShadows", showcase: "RayMarchingShadows", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] },
+    "RB Collision 2D": { url: "https://github.com/tomster12/coding/tree/master/processing/RBCollision2D", showcase: "RigidbodyCollision", repo: ["Coding", "https://github.com/tomster12/coding"], tags: ["processing"] }
 };
 
 const tagColours = {
@@ -79,7 +79,7 @@ Object.keys(projects).forEach(projectName => {
                 <p class="title">${projectName}</p>
             </div>
             <div class="showcase-section">
-                <img src="${project.showcase}" alt="" />
+                <img src="assets/previews/${project.showcase}.jpg" />
             </div>
             <div class="footer-section">
                 <div class="footer-row">
@@ -95,5 +95,15 @@ Object.keys(projects).forEach(projectName => {
             </div>
         </div>
     `);
+
+    // Listen to mouseenter / leave the .project and update the preview image src
+    const showcaseSection = projectElement.querySelector(".showcase-section");
+    projectElement.addEventListener("mouseenter", () => {
+        showcaseSection.querySelector("img").src = `assets/gifs/${project.showcase}.gif`;
+    });
+    projectElement.addEventListener("mouseleave", () => {
+        showcaseSection.querySelector("img").src = `assets/previews/${project.showcase}.jpg`;
+    });
+
     projectContainer.appendChild(projectElement);
 });
