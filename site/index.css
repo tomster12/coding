@@ -1,0 +1,145 @@
+@font-face {
+    font-family: "Custom";
+    src: url("assets/fonts/Custom.ttf") format("truetype");
+}
+
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+    user-select: none;
+    font-family: "Custom";
+}
+
+body {
+	background-color: #fcfcfc;
+}
+
+/* ------------- MAIN ------------- */
+
+.main-container {
+    max-width: 80rem;
+    margin: 0 auto;
+}
+
+.header {
+    padding: 1.2rem 5rem 1rem 4.5rem;
+    background-color: #a1c9f9;
+    box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.19);
+    border-radius: 0 0 0.4rem 0.4rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+@media (max-width: 80rem) {
+    .header {
+        border-radius: 0;
+    }
+}
+
+.header h1 {
+    color: #000000;
+    font-size: 1.7rem;
+}
+
+.header h2 {
+    color: #0000006c;
+    font-size: 1.2rem;
+}
+
+/* ------------- PROJECTS ------------- */
+
+.project-container {
+    margin: 3rem 2rem;
+    padding: 1.2rem;
+    background-color: #e3e3e3;
+    border-radius: 0.4rem;
+    box-shadow: inset 0 0.3rem 0.6rem rgba(0, 0, 0, 0.137);
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1.2rem;
+}
+
+.project {
+    height:fit-content;
+    width: min-content;
+	border-radius: 0.4rem;
+    padding: 0.8rem 1.2rem 0.5rem 1.2rem;
+    display: flex;
+    gap: 0.6rem;
+    flex-direction: column;
+    cursor: pointer;
+    transition: box-shadow 0.2s, background-color 0.2s;
+	background-color: #f4f4f4;
+	box-shadow: 0 0.2rem 0.6rem rgba(0, 0, 0, 0.154);
+}
+
+.project:hover {
+    background-color: #ffffff;
+    box-shadow: 0 0.4rem 1.1rem rgba(0, 0, 0, 0.19);
+}
+
+.project .title-section {
+    padding: 0 1rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.project .title {
+	font-size: 0.8rem;
+	text-align: center;
+	color: #000000;
+}
+
+.project .showcase-section {
+    display: flex;
+    justify-content: center;
+}
+
+.project .showcase-section img {
+    height: 10rem;
+    border-radius: 0.4rem;
+    box-shadow: 0 0.2rem 0.5rem rgba(0, 0, 0, 0.125);
+}
+
+.project .footer-section {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding-top: 0.4rem;
+}
+
+.project .footer-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: center;
+    padding: 0.2rem;
+}
+
+.project .footer-section .label {
+    font-size: 0.65rem;
+    font-weight: 100;
+}
+
+.project .footer-section .tag {
+    padding: 0.15rem 0.6rem;
+	font-size: 0.7rem;
+    font-weight: bold;
+	text-align: center;
+	color: #000000c7;
+	box-shadow: 0 0.1rem 0.3rem rgba(0, 0, 0, 0.226);
+	border-radius: 0.4rem;
+    transition: filter 0.2s;
+}
+
+.project .footer-section .tag:hover {
+    filter: brightness(110%);
+}
+
+.project .tags-list {
+	display: flex;
+	gap: 0.6rem;
+}

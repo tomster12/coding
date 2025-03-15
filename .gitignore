@@ -2,32 +2,25 @@
 /exclude/
 /software/
 /github/
+token
 
 # My submodule syntax
 /**/[Gg]it*/
 
 # Build byproducts
-_site/
-.jekyll-cache/
-/c++/**/bin/
+/general/docker/docker_network/mongodb/
 /c++/**/.vs/
 /c++/**/dependencies/
 /c++/**/x64/
 /c++/**/Release/
 /c++/**/Debug/
 /c/**/external/
-/**/node_modules/
 /**/.parcel-cache/
-/general/docker/docker_network/mongodb/
-
-# Build byproducts catch-all (these could be a bit over reaching)
 /**/target/
 /**/dist/
 /**/bin/
 /**/build/
-
-# Local files
-token
+/**/node_modules/
 
 # Unity Projects
 /unity/!Builds/
