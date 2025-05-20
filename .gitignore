@@ -1,7 +1,4 @@
 # Explicit hidden files
-/exclude/
-/software/
-/github/
 token
 
 # My submodule syntax

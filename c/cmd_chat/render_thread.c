@@ -1,10 +1,8 @@
 #include <windows.h>
 #include <stdio.h>
+#include "constants.h"
 #include "render_thread.h"
 #include "app_context.h"
-
-#define WINDOW_WIDTH 50
-#define MESSAGE_LIST_HEIGHT 12
 
 void move_cursor_to(int x, int y)
 {

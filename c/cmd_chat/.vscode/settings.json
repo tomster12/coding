@@ -1,0 +1,12 @@
+{
+    "files.associations": {
+        "*.jlox": "bat",
+        "*.lox": "ruby",
+        "listener_thread.h": "c",
+        "app_context.h": "c",
+        "input_thread.h": "c",
+        "constants.h": "c",
+        "render_thread.h": "c",
+        "stdio.h": "c"
+    }
+}

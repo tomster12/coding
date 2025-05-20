@@ -1,15 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "input_thread.h"
+#include "constants.h"
 #include "app_context.h"
-
-#define BROADCAST_IP "255.255.255.255"
-#define BROADCAST_PORT 5120
+#include "input_thread.h"
 
 SOCKET create_broadcast_socket(struct sockaddr_in *address)
 {
     SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
-
     if (sock == INVALID_SOCKET)
     {
         printf("Error creating broadcast socket: %ld\n", WSAGetLastError());

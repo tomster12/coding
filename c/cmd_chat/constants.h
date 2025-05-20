@@ -1,0 +1,10 @@
+#pragma once
+
+#define BROADCAST_IP "255.255.255.255"
+#define BROADCAST_PORT 5120
+#define MAX_BUFFER 256
+#define MAX_MESSAGES 100
+#define LISTEN_PORT 5120
+#define MAX_SIZE 1024
+#define WINDOW_WIDTH 50
+#define MESSAGE_LIST_HEIGHT 12

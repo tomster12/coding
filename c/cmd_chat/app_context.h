@@ -1,11 +1,9 @@
 #pragma once
 
 #include <windows.h>
+#include "constants.h"
 
-#define MAX_BUFFER 256
-#define MAX_MESSAGES 100
-
-typedef struct _AppContext
+typedef struct
 {
     HANDLE h_console;
     char *messages[MAX_MESSAGES];

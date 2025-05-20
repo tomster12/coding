@@ -1,11 +1,9 @@
 #include <stdio.h>
 #include <winsock2.h>
 #include <windows.h>
+#include "constants.h"
 #include "listener_thread.h"
 #include "app_context.h"
-
-#define LISTEN_PORT 5120
-#define MAX_SIZE 1024
 
 SOCKET create_listener_socket(struct sockaddr_in *address)
 {
