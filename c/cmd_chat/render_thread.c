@@ -1,33 +1,44 @@
 #include <windows.h>
 #include <stdio.h>
-#include "constants.h"
-#include "render_thread.h"
+#include <string.h>
 #include "app_context.h"
 
-void move_cursor_to(int x, int y)
+void move_cursor_to(AppContext *ctx, int x, int y)
 {
     COORD coord = {x, y};
-    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+    SetConsoleCursorPosition(ctx->h_console, coord);
 }
 
-void init_render_window()
+void clear_line(AppContext *ctx, int y)
 {
-    system("cls");
+    move_cursor_to(ctx, 0, y);
+    printf("                                                                              \r");
+}
 
-    printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    printf("┃                    Text Chat                ┃\n");
-    printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
+void render_messages(AppContext *ctx)
+{
+    int start = ctx->messages_count > MAX_MESSAGES_DISPLAY
+                ? ctx->messages_count - MAX_MESSAGES_DISPLAY
+                : 0;
 
-    for (int i = 0; i < MESSAGE_LIST_HEIGHT; i++)
+    for (int i = 0; i < MAX_MESSAGES_DISPLAY; i++)
     {
-        printf("                                               \n");
+        int msg_index = start + i;
+        int line = LINE_MESSAGES_START + i;
+        if (msg_index < ctx->messages_count)
+        {
+            clear_line(ctx, line);
+            move_cursor_to(ctx, 0, line);
+            printf("%s", ctx->messages[msg_index]);
+        }
     }
+}
 
-    printf("┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓\n");
-    printf("┃ >                                           ┃\n");
-    printf("┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛\n");
-
-    move_cursor_to(4, MESSAGE_LIST_HEIGHT + 4);
+void render_input_line(AppContext *ctx)
+{
+    clear_line(ctx, LINE_INPUT);
+    move_cursor_to(ctx, 0, LINE_INPUT);
+    printf("> ");
 }
 
 DWORD WINAPI render_thread(LPVOID arg)
@@ -35,8 +46,10 @@ DWORD WINAPI render_thread(LPVOID arg)
     AppContext *ctx = (AppContext *)arg;
 
     SetConsoleOutputCP(CP_UTF8);
+    system("cls");
 
-    init_render_window();
+    printf("----- CMD Chat -----\n");
+    render_input_line(ctx);
 
     while (1)
     {
@@ -44,46 +57,32 @@ DWORD WINAPI render_thread(LPVOID arg)
 
         if (ctx->to_exit)
         {
+            ReleaseMutex(ctx->ui_mutex);
             break;
         }
 
         if (ctx->to_update_messages)
         {
-            // Get current cursor position
             CONSOLE_SCREEN_BUFFER_INFO csbi;
             GetConsoleScreenBufferInfo(ctx->h_console, &csbi);
+            COORD cursor_pos = csbi.dwCursorPosition;
 
-            // Clear message box then write each message
-            for (int i = 0; i < MESSAGE_LIST_HEIGHT; i++)
-            {
-                move_cursor_to(2, 3 + i);
-                printf("                                               \n");
-            }
+            render_messages(ctx);
 
-            for (int i = 0; i < ctx->messages_count && i < MESSAGE_LIST_HEIGHT; i++)
-            {
-                move_cursor_to(2, 3 + MESSAGE_LIST_HEIGHT - i - 1);
-                printf("%s", ctx->messages[ctx->messages_count - i - 1]);
-            }
-
-            // Move cursor back to where it was before
-            SetConsoleCursorPosition(ctx->h_console, csbi.dwCursorPosition);
+            move_cursor_to(ctx, cursor_pos.X, cursor_pos.Y);
 
             ctx->to_update_messages = 0;
         }
 
         if (ctx->to_clear_input)
         {
-            move_cursor_to(0, MESSAGE_LIST_HEIGHT + 4);
-            printf("┃ >                                           ┃\n");
-            move_cursor_to(4, MESSAGE_LIST_HEIGHT + 4);
+            render_input_line(ctx);
             ctx->to_clear_input = 0;
         }
 
         ReleaseMutex(ctx->ui_mutex);
-
         Sleep(100);
     }
 
-    system("cls");
+    return 0;
 }

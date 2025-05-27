@@ -1,5 +1,5 @@
-// build: -I../libs/sdl/include -L../libs/sdl/lib
-// build: -lSDL2 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid -lsetupapi
+// cbuild: -I../libs/sdl/include -L../libs/sdl/lib
+// cbuild: -lSDL2 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid -lsetupapi
 
 #include <stdio.h>
 

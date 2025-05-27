@@ -1,6 +1,6 @@
-// build: wfc.c -Wall -Werror -O3
-// build: -I../libs/raylib/include -L../libs/raylib/lib
-// build: -lraylib -lopengl32 -lgdi32 -lwinmm -lm
+// cbuild: wfc.c -Wall -Werror -O3
+// cbuild: -I../libs/raylib/include -L../libs/raylib/lib
+// cbuild: -lraylib -lopengl32 -lgdi32 -lwinmm -lm
 
 #include <stdio.h>
 #include <stdlib.h>

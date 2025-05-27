@@ -7,17 +7,16 @@
 
 SOCKET create_listener_socket(struct sockaddr_in *address)
 {
-    SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
+    address->sin_family = AF_INET;
+    address->sin_addr.s_addr = INADDR_ANY;
+    address->sin_port = htons(LISTEN_PORT);
 
+    SOCKET sock = socket(AF_INET, SOCK_DGRAM, 0);
     if (sock == INVALID_SOCKET)
     {
         printf("Error creating listener socket: %ld\n", WSAGetLastError());
         exit(1);
     }
-
-    address->sin_family = AF_INET;
-    address->sin_addr.s_addr = INADDR_ANY;
-    address->sin_port = htons(LISTEN_PORT);
 
     BOOL reuse = TRUE;
     if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, (char *)&reuse, sizeof(reuse)) == SOCKET_ERROR)
@@ -45,12 +44,11 @@ DWORD WINAPI listener_thread(LPVOID arg)
     struct sockaddr_in client_addr;
     SOCKET server_sock = create_listener_socket(&server_addr);
     int client_addr_size = sizeof(client_addr);
-    char buffer[MAX_SIZE];
+    char buffer[MAX_MESSAGE_SIZE];
 
     while (1)
     {
-        int recv_len = recvfrom(server_sock, buffer, MAX_SIZE - 1, 0, (struct sockaddr *)&client_addr, &client_addr_size);
-
+        int recv_len = recvfrom(server_sock, buffer, MAX_MESSAGE_SIZE - 1, 0, (struct sockaddr *)&client_addr, &client_addr_size);
         if (recv_len <= 0)
         {
             printf("Failed to receive data.\n");

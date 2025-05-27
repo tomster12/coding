@@ -1,6 +1,6 @@
-// build: -Wall -Werror -O3
-// build: -I../libs/raylib/include -L../libs/raylib/lib
-// build: -lraylib -lopengl32 -lgdi32 -lwinmm
+// cbuild: -Wall -Werror -O3
+// cbuild: -I../libs/raylib/include -L../libs/raylib/lib
+// cbuild: -lraylib -lopengl32 -lgdi32 -lwinmm
 
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,5 +1,5 @@
-// build: -I../libs/raylib/include -L../libs/raylib/lib
-// build: -lraylib -lopengl32 -lgdi32 -lwinmm
+// cbuild: -I../libs/raylib/include -L../libs/raylib/lib
+// cbuild: -lraylib -lopengl32 -lgdi32 -lwinmm
 
 #include <math.h>
 #include "raylib.h"

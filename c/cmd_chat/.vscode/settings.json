@@ -7,6 +7,7 @@
         "input_thread.h": "c",
         "constants.h": "c",
         "render_thread.h": "c",
-        "stdio.h": "c"
+        "stdio.h": "c",
+        "windows.h": "c"
     }
 }

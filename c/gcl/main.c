@@ -1,5 +1,5 @@
-// build: -I../libs/sdl/include -L../libs/sdl/lib -I../libs/nuklear/include
-// build: -lSDL2 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid -lsetupapi -lopengl32
+// cbuild: -I../libs/sdl/include -L../libs/sdl/lib -I../libs/nuklear/include
+// cbuild: -lSDL2 -lgdi32 -lwinmm -limm32 -lole32 -loleaut32 -lversion -luuid -lsetupapi -lopengl32
 
 #define SDL_MAIN_HANDLED // Avoids SDL main which causes issues on Windows with WinMain
 #define NK_INCLUDE_FIXED_TYPES // All of toggles enable various features in nuklear and are needed for nuklear_sdl_gl2
