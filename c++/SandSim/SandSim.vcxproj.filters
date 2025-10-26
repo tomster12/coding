@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Particles">
+      <UniqueIdentifier>{1ae05cd5-3b6d-462b-9642-755570a377bc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Driver">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="ParticleGrid.cpp">
+      <Filter>Particles</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ParticleGrid.h">
+      <Filter>Particles</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="instanced.vs">
+      <Filter>Particles</Filter>
+    </None>
+    <None Include="instanced.fs">
+      <Filter>Particles</Filter>
+    </None>
+  </ItemGroup>
+</Project>
