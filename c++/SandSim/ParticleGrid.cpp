@@ -13,8 +13,7 @@ ParticleGrid::ParticleGrid(int sizeX, int sizeY, int sizeZ, float gridSize)
 	mesh = GenMeshCube(gridSize, gridSize, gridSize);
 
 	Shader shader = LoadShader("instanced.vs", "instanced.fs");
-	shader.locs[SHADER_LOC_MATRIX_MVP] = GetShaderLocation(shader, "mvp");
-	shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader, "model");
+	shader.locs[SHADER_LOC_MATRIX_MODEL] = GetShaderLocationAttrib(shader, "matInstance");
 
 	material = LoadMaterialDefault();
 	material.shader = shader;

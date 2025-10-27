@@ -6,7 +6,7 @@
 #define GRID_SIZE_X 32
 #define GRID_SIZE_Y 32
 #define GRID_SIZE_Z 32
-#define GRID_SIZE 0.1f
+#define GRID_SIZE 0.02f
 #define SCREEN_HEIGHT 1080
 #define SCREEN_WIDTH 1920
 #define SCREEN_HEIGHT 1080
@@ -37,7 +37,7 @@ int main()
 		spawnTimer += dt;
 		if (spawnTimer > SPAWN_TIMESTEP)
 		{
-			grid.spawnAtTop(15, 15, ParticleType::SAND);
+			grid.spawnAtTop(10, 10, ParticleType::SAND);
 			spawnTimer = 0;
 		}
 
