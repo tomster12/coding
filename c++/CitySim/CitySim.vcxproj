@@ -165,9 +165,9 @@
   <ItemGroup>
     <ClCompile Include="BuildingManager.cpp" />
     <ClCompile Include="DrawQueue.cpp" />
-    <ClCompile Include="Game.cpp" />
+    <ClCompile Include="Application.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="PlayerController.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="QuadArray.cpp" />
     <ClCompile Include="RoadNetwork.cpp" />
     <ClCompile Include="RoadPathfinding.cpp" />
@@ -185,8 +185,8 @@
   <ItemGroup>
     <ClInclude Include="BuildingManager.h" />
     <ClInclude Include="DrawQueue.h" />
-    <ClInclude Include="Game.h" />
-    <ClInclude Include="PlayerController.h" />
+    <ClInclude Include="Application.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="QuadArray.h" />
     <ClInclude Include="RoadNetwork.h" />
     <ClInclude Include="RoadPathfinding.h" />

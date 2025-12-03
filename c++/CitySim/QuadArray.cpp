@@ -5,7 +5,7 @@ QuadArray::QuadArray(size_t count, float size)
 	: quadsCount(count), quadsSize(size), quadsVtx(sf::Triangles, count * 6), quadsPos(count)
 {};
 
-void QuadArray::render(sf::RenderWindow* window)
+void QuadArray::queueRenders(sf::RenderWindow* window)
 {
 	window->draw(quadsVtx);
 }

@@ -1,19 +1,20 @@
 #pragma once
 
+#include "stdafx.h"
 #include "DrawQueue.h"
-#include "Game.h"
+#include "Application.h"
 #include "RoadNetwork.h"
 #include "RoadRenderer.h"
 #include "BuildingManager.h"
 #include "QuadArray.h"
 
-class Game;
+class Application;
 class Simulation;
 
 class Simulation
 {
 public:
-	Simulation(Game* game, sf::RenderWindow* window);
+	Simulation(Application* app, sf::RenderWindow* window);
 	~Simulation();
 	void update();
 	void queueRenders(DrawQueue& drawQueue);
@@ -29,9 +30,8 @@ public:
 	static const sf::Color GRASS_COL;
 
 private:
-	Game* game;
+	Application* app;
 	sf::RenderWindow* window;
-
 	RoadNetwork* roadNetwork;
 	RoadRenderer* roadRenderer;
 	BuildingManager* buildingManager;

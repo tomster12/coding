@@ -83,15 +83,16 @@ public:
 
 	RoadRenderer(RoadNetwork* network, bool isTemporary = false);
 
-	void queueRenders(DrawQueue& drawQueue, float zIndex = 3.0f);
+	void queueRenders(float zIndex, DrawQueue& drawQueue);
 	void updateMesh();
-	virtual void onMoveNode(int id, const sf::Vector2f& oldPos, const sf::Vector2f& newPos) override;
-	virtual void onAddSegment(int id) override;
-	virtual void onRemoveSegment(int id) override;
 	void clear();
 
 	const RoadNodeMesh& getNodeMesh(int id) { return nodeMeshes[id]; }
 	const RoadSegmentMesh& getSegmentMesh(int id) { return segmentMeshes[id]; }
+
+	virtual void onMoveNode(int id, const sf::Vector2f& oldPos, const sf::Vector2f& newPos) override;
+	virtual void onAddSegment(int id) override;
+	virtual void onRemoveSegment(int id) override;
 
 	void subscribeListener(IRoadRendererListener* listener) { listeners.push_back(listener); }
 	void unsubscribeListener(IRoadRendererListener* listener) { listeners.erase(std::find(listeners.begin(), listeners.end(), listener)); }

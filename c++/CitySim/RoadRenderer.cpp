@@ -15,18 +15,18 @@ RoadRenderer::RoadRenderer(RoadNetwork* network, bool isTemporary)
 	network->subscribeListener(this);
 }
 
-void RoadRenderer::queueRenders(DrawQueue& drawQueue, float zIndex)
+void RoadRenderer::queueRenders(float zIndex, DrawQueue& drawQueue)
 {
 	updateMesh();
 	for (auto& mesh : segmentMeshes)
 	{
-		drawQueue.queue({ zIndex, &mesh.second.mainVtx });
-		drawQueue.queue({ zIndex + 0.1f, &mesh.second.colliderVtx });
+		drawQueue.queue(zIndex, &mesh.second.mainVtx);
+		drawQueue.queue(zIndex + 0.1f, &mesh.second.colliderVtx);
 	}
 	for (auto& mesh : nodeMeshes)
 	{
-		drawQueue.queue({ zIndex, &mesh.second.mainVtx });
-		drawQueue.queue({ zIndex + 0.1f, &mesh.second.colliderVtx });
+		drawQueue.queue(zIndex, &mesh.second.mainVtx);
+		drawQueue.queue(zIndex + 0.1f, &mesh.second.colliderVtx);
 	}
 }
 

@@ -7,7 +7,7 @@ class QuadArray
 public:
 	QuadArray() {}
 	QuadArray(size_t count, float size);
-	void render(sf::RenderWindow* window);
+	void queueRenders(sf::RenderWindow* window);
 
 	const sf::Vector2f& getPosition(int i) const;
 	void setPosition(int i, float x, float y);

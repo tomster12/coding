@@ -8,10 +8,10 @@ const float Simulation::ROAD_HWIDTH = 10.0f;
 const float Simulation::PATH_HWIDTH = 10.0f;
 const float Simulation::NODE_CURVE_SIZE = 17.0f;
 
-Simulation::Simulation(Game* game, sf::RenderWindow* window)
-	: game(game), window(window)
+Simulation::Simulation(Application* app, sf::RenderWindow* window)
+	: app(app), window(window)
 {
-	game->setClearColor(GRASS_COL);
+	app->setClearColor(GRASS_COL);
 
 	// Intialize road network
 	roadNetwork = new RoadNetwork();
@@ -65,7 +65,7 @@ void Simulation::update()
 
 void Simulation::queueRenders(DrawQueue& drawQueue)
 {
-	roadRenderer->queueRenders(drawQueue);
+	roadRenderer->queueRenders(3.0f, drawQueue);
 	buildingManager->queueRenders(drawQueue);
-	quads.render(window);
+	quads.queueRenders(window);
 }

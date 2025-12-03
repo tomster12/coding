@@ -12,7 +12,7 @@ void BuildingManager::queueRenders(DrawQueue& drawQueue)
 {
 	for (auto& edgePair : buildableEdges)
 	{
-		drawQueue.queue({ 3.0f, &edgePair.second.mainVtx });
+		drawQueue.queue(3.0f, &edgePair.second.mainVtx);
 	}
 }
 

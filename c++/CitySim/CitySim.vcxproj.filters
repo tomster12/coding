@@ -16,7 +16,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Game.cpp">
+    <ClCompile Include="Application.cpp">
       <Filter>Driver</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
@@ -52,12 +52,12 @@
     <ClCompile Include="Simulation.cpp">
       <Filter>Main\Simulation</Filter>
     </ClCompile>
-    <ClCompile Include="PlayerController.cpp">
+    <ClCompile Include="Player.cpp">
       <Filter>Main</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Game.h">
+    <ClInclude Include="Application.h">
       <Filter>Driver</Filter>
     </ClInclude>
     <ClInclude Include="GeomUtility.h">
@@ -90,7 +90,7 @@
     <ClInclude Include="Simulation.h">
       <Filter>Main\Simulation</Filter>
     </ClInclude>
-    <ClInclude Include="PlayerController.h">
+    <ClInclude Include="Player.h">
       <Filter>Main</Filter>
     </ClInclude>
   </ItemGroup>

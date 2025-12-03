@@ -1,6 +1,6 @@
 #pragma once
 
-struct QueuedDraw
+struct DrawQueueEntry
 {
 	float zIndex;
 	sf::Drawable* drawable;
@@ -9,9 +9,10 @@ struct QueuedDraw
 class DrawQueue
 {
 public:
-	void queue(QueuedDraw draw);
+	void queue(float zIndex, sf::Drawable* drawable);
 	void render(sf::RenderWindow* window);
+	void clear();
 
 private:
-	std::vector<QueuedDraw> draws;
+	std::vector<DrawQueueEntry> draws;
 };
