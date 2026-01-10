@@ -34,7 +34,7 @@ public:
 	{
 		std::vector<size_t> l(size);
 		for (size_t i = 0; i < size; ++i) l[i] = i;
-		static thread_local std::mt19937 rng{ std::random_device{}() };
+		static thread_local std::mt19937 rng{ 0 }; //  std::random_device{}() };
 		std::shuffle(l.begin(), l.end(), rng);
 		return Element(l);
 	}
@@ -61,25 +61,43 @@ public:
 class Isomorph
 {
 public:
-	std::unordered_map<size_t, size_t> map;
-	size_t nextId = 0;
+	explicit Isomorph(size_t alphabetSize)
+		: map(alphabetSize, SIZE_MAX), nextId(0)
+	{}
 
-	size_t GetId(size_t letter)
+	size_t GetId(size_t symbol)
 	{
-		auto it = map.find(letter);
-		if (it != map.end()) return it->second;
-		size_t id = nextId++;
-		map[letter] = id;
-		return id;
+		size_t& v = map[symbol];
+		if (v != SIZE_MAX) return v;
+		v = nextId;
+		return nextId++;
 	}
 
-	size_t CheckId(size_t letter) const
+	size_t CheckId(size_t symbol) const
 	{
-		auto it = map.find(letter);
-		if (it != map.end()) return it->second;
-		return nextId + 1;
+		size_t v = map[symbol];
+		return (v != SIZE_MAX) ? v : SIZE_MAX;
 	}
+
+	size_t NextId() const { return nextId; }
+
+private:
+	std::vector<size_t> map;
+	size_t nextId;
 };
+
+std::vector<size_t> BuildIsomorphPattern(
+	const std::vector<size_t>& ct,
+	size_t alphabetSize)
+{
+	Isomorph ctLetterIsoValue(alphabetSize);
+	std::vector<size_t> pattern(ct.size());
+	for (size_t i = 0; i < ct.size(); ++i)
+	{
+		pattern[i] = ctLetterIsoValue.GetId(ct[i]);
+	}
+	return pattern;
+}
 
 std::vector<Swap> AllSwaps(size_t size)
 {
@@ -149,6 +167,7 @@ static void PrintSetup(
 	const Element& ptBasePermutation,
 	const std::vector<size_t>& pt,
 	const std::vector<size_t>& ct,
+	const std::vector<size_t>& ctPattern,
 	size_t ptAlphabetSize, size_t ctAlphabetSize)
 {
 	printf("PT Alphabet size: %zu\n", ptAlphabetSize);
@@ -165,6 +184,9 @@ static void PrintSetup(
 
 	printf("CT ASCII (+32): ");
 	PrintTextAscii(ct, 32);
+
+	printf("CT Pattern: ");
+	PrintText(ctPattern);
 
 	printf("\nCT Base state: ");
 	ctBaseState.Print();
@@ -198,68 +220,72 @@ static void PrintNewApplication(
 
 static bool DFS(
 	const std::vector<size_t>& pt,
-	const std::vector<size_t>& ct,
+	const std::vector<size_t>& ctPattern,
 	size_t index,
-	const Element& ctPrevState,
-	const Element& ptBasePermutation,
+	Isomorph stateIso,
+	const Element& prevState,
+	const Element& basePtPermutation,
 	std::unordered_map<size_t, TripleSwap>& ptPermutations,
 	const std::vector<Swap>& allSwaps)
 {
 	if (index == pt.size()) return true;
 
 	size_t ptLetter = pt[index];
+	size_t expectedIso = ctPattern[index];
+
+	auto applyTriple = [&](const Element& state, const TripleSwap& t)
+	{
+		Element next = state.ComposeLeft(basePtPermutation);
+		next.ApplySwap(t.s1.a, t.s1.b);
+		next.ApplySwap(t.s2.a, t.s2.b);
+		next.ApplySwap(t.s3.a, t.s3.b);
+		return next;
+	};
 
 	// Already assigned PT letter so reuse
-	if (ptPermutations.count(ptLetter))
+	auto it = ptPermutations.find(ptLetter);
+	if (it != ptPermutations.end())
 	{
-		TripleSwap triple = ptPermutations[ptLetter];
-		Element ctNextState = ctPrevState.ComposeLeft(ptBasePermutation);
-		ctNextState.ApplySwap(triple.s1.a, triple.s1.b);
-		ctNextState.ApplySwap(triple.s2.a, triple.s2.b);
-		ctNextState.ApplySwap(triple.s3.a, triple.s3.b);
+		Element nextState = applyTriple(prevState, it->second);
 
-		if (ctNextState.letters[0] == ct[index])
-		{
-			PrintRepeatedApplication(index, ptLetter, ct[index]);
-			return DFS(pt, ct, index + 1, ctNextState, ptBasePermutation, ptPermutations, allSwaps);
-		}
+		size_t ctLetter = nextState.letters[0];
+		size_t ctLetterIsoValue = stateIso.GetId(ctLetter);
+		if (ctLetterIsoValue != expectedIso) return false;
 
-		return false;
+		return DFS(pt, ctPattern, index + 1, stateIso, nextState, basePtPermutation, ptPermutations, allSwaps);
 	}
 
 	// Try all possible triple combinations for this PT
-	bool found = false;
 	for (const Swap& s1 : allSwaps)
 	{
 		for (const Swap& s2 : allSwaps)
 		{
 			for (const Swap& s3 : allSwaps)
 			{
-				TripleSwap triple = { s1, s2, s3 };
-				Element ctNextState = ctPrevState.ComposeLeft(ptBasePermutation);
-				ctNextState.ApplySwap(triple.s1.a, triple.s1.b);
-				ctNextState.ApplySwap(triple.s2.a, triple.s2.b);
-				ctNextState.ApplySwap(triple.s3.a, triple.s3.b);
+				TripleSwap triple{ s1, s2, s3 };
+				Element nextState = applyTriple(prevState, triple);
 				TallyCheck();
 
-				if (ctNextState.letters[0] == ct[index])
-				{
-					PrintNewApplication(index, ptLetter, ct[index], triple, ctPrevState, ctNextState);
-					ptPermutations[ptLetter] = triple;
-					found = DFS(pt, ct, index + 1, ctNextState, ptBasePermutation, ptPermutations, allSwaps);
-				}
+				Isomorph nextStateIso = stateIso;
+				size_t ctLetter = nextState.letters[0];
+				size_t ctLetterIsoValue = nextStateIso.GetId(ctLetter);
+				if (ctLetterIsoValue != expectedIso) continue;
 
-				if (found) break;
+				ptPermutations[ptLetter] = triple;
+				bool found = DFS(pt, ctPattern, index + 1, nextStateIso, nextState, basePtPermutation, ptPermutations, allSwaps);
+				if (found) return true;
+				ptPermutations.erase(ptLetter);
 			}
-			if (found) break;
 		}
-		if (found) break;
 	}
+
+	return false;
 }
 
 static void RunTesting(
 	const std::vector<size_t>& pt,
 	const std::vector<size_t>& ct,
+	size_t ptAlphabetSize,
 	const Element& ctBaseState,
 	const Element& ptBasePermutation,
 	std::unordered_map<size_t, TripleSwap>& ptPermutations)
@@ -294,7 +320,26 @@ static void RunTesting(
 		char ctChar = static_cast<char>(ctLetter + 32);
 		printf("= CT %zu (%c) = ", ctLetter, ctChar);
 		state.Print();
+
+		outCt.push_back(ctLetter);
 	}
+
+	auto realCtPattern = BuildIsomorphPattern(ct, ptAlphabetSize);
+	auto outCtPattern = BuildIsomorphPattern(outCt, ptAlphabetSize);
+
+	printf("\nReal CT: ");
+	PrintText(ct);
+
+	printf("Out CT: ");
+	PrintText(outCt);
+
+	printf("Real CT Pattern: ");
+	PrintText(realCtPattern);
+
+	printf("Out CT Pattern: ");
+	PrintText(outCtPattern);
+
+	int a;
 }
 
 int main()
@@ -306,46 +351,48 @@ int main()
 	std::vector<size_t> ptAlphabet(PTA_SIZE);
 	for (size_t i = 0; i < PTA_SIZE; ++i) ptAlphabet[i] = i;
 
+	#if 0
 	std::string ptEnglish = "helloworld";
 	std::vector<size_t> pt = TextFromString(ptEnglish);
 	std::vector<size_t> ct = { 50, 66, 5, 48, 62, 13, 75, 29, 24, 61 };
+	#endif
 
+	#if 1
+	std::string ptEnglish = "hamisarcool";
+	std::vector<size_t> pt = TextFromString(ptEnglish);
+	std::vector<size_t> ct = { 47, 44, 48, 42, 19, 48, 13, 47, 19, 49, 44 };
+	#endif
+
+	#if 0
 	// We will need isomorphic checking for this to even think about working
 	// We also likely need to support the numbers, so update the print functions
-	// std::string ptEnglish = "seekingtruththewisefindinsteaditsprofoundabsence";
-	// std::vector<size_t> pt = TextFromString(ptEnglish);
-	// std::vector<size_t> ct = { 50, 66, 5, 48, 62, 13, 75, 29, 24, 61, 42, 70, 66, 62, 32, 14, 81, 8, 15, 78, 2, 29, 13, 49, 1, 80, 82, 40, 63, 81, 21, 19, 0, 40, 51, 65, 26, 14, 21, 70, 47, 44, 48, 42, 19, 48, 13, 47 };
+	std::string ptEnglish = "seekingtruththewisefindinsteaditsprofoundabsence";
+	std::vector<size_t> pt = TextFromString(ptEnglish);
+	std::vector<size_t> ct = { 50, 66, 5, 48, 62, 13, 75, 29, 24, 61, 42, 70, 66, 62, 32, 14, 81, 8, 15, 78, 2, 29, 13, 49, 1, 80, 82, 40, 63, 81, 21, 19, 0, 40, 51, 65, 26, 14, 21, 70, 47, 44, 48, 42, 19, 48, 13, 47 };
+	#endif
 
-	Element ptBasePermutation = Element::Random(CTA_SIZE);
-	Element ctBaseState = Element::Identity(CTA_SIZE);
-
-	PrintSetup(ctBaseState, ptBasePermutation, pt, ct, PTA_SIZE, CTA_SIZE);
+	Element basePtPermutation = Element::Random(CTA_SIZE);
+	Element baseState = Element::Identity(CTA_SIZE);
 
 	// Variables required for running DFS
 	std::vector<Swap> allSwaps = AllSwaps(CTA_SIZE);
 	std::unordered_map<size_t, TripleSwap> ptPermutations;
+	auto ctPattern = BuildIsomorphPattern(ct, CTA_SIZE);
+	Isomorph baseIso(CTA_SIZE);
+
+	PrintSetup(baseState, basePtPermutation, pt, ct, ctPattern, PTA_SIZE, CTA_SIZE);
 
 	// Run, time, and print the DFS
 	printf("Starting DFS...\n");
-
-	#ifdef LOG_DEBUG
-	printf("-----------------\n");
-	#endif
-
 	auto start = std::chrono::high_resolution_clock::now();
-	DFS(pt, ct, 0, ctBaseState, ptBasePermutation, ptPermutations, allSwaps);
+	DFS(pt, ctPattern, 0, baseIso, baseState, basePtPermutation, ptPermutations, allSwaps);
 	auto end = std::chrono::high_resolution_clock::now();
 	std::chrono::duration<double> elapsed = end - start;
-
-	#ifdef LOG_DEBUG
-	printf("-----------------\n");
-	#endif
-
 	printf("DFS finished in% f seconds after viewing %zu triples.\n", elapsed.count(), globalTripleCount);
 
 	// Run testing afterwards
 	printf("\nTesting final plaintext permutations...\n\n");
-	RunTesting(pt, ct, ctBaseState, ptBasePermutation, ptPermutations);
+	RunTesting(pt, ct, CTA_SIZE, baseState, basePtPermutation, ptPermutations);
 
 	return 0;
 }
