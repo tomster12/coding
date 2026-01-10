@@ -310,7 +310,8 @@ int main()
 	std::vector<size_t> pt = TextFromString(ptEnglish);
 	std::vector<size_t> ct = { 50, 66, 5, 48, 62, 13, 75, 29, 24, 61 };
 
-	// We will need isomorph
+	// We will need isomorphic checking for this to even think about working
+	// We also likely need to support the numbers, so update the print functions
 	// std::string ptEnglish = "seekingtruththewisefindinsteaditsprofoundabsence";
 	// std::vector<size_t> pt = TextFromString(ptEnglish);
 	// std::vector<size_t> ct = { 50, 66, 5, 48, 62, 13, 75, 29, 24, 61, 42, 70, 66, 62, 32, 14, 81, 8, 15, 78, 2, 29, 13, 49, 1, 80, 82, 40, 63, 81, 21, 19, 0, 40, 51, 65, 26, 14, 21, 70, 47, 44, 48, 42, 19, 48, 13, 47 };
