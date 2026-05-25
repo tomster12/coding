@@ -1,0 +1,505 @@
+// ./Client/ClientConnection.cs
+namespace Drakken.Client
+{
+    public class ClientConnection
+    {
+        public static ClientConnection Singleton { get; private set; }
+        private readonly GameClient client;
+        private TaskCompletionSource<JoinMatchResponse> _joinMatchTcs;
+        public ClientConnection(GameClient client);
+        // -------------------------------------- Match Setup
+        public Task<JoinMatchResponse> RequestJoinMatch();
+        public void OnRespondJoinMatch(JoinMatchResponse response);
+        public void SendMatchReady(ulong matchId);
+        public void OnMatchStarted(GameState state);
+        // -------------------------------------- Match Flow
+        public void SendMatchPlayToken(TokenIntentMessage intentMsg);
+        public void OnMatchPlayTokenResolved(TokenResolutionMessage resolution);
+        public void OnMatchStartTurn(int activeClientIndex);
+        public void OnMatchEndRound(int p0Score, int p1Score);
+    }
+}
+// ./Client/ClientMatch.cs
+namespace Drakken.Client
+{
+    public class ClientMatch
+    {
+        public System.Action MatchStarted = default;
+        public System.Action<int> TurnStarted = default;
+        public System.Action<int, int> RoundEnded = default;
+        public ulong MatchId { get; }
+        public int ClientIndex { get; }
+        public GameState GameState { get; private set; }
+        public bool IsMyTurn;
+        private readonly GameClient client;
+        private Task currentResolutionTask;
+        public ClientMatch(GameClient client, JoinMatchResponse response);
+        public void SetReady();
+        public void OnMatchStarted(GameState state);
+        public void OnStartTurn(int activeClientIndex);
+        public void OnEndRound(int p0Score, int p1Score);
+        public void PlayToken(TokenInstance token, TokenIntent intent);
+        public void OnPlayTokenResolved(TokenResolutionMessage resolutionMsg);
+        private TokenVisualContext BuildVisualContext();
+    }
+}
+// ./Client/ClientState.cs
+namespace Drakken.Client
+{
+    public class ClientState
+    {
+        protected GameClient client;
+        protected ClientMatch Match;
+        protected GameState GameState;
+        public void Init(GameClient client);
+        public virtual Task Enter();
+        public virtual Task Update();
+    }
+}
+// ./Client/GameClient.cs
+namespace Drakken.Client
+{
+    public class GameClient : MonoBehaviour
+    {
+        [Header("Config")]
+        [SerializeField]
+        private string serverAddress = "127.0.0.1";
+        [SerializeField]
+        private ushort serverPort = 7777;
+        public static GameClient Singleton { get; private set; }
+        public ClientConnection Connection { get; private set; }
+        public ClientMatch Match { get; private set; }
+        public TokenRegistry TokenRegistry { get; private set; }
+        private ClientState currentState = null;
+        public bool IsConnecting { get; private set; }
+        public bool IsConnected;
+        public bool IsInMatch;
+        private void Awake();
+        public async Task StartApplication();
+        public async Task GotoState(ClientState newState);
+        public Task<bool> Connect();
+        public async Task<bool> JoinMatch();
+    }
+}
+// ./Client/States/ConnectingClientState.cs
+namespace Drakken.Client.States
+{
+    public class ConnectingClientState : ClientState
+    {
+        public override async Task Enter();
+        private async void MatchStarted();
+    }
+}
+// ./Client/States/PlayingClientState.cs
+namespace Drakken.Client.States
+{
+    public class PlayingClientState : ClientState
+    {
+        public override Task Enter();
+    }
+}
+// ./Domain/DiceEffect.cs
+namespace Drakken.Domain
+{
+    public class DiceEffect : INetworkSerializable
+    {
+        public string EffectId;
+        public int SourceClientIndex;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/DiceInstance.cs
+namespace Drakken.Domain
+{
+    public class DiceInstance : INetworkSerializable
+    {
+        private static int nextId = 1;
+        public int Id;
+        public int Sides;
+        public int Value;
+        public List<DiceEffect> Effects = new();
+        public static DiceInstance Create(int sides);
+        public void Roll();
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/GameState.cs
+namespace Drakken.Domain
+{
+    public class GameState : INetworkSerializable
+    {
+        public GameStateClient[] Clients { get; set; } = new GameStateClient[2]
+        {
+            new(),
+            new()
+        };
+        public int TurnClientIndex;
+        public int Turn = 1;
+        public int Round = 1;
+        public GameStateClient CurrentClient;
+        public GameStateClient OpponentClient;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/GameStateClient.cs
+namespace Drakken.Domain
+{
+    public class GameStateClient : INetworkSerializable
+    {
+        public List<DiceInstance> Dice = new();
+        public List<TokenInstance> Hand = new();
+        public int Score;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/Tokens/Implementation/DragonToken.cs
+namespace Drakken.Domain.Tokens.Implementation
+{
+    public class DragonTokenIntent : TokenIntent { }
+    public class DragonTokenResolution : TokenResolution
+    {
+        public int D3Roll;
+        public List<int> RemovedDiceIds = new();
+        public List<DiceInstance> AddedDice = new();
+        public override void NetworkSerialize<T>(BufferSerializer<T> serializer);
+    }
+    public class DragonTokenExecutor : TokenExecutor<DragonTokenIntent, DragonTokenResolution>
+    {
+        protected override DragonTokenResolution Execute(GameState gameState, DragonTokenIntent intent, int sourceClientIndex);
+    }
+    public class DragonTokenAnimator : TokenAnimator<DragonTokenResolution>
+    {
+        protected override async Task Animate(DragonTokenResolution resolution, TokenVisualContext context, int sourceClientIndex);
+    }
+}
+// ./Domain/Tokens/Implementation/ParasiteToken.cs
+namespace Drakken.Domain.Tokens.Implementation
+{
+    public class ParasiteTokenIntent : TokenIntent
+    {
+        public int TargetDiceId;
+        public override void NetworkSerialize<T>(BufferSerializer<T> serializer);
+    }
+    public class ParasiteTokenResolution : TokenResolution
+    {
+        public int TargetDiceId;
+        public override void NetworkSerialize<T>(BufferSerializer<T> serializer);
+    }
+    public class ParasiteTokenExecutor : TokenExecutor<ParasiteTokenIntent, ParasiteTokenResolution>
+    {
+        protected override ParasiteTokenResolution Execute(GameState state, ParasiteTokenIntent intent, int sourceClientIndex);
+    }
+    public class ParasiteTokenAnimator : TokenAnimator<ParasiteTokenResolution>
+    {
+        protected override async Task Animate(ParasiteTokenResolution resolution, TokenVisualContext context, int sourceClientIndex);
+    }
+}
+// ./Domain/Tokens/ITokenAnimator.cs
+namespace Drakken.Domain.Tokens
+{
+    public interface ITokenAnimator
+    {
+        Task Animate(TokenResolution resolution, TokenVisualContext context, int sourceClientIndex);
+    }
+    public abstract class TokenAnimator<TResolution> : ITokenAnimator where TResolution : TokenResolution
+    {
+        public Task Animate(TokenResolution resolution, TokenVisualContext context, int sourceClientIndex);
+        protected abstract Task Animate(TResolution resolution, TokenVisualContext context, int sourceClientIndex);
+    }
+}
+// ./Domain/Tokens/ITokenExecutor.cs
+namespace Drakken.Domain.Tokens
+{
+    public interface ITokenExecutor
+    {
+        TokenResolution Execute(GameState state, TokenIntent intent, int sourceClientIndex);
+    }
+    public abstract class TokenExecutor<TIntent, TResolution> : ITokenExecutor where TIntent : TokenIntent where TResolution : TokenResolution
+    {
+        public TokenResolution Execute(GameState state, TokenIntent intent, int sourceClientIndex);
+        protected abstract TResolution Execute(GameState state, TIntent intent, int sourceClientIndex);
+    }
+}
+// ./Domain/Tokens/TokenDefinition.cs
+namespace Drakken.Domain.Tokens
+{
+    public enum TokenRarity
+    { Common, Rare, Epic, Legendary }
+    public enum TokenCategory
+    { DiceGrowth, Attack, Effect, Chaos }
+    public enum TargetOwner
+    { None, Self, Opponent, Any }
+    public class TokenDefinition
+    {
+        public string TokenId;
+        public string DisplayName;
+        public string Description;
+        public TokenRarity Rarity;
+        public TokenCategory[] Categories;
+        public TargetOwner TargetOwner;
+        public bool RequiresTarget;
+    }
+}
+// ./Domain/Tokens/TokenInstance.cs
+namespace Drakken.Domain.Tokens
+{
+    public class TokenInstance : INetworkSerializable
+    {
+        private static int nextId = 1;
+        public int InstanceId;
+        public string TokenId;
+        public static TokenInstance Create(string tokenId);
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/Tokens/TokenIntent.cs
+namespace Drakken.Domain.Tokens
+{
+    public abstract class TokenIntent : INetworkSerializable
+    {
+        public virtual void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/Tokens/TokenIntentMessage.cs
+namespace Drakken.Networking
+{
+    public struct TokenIntentMessage : INetworkSerializable
+    {
+        public string TokenId;
+        public int InstanceId;
+        public string IntentJson;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/Tokens/TokenRegistry.cs
+namespace Drakken.Domain.Tokens
+{
+    public class TokenRegistry
+    {
+        private readonly Dictionary<string, TokenDefinition> definitions = new();
+        private readonly Dictionary<string, ITokenExecutor> executors = new();
+        private readonly Dictionary<string, ITokenAnimator> animators = new();
+        private static readonly Dictionary<string, (Type intentType, Type resolutionType)> messageTypes = new();
+        public IEnumerable<TokenDefinition> AllDefinitions;
+        public void Register(TokenDefinition definition, ITokenExecutor executor, ITokenAnimator animator, Type intentType, Type resolutionType);
+        public TokenDefinition GetDefinition(string tokenId);
+        public bool TryGetDefinition(string tokenId, out TokenDefinition def);
+        public ITokenExecutor GetExecutor(string tokenId);
+        public ITokenAnimator GetAnimator(string tokenId);
+        public static TokenIntent DeserialiseIntent(string tokenId, string json);
+        public static TokenResolution DeserialiseResolution(string tokenId, string json);
+    }
+}
+// ./Domain/Tokens/TokenRegistryBuilder.cs
+namespace Drakken.Domain.Tokens
+{
+    public static class TokenRegistryBuilder
+    {
+        public static TokenRegistry Build();
+    }
+}
+// ./Domain/Tokens/TokenResolution.cs
+namespace Drakken.Domain.Tokens
+{
+    public abstract class TokenResolution : INetworkSerializable
+    {
+        public virtual void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/Tokens/TokenResolutionMessage.cs
+namespace Drakken.Networking
+{
+    public struct TokenResolutionMessage : INetworkSerializable
+    {
+        public string TokenId;
+        public int SourceClientIndex;
+        public string ResolutionJson;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Domain/Tokens/TokenVisualContext.cs
+namespace Drakken.Domain.Tokens
+{
+    public class TokenVisualContext
+    {
+        public int LocalClientIndex { get; }
+        public Vector3 BoardCenter { get; }
+        public TokenVisualContext(int localClientIndex, Vector3 boardCenter);
+        public DiceViewPlaceholder GetDiceView(int clientIndex, int diceId);
+    }
+    public class DiceViewPlaceholder
+    {
+        public void PlayShatterAnimation();
+        public void PlayLandAnimation(int value);
+        public void AttachEffect(string effectId);
+    }
+}
+// ./GameEntrypoint.cs
+namespace Drakken
+{
+    internal class GameEntrypoint : MonoBehaviour
+    {
+        [Header("References")]
+        [SerializeField]
+        private GameClient client;
+        [SerializeField]
+        private GameServer server;
+        private void Start();
+    }
+}
+// ./Networking/GameConnection.cs
+namespace Drakken.Networking
+{
+    public class GameConnection : NetworkBehaviour
+    {
+        public static GameConnection Singleton { get; private set; }
+        private void Awake();
+        // -------------------------------------- Match Setup
+        [Rpc(SendTo.Server)]
+        public void RequestServerJoinMatchRpc(RpcParams rpc = default);
+        [Rpc(SendTo.SpecifiedInParams)]
+        public void RespondClientJoinMatchRpc(JoinMatchResponse response, RpcParams rpc = default);
+        [Rpc(SendTo.Server)]
+        public void MessageServerMatchClientReadyRpc(ulong matchId, RpcParams rpc = default);
+        [Rpc(SendTo.SpecifiedInParams)]
+        public void BroadcastClientMatchStartedRpc(GameState gameState, RpcParams rpc = default);
+        // -------------------------------------- Match Flow
+        [Rpc(SendTo.Server)]
+        public void MessageServerMatchPlayTokenRpc(TokenIntentMessage intentMsg, RpcParams rpc = default);
+        [Rpc(SendTo.SpecifiedInParams)]
+        public void BroadcastClientsMatchPlayTokenResolvedRpc(TokenResolutionMessage resolution, RpcParams rpc = default);
+        [Rpc(SendTo.SpecifiedInParams)]
+        public void BroadcastClientsMatchStartTurnRpc(int activeClientIndex, RpcParams rpc = default);
+        [Rpc(SendTo.SpecifiedInParams)]
+        public void BroadcastClientsMatchEndRoundRpc(int p0Score, int p1Score, RpcParams rpc = default);
+    }
+}
+// ./Networking/JoinMatchResponse.cs
+namespace Drakken.Networking
+{
+    public class JoinMatchResponse : INetworkSerializable
+    {
+        public bool Success;
+        public ulong MatchId;
+        public ulong ClientIndex;
+        public void NetworkSerialize<T>(BufferSerializer<T> serializer)
+            where T : IReaderWriter;
+    }
+}
+// ./Server/GameServer.cs
+namespace Drakken.Server
+{
+    public class GameServer : MonoBehaviour
+    {
+        public static GameServer Singleton { get; private set; }
+        [Header("References")]
+        [SerializeField]
+        private UnityTransport transport;
+        [Header("Config")]
+        [SerializeField]
+        private string hostAddress = "0.0.0.0";
+        [SerializeField]
+        private ushort hostPort = 7777;
+        public ServerConnection Connection { get; private set; }
+        public TokenRegistry TokenRegistry { get; private set; }
+        private ServerMatch currentMatch;
+        private void Awake();
+        public void StartApplication();
+        public ServerMatch GetOrCreateMatch();
+        public ServerMatch GetMatch(ulong matchId);
+    }
+}
+// ./Server/ServerConnection.cs
+namespace Drakken.Server
+{
+    public class ServerConnection
+    {
+        public static ServerConnection Singleton { get; private set; }
+        private readonly GameServer server;
+        public ServerConnection(GameServer server);
+        // -------------------------------------- Match Setup
+        public void OnRequestJoinMatch(ulong clientId);
+        public void RespondJoinMatch(JoinMatchResponse res, ulong clientId);
+        public void OnMatchReady(ulong matchId, ulong clientId);
+        // -------------------------------------- Match Flow
+        public void OnMatchPlayToken(TokenIntentMessage intentMsg, ulong clientId);
+        public void BroadcastMatchStarted(GameState state, ulong[] clientIds);
+        public void BroadcastMatchPlayTokenResolved(TokenResolutionMessage resolution, ulong[] clientIds);
+        public void BroadcastMatchStartTurn(int activeClientIndex, ulong[] clientIds);
+    }
+}
+// ./Server/ServerMatch.cs
+namespace Drakken.Server
+{
+    public class ServerMatch
+    {
+        private static ulong nextMatchId = 1;
+        public ulong MatchId { get; }
+        private readonly GameServer server;
+        private readonly ulong[] clientIds = new ulong[2];
+        private readonly Dictionary<ulong, int> clientIndexAssignment = new();
+        private int connectedCount;
+        private int readyCount;
+        private bool isStarted;
+        private GameState gameState;
+        public ServerMatch(GameServer server);
+        public void OnRequestJoinMatch(ulong clientId);
+        public void OnReady(ulong clientId);
+        private void StartGame();
+        public void OnPlayToken(TokenIntentMessage intentMsg, ulong clientId);
+        public void OnPassTurn(ulong clientId);
+        private void AdvanceTurn();
+    }
+}
+// ./Utility/Assert.cs
+namespace Drakken.Common.Utility
+{
+    public static class Assert
+    {
+        public static void True(bool condition, string message = null);
+        public static void False(bool condition, string message = null);
+        public static void NotNull<T>(T obj, string message = null)
+            where T : class;
+        public static void NotNullOrEmpty(string obj, string message = null);
+    }
+}
+// ./Utility/BufferSerializerExtensions.cs
+public static class BufferSerializerExtensions
+{
+    public static void SerializeList<TItem, TReaderWriter>(this BufferSerializer<TReaderWriter> serializer, List<TItem> list)
+        where TReaderWriter : IReaderWriter where TItem : INetworkSerializable, new();
+    public static void SerializeList<TReaderWriter>(this BufferSerializer<TReaderWriter> serializer, List<int> list)
+        where TReaderWriter : IReaderWriter;
+    public static void SerializeString<TReaderWriter>(this BufferSerializer<TReaderWriter> serializer, ref string value)
+        where TReaderWriter : IReaderWriter;
+}
+// ./Utility/Log.cs
+namespace Drakken.Common.Utility
+{
+    public static class Log
+    {
+        public static void Info(string tag, string message);
+        public static void Warning(string tag, string message);
+        public static void Error(string tag, string message);
+    }
+}
+// ./Utility/TaskManager.cs
+namespace Drakken.Common
+{
+    internal class TaskManager
+    {
+        private ulong nextTaskId = 1;
+        private readonly Dictionary<ulong, TaskCompletionSource<object>> current = new();
+        public (ulong taskId, Task<T> task) Create<T>();
+        public bool Complete<T>(ulong taskId, T result);
+    }
+}
