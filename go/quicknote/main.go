@@ -4,14 +4,12 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
-	"time"
 )
 
 func main() {
 	if len(os.Args) < 2 {
-		printUsage()
+		printUsage(true)
 		return
 	}
 	switch os.Args[1] {
@@ -28,30 +26,39 @@ func main() {
 	case "show":
 		handleCmdShow()
 	default:
-		fmt.Printf("Unknown command '%s'\n", os.Args[1])
-		printUsage()
+		if len(os.Args[1]) > 0 {
+			fmt.Printf("Unknown command %q\n", os.Args[1])
+		}
+		printUsage(len(os.Args[1]) == 0)
 	}
 }
 
-func printUsage() {
-	fmt.Println("")
-	fmt.Println("qn a  <name> <text>   add note")
-	fmt.Println("qn ao <name> <text>   add note and open")
-	fmt.Println("| <name> and <text> is optional.")
-	fmt.Println("| Using '.' for <name> will be treated as empty.")
-	fmt.Println("")
-	fmt.Println("qn o <args>           open notes")
-	fmt.Println("qn d <args>           delete notes")
-	fmt.Println("qn l <args>           list notes")
-	fmt.Println("| Where <args> is one of the following:")
-	fmt.Println("|- qn .. -5              last 5 notes")
-	fmt.Println("|- qn .. dd/MM/yyyy      notes from date")
-	fmt.Println("|- qn .. <id>            note by ID")
-	fmt.Println("|- qn .. <text>          notes matching text")
-	fmt.Println("|- qn .. <empty>         all notes")
-	fmt.Println("")
-	fmt.Println("qn show 			   reveal folder")
-	fmt.Println("")
+func printUsage(includeTagline bool) {
+	if includeTagline {
+		fmt.Println("Quicknote is a minimal note taking CLI.")
+	}
+
+	fmt.Print(`
+Usage:
+
+    qn a  <name> <text>       add note
+    qn ao <name> <text>       add note and open
+    qn show                   reveal notes folder
+    qn o <query>              open notes
+    qn d <query>              delete notes
+    qn l <query>              list notes
+
+Queries accepts the following:
+
+    (empty)              all notes
+    -N                   last N notes (e.g. -5)
+    d-N                  notes from the last N days (e.g. d-7)
+    d0                   notes from today
+    DD/MM/YYYY           notes from a specific date
+    <id>                 note by 4-hex-char ID
+    <text>               notes fuzzy matching name or text
+
+`)
 }
 
 func handleCmdAdd(open bool) {
@@ -75,7 +82,7 @@ func handleCmdAdd(open bool) {
 }
 
 func handleCmdOpen() {
-	notes, err := loadNotesFromArgs()
+	notes, err := queryNotes(os.Args[2:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -87,13 +94,13 @@ func handleCmdOpen() {
 	if len(notes) == 1 {
 		openNote(notes[0].Path)
 	} else {
-		sortNotes(notes)
+		sortNotesByDate(notes)
 		openNotesAggregated(notes)
 	}
 }
 
 func handleCmdDelete() {
-	notes, err := loadNotesFromArgs()
+	notes, err := queryNotes(os.Args[2:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
@@ -102,27 +109,26 @@ func handleCmdDelete() {
 		fmt.Println("no notes")
 		return
 	}
+
 	fmt.Printf("Will delete %d note(s):\n", len(notes))
-	sortNotes(notes)
+	sortNotesByDate(notes)
 	for _, note := range notes {
-		fmt.Printf(
-			"  %s  %-20s  %s\n",
-			note.Date.Format("2006-01-02 15:04"),
+		fmt.Printf("  %s  %s  %s\n",
 			note.ID,
 			note.Name,
+			note.Date.Format("2006-01-02"),
 		)
 	}
 	fmt.Print("Delete? [y/n] ")
 
 	scanner := bufio.NewScanner(os.Stdin)
 	scanner.Scan()
-	answer := strings.TrimSpace(strings.ToLower(scanner.Text()))
-	if answer != "y" {
+	if strings.TrimSpace(strings.ToLower(scanner.Text())) != "y" {
 		fmt.Println("cancelled")
 		return
 	}
 
-	var failed int
+	failed := 0
 	for _, note := range notes {
 		if err := os.Remove(note.Path); err != nil {
 			fmt.Fprintf(os.Stderr, "failed to delete %s: %v\n", note.ID, err)
@@ -137,93 +143,57 @@ func handleCmdDelete() {
 }
 
 func handleCmdList() {
-	notes, err := loadNotesFromArgs()
+	notes, err := queryNotes(os.Args[2:])
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
-	sortNotes(notes)
-	for _, note := range notes {
-		fmt.Printf(
-			"%s  %s  %-20s  %s\n",
-			note.Date.Format("2006-01-02 15:04"),
-			note.ID,
-			note.Name,
-			firstLine(note.Text),
+	if len(notes) == 0 {
+		queryString := strings.Join(os.Args[2:], " ")
+		fmt.Printf("No notes found for query: '%s'\n", queryString)
+	} else {
+		sortNotesByDate(notes)
+		const format = "%-4s  %-20s  %-50s  %-10s  %-19s\n"
+		fmt.Printf(format,
+			"ID",
+			"Name",
+			"Content",
+			"Created",
+			"Modified",
 		)
-	}
-}
-
-func loadNotesFromArgs() ([]Note, error) {
-	if len(os.Args) >= 3 {
-		arg := os.Args[2]
-		switch {
-		case strings.HasPrefix(arg, "-"):
-			days, err := strconv.Atoi(arg)
-			if err != nil {
-				return nil, fmt.Errorf("invalid day offset: %s", arg)
-			}
-			days = -days
-			all, err := loadAllNotes()
-			if err != nil {
-				return nil, err
-			}
-			sortNotes(all)
-			if len(all) == 0 {
-				return []Note{}, nil
-			}
-			if days < 0 {
-				days = 0
-			}
-			if days > len(all) {
-				days = len(all)
-			}
-			fmt.Printf("")
-			return all[:days], nil
-
-		case isDate(arg):
-			parsed, _ := time.Parse("02/01/2006", arg)
-			return loadNotesForDate(parsed)
-
-		case isID(arg):
-			note, err := loadNoteByID(arg)
-			if err != nil {
-				return nil, err
-			}
-			return []Note{note}, nil
-
-		default:
-			all, err := loadAllNotes()
-			if err != nil {
-				return nil, err
-			}
-			arg = strings.Join(os.Args[2:], " ")
-			filter := strings.ToLower(arg)
-			var out []Note
-			// If any match exactly only take exact matches
-			anyExact := false
-			for _, n := range all {
-				if n.Name == filter {
-					anyExact = true
-				}
-			}
-			for _, n := range all {
-				if anyExact == true {
-					if n.Name == filter {
-						out = append(out, n)
-					}
-				} else if strings.Contains(strings.ToLower(n.Name), filter) {
-					out = append(out, n)
-				}
-			}
-			return out, nil
+		for _, note := range notes {
+			fmt.Printf(format,
+				note.ID,
+				squish(note.Name, 20),
+				squish(note.Text, 50),
+				note.Date.Format("2006-01-02"),
+				note.ModDate.Format("2006-01-02 15:04:05"),
+			)
 		}
 	}
-
-	// No arg: today
-	return loadNotesForDate(time.Now())
+	fmt.Println()
 }
 
 func handleCmdShow() {
 	revealFolder(getNotesRootDir())
+}
+
+func queryNotes(args []string) ([]Note, error) {
+	q, err := ParseQuery(args)
+	if err != nil {
+		return nil, err
+	}
+	all, err := loadAllNotes()
+	if err != nil {
+		return nil, err
+	}
+	return q.Apply(all), nil
+}
+
+func squish(s string, maxLen int) string {
+	s = strings.Join(strings.Fields(s), " ")
+	if len(s) <= (maxLen - 3) {
+		return s
+	}
+	return s[:(maxLen-3)] + "..."
 }
